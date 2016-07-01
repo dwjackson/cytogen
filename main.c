@@ -135,6 +135,15 @@ cmd_generate()
     }
     free(file_names);
 }
+
+static void
+cmd_initialize(const char *project_name)
+{
+    if (mkdir(project_name, 0770) != 0) {
+        char *err_fmt = "ERROR: Could not create project directory: %s\n";
+        fprintf(stderr, err_fmt, project_name);
+    }
+}
     
 int
 main(int argc, char *argv[])
@@ -149,6 +158,14 @@ main(int argc, char *argv[])
         || strcmp(cmd, "gen") == 0
         || strcmp(cmd, "generate") == 0) {
         cmd_generate();
+    } else if (strcmp(cmd, "init") == 0) {
+        if (argc == 3) {
+            char *proj_name = argv[2];
+            cmd_initialize(proj_name);
+        } else {
+            fprintf(stderr, "ERROR: No project name given\n");
+            exit(EXIT_FAILURE);
+        }
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
