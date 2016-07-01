@@ -10,6 +10,7 @@
 #define USAGE "Usage: cyto [COMMAND]"
 
 #define NUM_WORKERS 4
+#define SITE_DIR "_site"
 
 struct layout {
     char *name;
@@ -104,6 +105,8 @@ static char
 static void
 cmd_generate()
 {
+    mkdir(SITE_DIR, 0770);
+
     int num_files;
     char **file_names = get_file_list(&num_files);
     int num_layouts;
