@@ -5,8 +5,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
+
+#define NUM_WORKERS 4
 
 struct layout {
     char *name;
@@ -14,20 +17,37 @@ struct layout {
 };
 
 static struct layout
-**get_layouts(int *num_layouts_ptr)
+*get_layouts(int *num_layouts_ptr)
 {
-    struct layout **layouts = NULL;
+    struct layout *layouts = NULL;
     int num_layouts = 0;
 
     struct dirent *de;
     DIR *layouts_dir = opendir("_layouts");
     if (layouts_dir != NULL) {
-        de = readdir(layouts_dir); // TODO: loop
-        char *file_name = de->d_name;
-        if (file_name[0] != '.') {
-            num_layouts++;
+        while ((de = readdir(layouts_dir)) != NULL) {
+            char *file_name = de->d_name;
+            if (file_name[0] != '.') {
+                num_layouts++;
+            }
         }
-        // TODO
+        rewinddir(layouts_dir);
+
+        layouts = malloc(sizeof(struct layout) * num_layouts);
+        if (layouts == NULL) {
+            fprintf(stderr, "ERROR: Could not malloc()\n");
+            abort();
+        }
+
+        int index = 0;
+        while ((de = readdir(layouts_dir)) != NULL) {
+            char *file_name = de->d_name;
+            if (file_name[0] != '.') {
+                // TODO: create the layout (use mmap for file content, shared)
+                index++;
+            }
+        }
+        closedir(layouts_dir);
     }
     *num_layouts_ptr = num_layouts;
     return layouts;
@@ -86,9 +106,30 @@ cmd_generate()
 {
     int num_files;
     char **file_names = get_file_list(&num_files);
-    // TODO: mmap() the layout files in _layout, index them by name
-    // TODO: fork() into worker processes to render the files
-    // TODO: waitpid() for the children to exit
+    int num_layouts;
+    struct layout *layouts = get_layouts(&num_layouts);
+    pid_t child_pids[NUM_WORKERS];
+    int i;
+    pid_t pid;
+
+    /* Create worker processes */
+    for (i = 0; i < NUM_WORKERS && pid != 0; i++) {
+        pid = fork();
+        if (pid > 0) {
+            child_pids[i] = pid;
+        }
+    }
+
+    if (pid == 0) {
+        // TODO: Do work as worker/child process
+        exit(EXIT_SUCCESS);
+    }
+    
+    /* Wait for worker processes to finish */
+    for (i = 0; i < NUM_WORKERS; i++) {
+        int stat_loc;
+        waitpid(child_pids[i], &stat_loc, 0);
+    }
     free(file_names);
 }
     
