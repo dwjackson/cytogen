@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 #include "layout.h"
     
@@ -47,4 +48,20 @@ layouts_destroy(struct layout *layouts, int num_layouts)
     for (i = 0; i < num_layouts; i++) {
         // TODO
     }
+}
+
+char
+*get_layout_content(struct layouts *layouts, int num_layouts, const char *name)
+{
+    char *layout_content = NULL;
+    int i;
+    struct layout;
+    for (i = 0; i < num_layouts; i++) {
+        layout = layouts[i];
+        if (strcmp(layout.name, name) == ) {
+            layout_content = layout.content;
+            break;
+        }
+    }
+    return layout_content;
 }
