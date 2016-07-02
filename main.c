@@ -6,53 +6,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "layout.h"
 
 #define USAGE "Usage: cyto [COMMAND]"
 
 #define NUM_WORKERS 4
 #define SITE_DIR "_site"
-
-struct layout {
-    char *name;
-    char *content;
-};
-
-static struct layout
-*get_layouts(int *num_layouts_ptr)
-{
-    struct layout *layouts = NULL;
-    int num_layouts = 0;
-
-    struct dirent *de;
-    DIR *layouts_dir = opendir("_layouts");
-    if (layouts_dir != NULL) {
-        while ((de = readdir(layouts_dir)) != NULL) {
-            char *file_name = de->d_name;
-            if (file_name[0] != '.') {
-                num_layouts++;
-            }
-        }
-        rewinddir(layouts_dir);
-
-        layouts = malloc(sizeof(struct layout) * num_layouts);
-        if (layouts == NULL) {
-            fprintf(stderr, "ERROR: Could not malloc()\n");
-            abort();
-        }
-
-        int index = 0;
-        while ((de = readdir(layouts_dir)) != NULL) {
-            char *file_name = de->d_name;
-            if (file_name[0] != '.') {
-                // TODO: create the layout (use mmap for file content, shared)
-                index++;
-            }
-        }
-        closedir(layouts_dir);
-    }
-    *num_layouts_ptr = num_layouts;
-    return layouts;
-}
 
 static char
 **get_file_list(int *num_files_ptr)
@@ -133,6 +92,7 @@ cmd_generate()
         int stat_loc;
         waitpid(child_pids[i], &stat_loc, 0);
     }
+    layouts_destroy(layouts, num_layouts);
     free(file_names);
 }
 

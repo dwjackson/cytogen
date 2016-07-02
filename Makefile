@@ -1,8 +1,8 @@
 CFLAGS = -Wall -g -O0
 
 EXE_NAME = cyto
-OBJ_FILES = main.o
-SRC_FILES = main.c
+OBJ_FILES = main.o layout.o
+SRC_FILES = main.c layout.c
 
 all: $(EXE_NAME)
 
