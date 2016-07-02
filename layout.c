@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include "layout.h"
     
 struct layout
@@ -31,7 +35,35 @@ struct layout
         while ((de = readdir(layouts_dir)) != NULL) {
             char *file_name = de->d_name;
             if (file_name[0] != '.') {
-                // TODO: create the layout (use mmap for file content, shared)
+                size_t file_name_len = strlen(file_name);
+                char *layout_name = malloc(file_name_len + 1);
+                memset(layout_name, 0, file_name_len);
+                int i;
+                int ch;
+                for (i = 0; i < file_name_len; i++) {
+                    ch = file_name[i];
+                    if (ch == '.') {
+                        break;
+                    }
+                    layout_name[i] = ch;
+                }
+                struct stat statbuf; 
+                if (stat(file_name, &statbuf) < 0) {
+                    fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
+                    exit(EXIT_FAILURE);
+                }
+                int fd = open(file_name, O_RDONLY);
+                if (fd < 0) {
+                    fprintf(stderr, "ERROR: Could not open %s\n", file_name);
+                    exit(EXIT_FAILURE);
+                }
+                void *r; /* Region */
+                size_t size = statbuf.st_size;
+                r = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+                char *content = (char *)r;
+                struct layout l = { layout_name, content, size };
+                layouts[index] = l;
+                close(fd);
                 index++;
             }
         }
@@ -45,20 +77,23 @@ void
 layouts_destroy(struct layout *layouts, int num_layouts)
 {
     int i;
+    struct layout layout;
     for (i = 0; i < num_layouts; i++) {
-        // TODO
+        layout = layouts[i];
+        free(layout.name);
+        munmap(layout.content, layout.length);
     }
 }
 
 char
-*get_layout_content(struct layouts *layouts, int num_layouts, const char *name)
+*get_layout_content(struct layout *layouts, int num_layouts, const char *name)
 {
     char *layout_content = NULL;
     int i;
-    struct layout;
+    struct layout layout;
     for (i = 0; i < num_layouts; i++) {
         layout = layouts[i];
-        if (strcmp(layout.name, name) == ) {
+        if (strcmp(layout.name, name) == 0) {
             layout_content = layout.content;
             break;
         }
