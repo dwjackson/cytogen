@@ -68,22 +68,37 @@ cmd_generate()
 
     int num_files;
     char **file_names = get_file_list(&num_files);
+    char *file_name;
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
     pid_t child_pids[NUM_WORKERS];
     int i;
     pid_t pid;
 
+    int files_per_worker = num_files / NUM_WORKERS;
+    int start_index; /* Worker-use-only */
+    int end_index;   /* Worker-use-only */
+
     /* Create worker processes */
     for (i = 0; i < NUM_WORKERS && pid != 0; i++) {
+        start_index = i * files_per_worker;
+        if (i + 1 < NUM_WORKERS) {
+            end_index = start_index + files_per_worker;
+        } else {
+            end_index = num_files;
+        }
         pid = fork();
         if (pid > 0) {
             child_pids[i] = pid;
         }
     }
 
+    /* Worker process code */
     if (pid == 0) {
-        // TODO: Do work as worker/child process
+        for (i = start_index; i < end_index; i++) {
+            file_name = file_names[i];
+            // TODO: Do work on file
+        }
         exit(EXIT_SUCCESS);
     }
     
