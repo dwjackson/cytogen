@@ -5,7 +5,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <sys/wait.h>
+#include <pthread.h>
+#include <ctache/ctache.h>
 #include "layout.h"
 
 #define USAGE "Usage: cyto [COMMAND]"
@@ -61,6 +62,33 @@ static char
     return file_names;
 }
 
+struct process_file_args {
+    int start_index;
+    int end_index;
+    char **file_names;
+    ctache_data_t *data;
+    pthread_mutex_t *data_mutex;
+};
+
+static void
+*process_file(void *args_ptr)
+{
+    struct process_file_args *args = (struct process_file_args *)args_ptr;
+    int i;
+    char *file_name;
+    for (i = args->start_index; i < args->end_index; i++) {
+        file_name = (args->file_names)[i];
+        // TODO
+    }
+    /* TODO: For future use in createing header data
+    pthread_mutex_lock(args->data_mutex);
+    // TODO: Add to data
+    pthread_mutex_unlock(args->data_mutex);
+    */
+
+    return NULL;
+}
+
 static void
 cmd_generate()
 {
@@ -68,45 +96,42 @@ cmd_generate()
 
     int num_files;
     char **file_names = get_file_list(&num_files);
-    char *file_name;
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
-    pid_t child_pids[NUM_WORKERS];
-    int i;
-    pid_t pid;
+
+    /* Set up the data */
+    ctache_data_t *data = ctache_data_create_hash();
+    pthread_mutex_t data_mutex;
+    pthread_mutex_init(&data_mutex, NULL);
 
     int files_per_worker = num_files / NUM_WORKERS;
-    int start_index; /* Worker-use-only */
-    int end_index;   /* Worker-use-only */
+    pthread_t thr_pool[NUM_WORKERS];
+    struct process_file_args threads_args[NUM_WORKERS];
 
-    /* Create worker processes */
-    for (i = 0; i < NUM_WORKERS && pid != 0; i++) {
-        start_index = i * files_per_worker;
-        if (i + 1 < NUM_WORKERS) {
-            end_index = start_index + files_per_worker;
-        } else {
-            end_index = num_files;
-        }
-        pid = fork();
-        if (pid > 0) {
-            child_pids[i] = pid;
-        }
-    }
-
-    /* Worker process code */
-    if (pid == 0) {
-        for (i = start_index; i < end_index; i++) {
-            file_name = file_names[i];
-            // TODO: Do work on file
-        }
-        exit(EXIT_SUCCESS);
-    }
-    
-    /* Wait for worker processes to finish */
+    /* Create workers */
+    int i;
     for (i = 0; i < NUM_WORKERS; i++) {
-        int stat_loc;
-        waitpid(child_pids[i], &stat_loc, 0);
+        threads_args[i].start_index = i * files_per_worker;
+        if (i + 1 < NUM_WORKERS) {
+            threads_args[i].end_index = threads_args[i].start_index
+                + files_per_worker;
+        } else {
+            threads_args[i].end_index = num_files;
+        }
+        threads_args[i].file_names = file_names;
+        threads_args[i].data = data;
+        threads_args[i].data_mutex = &data_mutex;
+        pthread_create(&(thr_pool[i]), NULL, process_file, &(threads_args[i]));
     }
+
+    /* Wait for workers to finish */
+    for (i = 0; i < NUM_WORKERS; i++) {
+        pthread_join(thr_pool[i], NULL);
+    }
+
+    /* Cleanup */
+    pthread_mutex_destroy(&data_mutex);
+    ctache_data_destroy(data);
     layouts_destroy(layouts, num_layouts);
     free(file_names);
 }
