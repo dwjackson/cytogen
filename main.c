@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include "layout.h"
+#include "cytoplasm_header.h"
 
 #define USAGE "Usage: cyto [COMMAND]"
 
@@ -75,16 +76,42 @@ static void
 {
     struct process_file_args *args = (struct process_file_args *)args_ptr;
     int i;
-    char *file_name;
+    char *in_file_name;
+    char *out_file_name;
     for (i = args->start_index; i < args->end_index; i++) {
-        file_name = (args->file_names)[i];
-        // TODO
+        in_file_name = (args->file_names)[i];
+        out_file_name = malloc(strlen(SITE_DIR) + 1 + strlen(in_file_name) + 1);
+        strcpy(out_file_name, SITE_DIR);
+        strcat(out_file_name, "/");
+        strcat(out_file_name, in_file_name);
+        if (out_file_name == NULL) {
+            fprintf(stderr, "ERROR: Could not malloc()\n");
+            break;
+        }
+        FILE *in_fp = fopen(in_file_name, "r");
+        if (in_fp != NULL) {
+            ctache_data_t *file_data = ctache_data_create_hash();
+            cytoplasm_header_read(in_fp, file_data);
+            FILE *out_fp = fopen(out_file_name, "w");
+            int ch;
+            if (out_fp != NULL) {
+                /* Copy the file content to the site directory */
+                while ((ch = fgetc(in_fp)) != EOF) {
+                    fputc(ch, out_fp);
+                }
+                fclose(out_fp);
+            } else {
+                fprintf(stderr, "ERROR: Could not open %s\n", out_file_name);
+            }
+            fclose(in_fp);
+            pthread_mutex_lock(args->data_mutex);
+            ctache_data_hash_table_set(args->data, in_file_name, file_data);
+            pthread_mutex_unlock(args->data_mutex);
+        } else {
+            fprintf(stderr, "ERROR: Could not open %s\n", in_file_name);
+        }
+        free(out_file_name);
     }
-    /* TODO: For future use in createing header data
-    pthread_mutex_lock(args->data_mutex);
-    // TODO: Add to data
-    pthread_mutex_unlock(args->data_mutex);
-    */
 
     return NULL;
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "cyto_header.h"
+#include "cytoplasm_header.h"
 
 #define CYTO_HEADER_BORDER "---"
 
@@ -31,7 +31,7 @@ char
 }
 
 void
-header_read(FILE *fp, ctache_data_t *data)
+cytoplasm_header_read(FILE *fp, ctache_data_t *data)
 {
     char *line;
     size_t line_len;

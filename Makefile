@@ -1,8 +1,8 @@
 CFLAGS = -Wall -g -O0 -I$(HOME)/localapps/ctache/include -L$(HOME)/localapps/ctache/lib
 
 EXE_NAME = cyto
-OBJ_FILES = main.o layout.o
-SRC_FILES = main.c layout.c
+OBJ_FILES = main.o layout.o cytoplasm_header.o
+SRC_FILES = main.c layout.c cytoplasm_header.c
 
 all: $(EXE_NAME)
 
