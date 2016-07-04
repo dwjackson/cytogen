@@ -14,6 +14,8 @@
 
 #define NUM_WORKERS 4
 #define SITE_DIR "_site"
+#define DEFAULT_CONTENT_LENGTH 1024
+#define LAYOUT "layout"
 
 static char
 **get_file_list(int *num_files_ptr)
@@ -63,6 +65,29 @@ static char
     return file_names;
 }
 
+static char
+*read_file_contents(FILE *fp)
+{
+    char *content;
+    size_t content_length;
+    size_t content_bufsize;
+    char ch;
+
+    content_bufsize = DEFAULT_CONTENT_LENGTH ;
+    content = malloc(content_bufsize);
+    content_length = 0;
+    while ((ch = fgetc(fp)) != EOF) {
+        if (content_length + 1 >= content_bufsize) {
+            content_bufsize *= 2;
+            content = realloc(content, content_bufsize);
+        }
+        content[content_length] = ch;
+        content_length++;
+    }
+    content[content_length] = '\0';
+    return content;
+}
+
 struct process_file_args {
     int start_index;
     int end_index;
@@ -96,8 +121,30 @@ static void
             cytoplasm_header_read(in_fp, file_data);
             FILE *out_fp = fopen(out_file_name, "w");
             if (out_fp != NULL) {
-                /* Render the file as a ctache template */
-                ctache_render_file(in_fp, out_fp, file_data, ESCAPE_HTML);
+                if (!ctache_data_hash_table_has_key(file_data, LAYOUT)) {
+                    /* Render the file as a ctache template */
+                    ctache_render_file(in_fp, out_fp, file_data, ESCAPE_HTML);
+                } else {
+                    /*
+                     * Render the layout with the file content passed as a
+                     * partial with the key "content"
+                     */
+                    char *content = read_file_contents(in_fp);
+                    ctache_data_hash_table_set(file_data, "content", content);
+                    ctache_data_t *layout_data;
+                    layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
+                    char *layout_name = layout_data->data.string;
+                    char *layout = get_layout_content(args->layouts,
+                                                      args->num_layouts,
+                                                      layout_name);
+                    size_t layout_len = strlen(layout);
+                    ctache_render_string(layout,
+                                         layout_len,
+                                         out_fp,
+                                         file_data,
+                                         ESCAPE_HTML);
+                    free(content);
+                }
 
                 /* Clean up the file pointer */
                 fclose(out_fp);
