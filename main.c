@@ -93,13 +93,13 @@ static void
             ctache_data_t *file_data = ctache_data_create_hash();
             cytoplasm_header_read(in_fp, file_data);
             FILE *out_fp = fopen(out_file_name, "w");
-            int ch;
             if (out_fp != NULL) {
-                /* Copy the file content to the site directory */
-                while ((ch = fgetc(in_fp)) != EOF) {
-                    fputc(ch, out_fp);
-                }
+                /* Render the file as a ctache template */
+                ctache_render_file(in_fp, out_fp, file_data, 0, ESCAPE_HTML);
+
+                /* Clean up the file pointer */
                 fclose(out_fp);
+                out_fp = NULL;
             } else {
                 fprintf(stderr, "ERROR: Could not open %s\n", out_file_name);
             }
