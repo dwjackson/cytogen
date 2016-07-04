@@ -95,7 +95,7 @@ static void
             FILE *out_fp = fopen(out_file_name, "w");
             if (out_fp != NULL) {
                 /* Render the file as a ctache template */
-                ctache_render_file(in_fp, out_fp, file_data, 0, ESCAPE_HTML);
+                ctache_render_file(in_fp, out_fp, file_data, ESCAPE_HTML);
 
                 /* Clean up the file pointer */
                 fclose(out_fp);
