@@ -69,6 +69,8 @@ struct process_file_args {
     char **file_names;
     ctache_data_t *data;
     pthread_mutex_t *data_mutex;
+    struct layout *layouts;
+    int num_layouts;
 };
 
 static void
@@ -148,6 +150,8 @@ cmd_generate()
         threads_args[i].file_names = file_names;
         threads_args[i].data = data;
         threads_args[i].data_mutex = &data_mutex;
+        threads_args[i].layouts = layouts;
+        threads_args[i].num_layouts = num_layouts;
         pthread_create(&(thr_pool[i]), NULL, process_file, &(threads_args[i]));
     }
 
