@@ -7,6 +7,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include "layout.h"
+
+#define LAYOUTS_DIR_NAME "_layouts"
     
 struct layout
 *get_layouts(int *num_layouts_ptr)
@@ -15,7 +17,7 @@ struct layout
     int num_layouts = 0;
 
     struct dirent *de;
-    DIR *layouts_dir = opendir("_layouts");
+    DIR *layouts_dir = opendir(LAYOUTS_DIR_NAME);
     if (layouts_dir != NULL) {
         while ((de = readdir(layouts_dir)) != NULL) {
             char *file_name = de->d_name;
@@ -47,14 +49,20 @@ struct layout
                     }
                     layout_name[i] = ch;
                 }
+                char *file_path = malloc(strlen(LAYOUTS_DIR_NAME) + 1
+                                         + file_name_len
+                                         + 1);
+                strcpy(file_path, LAYOUTS_DIR_NAME);
+                strcat(file_path, "/");
+                strcat(file_path, file_name);
                 struct stat statbuf; 
-                if (stat(file_name, &statbuf) < 0) {
-                    fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
+                if (stat(file_path, &statbuf) < 0) {
+                    fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
                     exit(EXIT_FAILURE);
                 }
-                int fd = open(file_name, O_RDONLY);
+                int fd = open(file_path, O_RDONLY);
                 if (fd < 0) {
-                    fprintf(stderr, "ERROR: Could not open %s\n", file_name);
+                    fprintf(stderr, "ERROR: Could not open %s\n", file_path);
                     exit(EXIT_FAILURE);
                 }
                 void *r; /* Region */
@@ -64,6 +72,7 @@ struct layout
                 struct layout l = { layout_name, content, size };
                 layouts[index] = l;
                 close(fd);
+                free(file_path);
                 index++;
             }
         }
