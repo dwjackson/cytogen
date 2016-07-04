@@ -66,10 +66,12 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
                 value[i - index] = ch;
             }
 
-            ctache_data_t *str_data;
-            size_t value_len = strlen(value);
-            str_data = ctache_data_create_string(value, value_len);
-            ctache_data_hash_table_set(data, key, str_data);
+            if (!ctache_data_hash_table_has_key(data, key)) {
+                ctache_data_t *str_data;
+                size_t value_len = strlen(value);
+                str_data = ctache_data_create_string(value, value_len);
+                ctache_data_hash_table_set(data, key, str_data);
+            }
 
             value = NULL;
             free(key);
