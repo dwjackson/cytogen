@@ -16,7 +16,7 @@ char
     while ((ch = fgetc(fp)) != EOF && ch != '\n') {
         line_length++;
     }
-    fseek(fp, -1 * line_length, SEEK_CUR); /* Rewind */
+    fseek(fp, -1 * line_length - 1, SEEK_CUR); /* Rewind */
 
     /* Read the line */
     line = malloc(line_length + 1);
@@ -26,6 +26,7 @@ char
         ch = fgetc(fp);
         line[i] = ch;
     }
+    fgetc(fp); /* Throw away the newline/EOF */
 
     return line;
 }
@@ -48,9 +49,9 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
     if (strcmp(line, CYTO_HEADER_BORDER) == 0) {
         line = read_line(fp);
         line_len = strlen(line);
-        key = malloc(line_len + 1);
-        value = malloc(line_len + 1);
-        while (!strcmp(line, CYTO_HEADER_BORDER)) {
+        while (strcmp(line, CYTO_HEADER_BORDER) != 0 && !feof(fp)) {
+            key = malloc(line_len + 1);
+            value = malloc(line_len + 1);
             for (i = 0; i < line_len; i++) {
                 ch = line[i];
                 if (ch == ':') {
@@ -70,6 +71,9 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
             free(key);
             key = NULL;
             free(line);
+
+            line = read_line(fp);
+            line_len = strlen(line);
         }
     } else {
         /* Rewind the file since there is no header */
