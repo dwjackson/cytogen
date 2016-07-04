@@ -6,6 +6,27 @@
 
 #define CYTO_HEADER_BORDER "---"
 
+static char *reserved_words[] = {
+    "content"
+};
+#define NUM_RESERVED_WORDS 1
+
+static bool
+is_reserved(const char *str)
+{
+    bool reserved = false;
+    int i;
+    char *word;
+    for (i = 0; i < NUM_RESERVED_WORDS; i++) {
+        word = reserved_words[i];
+        if (strcmp(str, word) == 0) {
+            reserved = true;
+            break;
+        }
+    }
+    return reserved;
+}
+
 char
 *read_line(FILE *fp)
 {
@@ -66,7 +87,8 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
                 value[i - index] = ch;
             }
 
-            if (!ctache_data_hash_table_has_key(data, key)) {
+            if (!ctache_data_hash_table_has_key(data, key)
+                    && !is_reserved(key)) {
                 ctache_data_t *str_data;
                 size_t value_len = strlen(value);
                 str_data = ctache_data_create_string(value, value_len);
