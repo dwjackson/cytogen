@@ -4,6 +4,9 @@ Cytoplasm (or `cyto`) is a static site generator written in C.
 
 ## Building and Installing
 
+Cytoplasm depends on the [Ctache](https://github.com/dwjackson/ctache)
+templating library, a C99 compiler, and several POSIX-standard functions.
+
 If you downloaded an archive of Cytopasm that does not have a configure script,
 you will need to have the GNU Autotools installed to create it. To create the
 configure script, run:
