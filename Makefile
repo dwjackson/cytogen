@@ -14,6 +14,7 @@ $(OBJ_FILES): $(SRC_FILES)
 
 clean:
 	rm -f $(EXE_NAME)
-	rm *.o
+	rm -f *.o
+	rm -rf cyto.dSYM
 
 .PHONY: all clean

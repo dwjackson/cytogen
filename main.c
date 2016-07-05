@@ -56,7 +56,7 @@ static char
         if (!S_ISDIR(statbuf.st_mode)
             && file_name[0] != '_'
             && file_name[0] != '.') {
-            file_names[index] = file_name;
+            file_names[index] = strdup(file_name);
             index++;
         }
     }
@@ -156,7 +156,6 @@ static void
                                          file_data,
                                          ESCAPE_HTML);
                     free(layout_name);
-                    free(content);
                 }
 
                 /* Clean up the file pointer */
@@ -224,6 +223,9 @@ cmd_generate()
     pthread_mutex_destroy(&data_mutex);
     ctache_data_destroy(data);
     layouts_destroy(layouts, num_layouts);
+    for (i = 0; i < num_files; i++) {
+        free(file_names[i]);
+    }
     free(file_names);
 }
 

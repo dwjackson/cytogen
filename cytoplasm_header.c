@@ -72,6 +72,9 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
         line = read_line(fp);
         line_len = strlen(line);
         while (strcmp(line, CYTO_HEADER_BORDER) != 0 && !feof(fp)) {
+            if (line_len == 0) {
+                continue; /* Skip empty lines */
+            }
             key = malloc(line_len + 1);
             value = malloc(line_len + 1);
             for (i = 0; i < line_len; i++) {
