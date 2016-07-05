@@ -72,7 +72,7 @@ static char
     char *content;
     size_t content_length;
     size_t content_bufsize;
-    char ch;
+    int ch;
 
     content_bufsize = DEFAULT_CONTENT_LENGTH ;
     content = malloc(content_bufsize);
