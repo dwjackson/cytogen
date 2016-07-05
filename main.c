@@ -137,6 +137,11 @@ static void
                     char *layout = get_layout_content(args->layouts,
                                                       args->num_layouts,
                                                       layout_name);
+                    if (layout == NULL) {
+                        char *err_fmt = "ERROR: Layout not found: \"%s\"\n";
+                        fprintf(stderr, err_fmt, layout_name);
+                        abort();
+                    }
                     size_t layout_len = strlen(layout);
                     ctache_render_string(layout,
                                          layout_len,
