@@ -135,7 +135,9 @@ static void
                     ctache_data_t *content_data;
                     content_data = ctache_data_create_string(content,
                                                              content_len);
-                    ctache_data_hash_table_set(file_data, "content", content);
+                    ctache_data_hash_table_set(file_data,
+                                               "content",
+                                               content_data);
                     ctache_data_t *layout_data;
                     layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
                     char *layout_name = string_trim(layout_data->data.string);
