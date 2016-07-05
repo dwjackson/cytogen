@@ -9,6 +9,7 @@
 #include <ctache/ctache.h>
 #include "layout.h"
 #include "cytoplasm_header.h"
+#include "string_util.h"
 
 #define USAGE "Usage: cyto [COMMAND]"
 
@@ -133,7 +134,7 @@ static void
                     ctache_data_hash_table_set(file_data, "content", content);
                     ctache_data_t *layout_data;
                     layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
-                    char *layout_name = layout_data->data.string;
+                    char *layout_name = string_trim(layout_data->data.string);
                     char *layout = get_layout_content(args->layouts,
                                                       args->num_layouts,
                                                       layout_name);
@@ -148,6 +149,7 @@ static void
                                          out_fp,
                                          file_data,
                                          ESCAPE_HTML);
+                    free(layout_name);
                     free(content);
                 }
 
