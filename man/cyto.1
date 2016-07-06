@@ -1,0 +1,26 @@
+.\" This Source Code Form is subject to the terms of the Mozilla Public
+.\" License, v. 2.0. If a copy of the MPL was not distributed with this
+.\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.\"
+.\" Copyright (c) 2016 David Jackson
+.Dd July 5, 2016
+.Dt CYTO 1
+.Os
+.Sh NAME
+.Nm cyto
+.Nd simple static site generator
+.Sh SYNOPSIS
+.Nm
+.Op Ar command
+.Sh DESCRIPTION
+Generate static websites from a collection of template files. The available
+commands are:
+.Bl -tag -width Ds
+.It init Ar project
+Create a directory named for
+.Ar project
+and initialize a Cytoplasm project within it.
+.It generate
+Within a cytoplasm project directory, generate the static site to a directory
+called _site.
+.El
