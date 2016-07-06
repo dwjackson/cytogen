@@ -251,6 +251,18 @@ cmd_generate(const char *site_dir)
         pthread_join(thr_pool[i], NULL);
     }
 
+    /* Process the subdirectories, recursively */
+    for (i = 0; i < num_directories; i++) {
+        char *directory = directories[i];
+        size_t subdir_len = strlen(site_dir) + 1 + strlen(directory) + 1;
+        char *site_subdir = malloc(subdir_len);
+        strcpy(site_subdir, site_dir);
+        strcat(site_subdir, "/");
+        strcat(site_subdir, directory);
+        cmd_generate(site_subdir);
+        free(site_subdir);
+    }
+
     /* Cleanup */
     pthread_mutex_destroy(&data_mutex);
     ctache_data_destroy(data);
