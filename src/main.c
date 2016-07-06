@@ -29,12 +29,13 @@
 #define LAYOUT "layout"
 
 static void
-get_file_list(char ***file_names_ptr,
+get_file_list(const char *dir_name,
+              char ***file_names_ptr,
               int *num_files_ptr, 
               char ***directories_ptr,
               int *num_directories_ptr)
 {
-    DIR *dir = opendir(".");
+    DIR *dir = opendir(dir_name);
     if (dir == NULL) {
         fprintf(stderr, "ERROR: Could not open current directory\n");
         exit(EXIT_FAILURE);
@@ -206,7 +207,7 @@ static void
 }
 
 static void
-cmd_generate(const char *site_dir)
+cmd_generate(const char *curr_dir_name, const char *site_dir)
 {
     mkdir(site_dir, 0770);
 
@@ -214,7 +215,11 @@ cmd_generate(const char *site_dir)
     int num_files;
     char **directories;
     int num_directories;
-    get_file_list(&file_names, &num_files, &directories, &num_directories);
+    get_file_list(curr_dir_name,
+                  &file_names,
+                  &num_files,
+                  &directories,
+                  &num_directories);
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
 
@@ -254,13 +259,22 @@ cmd_generate(const char *site_dir)
     /* Process the subdirectories, recursively */
     for (i = 0; i < num_directories; i++) {
         char *directory = directories[i];
-        size_t subdir_len = strlen(site_dir) + 1 + strlen(directory) + 1;
-        char *site_subdir = malloc(subdir_len);
+
+        size_t subdir_len = strlen(curr_dir_name) + 1 + strlen(directory);
+        char *subdir = malloc(subdir_len + 1);
+        strcpy(subdir, curr_dir_name);
+        strcat(subdir, "/");
+        strcat(subdir, directory);
+
+        size_t site_subdir_len = strlen(site_dir) + 1 + strlen(subdir);
+        char *site_subdir = malloc(site_subdir_len + 1);
         strcpy(site_subdir, site_dir);
         strcat(site_subdir, "/");
-        strcat(site_subdir, directory);
-        cmd_generate(site_subdir);
+        strcat(site_subdir, subdir);
+        cmd_generate(subdir, site_subdir);
+
         free(site_subdir);
+        free(subdir);
     }
 
     /* Cleanup */
@@ -295,7 +309,7 @@ main(int argc, char *argv[])
     if (strcmp(cmd, "g") == 0
         || strcmp(cmd, "gen") == 0
         || strcmp(cmd, "generate") == 0) {
-        cmd_generate(SITE_DIR);
+        cmd_generate(".", SITE_DIR);
     } else if (strcmp(cmd, "init") == 0) {
         if (argc == 3) {
             char *proj_name = argv[2];
