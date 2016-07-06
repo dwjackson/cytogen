@@ -34,5 +34,6 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset mkdir munmap strdup])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+                 man/Makefile])
 AC_OUTPUT
