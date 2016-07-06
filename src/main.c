@@ -28,8 +28,11 @@
 #define DEFAULT_CONTENT_LENGTH 1024
 #define LAYOUT "layout"
 
-static char
-**get_file_list(int *num_files_ptr)
+static void
+get_file_list(char ***file_names_ptr,
+              int *num_files_ptr, 
+              char ***directories_ptr,
+              int *num_directories_ptr)
 {
     DIR *dir = opendir(".");
     if (dir == NULL) {
@@ -38,6 +41,7 @@ static char
     }
 
     int num_files = 0;
+    int num_directories = 0;
     struct dirent *de;
     struct stat statbuf;
     while ((de = readdir(dir)) != NULL) {
@@ -50,13 +54,20 @@ static char
             && file_name[0] != '_'
             && file_name[0] != '.') {
             num_files++;
+        } else if (S_ISDIR(statbuf.st_mode)
+                   && file_name[0] != '_'
+                   && file_name[0] != '.') {
+            num_directories++;
         }
     }
     *num_files_ptr = num_files;
+    *num_directories_ptr = num_directories;
     rewinddir(dir);
 
     char **file_names = malloc(sizeof(char*) * num_files);
+    char **directory_names = malloc(sizeof(char*) * num_directories);
     int index = 0;
+    int dir_index = 0;
     while ((de = readdir(dir)) != NULL) {
         char *file_name = de->d_name;
         if (stat(file_name, &statbuf) == -1) {
@@ -68,12 +79,17 @@ static char
             && file_name[0] != '.') {
             file_names[index] = strdup(file_name);
             index++;
+        } else if (S_ISDIR(statbuf.st_mode)
+                   && file_name[0] != '_'
+                   && file_name[0] != '.') {
+            directory_names[dir_index] = strdup(file_name);
+            dir_index++;
         }
     }
 
     closedir(dir);
-
-    return file_names;
+    *file_names_ptr = file_names;
+    *directories_ptr = directory_names;
 }
 
 static char
@@ -192,8 +208,11 @@ cmd_generate()
 {
     mkdir(SITE_DIR, 0770);
 
+    char **file_names;
     int num_files;
-    char **file_names = get_file_list(&num_files);
+    char **directories;
+    int num_directories;
+    get_file_list(&file_names, &num_files, &directories, &num_directories);
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
 
@@ -237,6 +256,7 @@ cmd_generate()
         free(file_names[i]);
     }
     free(file_names);
+    free(directories);
 }
 
 static void
