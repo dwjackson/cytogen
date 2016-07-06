@@ -123,6 +123,7 @@ struct process_file_args {
     pthread_mutex_t *data_mutex;
     struct layout *layouts;
     int num_layouts;
+    const char *site_dir;
 };
 
 static void
@@ -130,12 +131,13 @@ static void
 {
     struct process_file_args *args = (struct process_file_args *)args_ptr;
     int i;
+    const char *site_dir = args->site_dir;
     char *in_file_name;
     char *out_file_name;
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
-        out_file_name = malloc(strlen(SITE_DIR) + 1 + strlen(in_file_name) + 1);
-        strcpy(out_file_name, SITE_DIR);
+        out_file_name = malloc(strlen(site_dir) + 1 + strlen(in_file_name) + 1);
+        strcpy(out_file_name, site_dir);
         strcat(out_file_name, "/");
         strcat(out_file_name, in_file_name);
         if (out_file_name == NULL) {
@@ -204,9 +206,9 @@ static void
 }
 
 static void
-cmd_generate()
+cmd_generate(const char *site_dir)
 {
-    mkdir(SITE_DIR, 0770);
+    mkdir(site_dir, 0770);
 
     char **file_names;
     int num_files;
@@ -240,6 +242,7 @@ cmd_generate()
         threads_args[i].data_mutex = &data_mutex;
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
+        threads_args[i].site_dir = site_dir;
         pthread_create(&(thr_pool[i]), NULL, process_file, &(threads_args[i]));
     }
 
@@ -280,7 +283,7 @@ main(int argc, char *argv[])
     if (strcmp(cmd, "g") == 0
         || strcmp(cmd, "gen") == 0
         || strcmp(cmd, "generate") == 0) {
-        cmd_generate();
+        cmd_generate(SITE_DIR);
     } else if (strcmp(cmd, "init") == 0) {
         if (argc == 3) {
             char *proj_name = argv[2];
