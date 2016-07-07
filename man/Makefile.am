@@ -4,4 +4,4 @@
 
 # Copyright (c) 2016 David Jackson
 
-man1_MANS = cyto.1
+man1_MANS = cyto.1 cytoplasm.1

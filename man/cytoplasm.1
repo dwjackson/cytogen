@@ -1,0 +1,68 @@
+.\" This Source Code Form is subject to the terms of the Mozilla Public
+.\" License, v. 2.0. If a copy of the MPL was not distributed with this
+.\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.\"
+.\" Copyright (c) 2016 David Jackson
+.Dd July 7, 2016
+.Dt CYTOPLASM 1
+.Sh NAME
+.Nm cytoplasm
+.Nd fast and simple static-site generator
+.Sh DESCRIPTION
+Cytoplasm is a program you can use to create static websites from a series
+of templates and contents files. It is designed to be simple to use, fast, and
+obvious (i.e. it doesn't do anything you didn't tell it to do). You interact
+with Cytoplasm via the
+.Sy cyto
+command. See the associated man page for more information on how it works.
+.Sh PROJECT SETUP
+Inside a Cytoplasm project directory, all files are assumed to be intended to
+be rendered to the static site. Your main directory should have an index.html
+file in it as the main entry point to your site. Apart from some special
+directories (all of which begin with an underscore "_"), everything in the
+directory should be organized in the same hierarchy as you'd like to use in
+the finalized site.
+.Ss LAYOUTS
+Most of the pages on your site will share common elements (e.g. the <html>
+tags, the navigation menu, etc) and layouts mean you only have to write these
+bits once. The layouts files go in the special
+.Sy _layouts
+directory. Layout files are
+.Sy ctache
+templated HTML files. They must all contain a 
+.Sy {{>content}}
+partial which is where the main content of the page will be rendered. Here is
+a very simple example in a file called
+.Qq default.html
+.Bd -literal
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Example</title>
+    </head>
+    <body>
+        <h1>Example</h1>
+        {{>content}}
+    </body>
+</html>
+.Ed
+You can use your layouts by specifying a
+.Qq layout
+in your actual file's cytoplasm-header.
+.Ss FILE HEADERS
+To include dynamic information in your files, add a cytoplasm header to the
+top of the file. The cytoplasm header are lines delineated by "---". For
+example, to put some content in the layout above:
+.Bd -literal
+---
+layout: default
+name: Test Testerson
+---
+<div id="content">
+    <p>Hello {{name}}!</p>
+</div>
+.Ed
+.Sh SEE ALSO
+.Xr cyto 1
+.Xr ctache 1
