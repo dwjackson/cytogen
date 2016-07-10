@@ -14,6 +14,7 @@
 
 #define USAGE_FMT "Usage: %s [markdown_file]"
 #define CONTENTS_DEFAULT_BUFSIZE 1024
+#define INDENT "    "
 
 int
 main(int argc, char *argv[])
@@ -53,7 +54,19 @@ main(int argc, char *argv[])
         contents_len++;
     }
     contents[contents_len] = '\0';
+
+    fprintf(out_fp, "<!DOCTYPE html>\n");
+    fprintf(out_fp, "<html>\n");
+    fprintf(out_fp, "%s<head>\n", INDENT);
+    fprintf(out_fp, "%s%s<meta charset=\"utf-8\">\n", INDENT, INDENT);
+    fprintf(out_fp, "%s</head>\n", INDENT);
+    fprintf(out_fp, "%s<body>\n", INDENT);
+
     cymkd_render(contents, contents_len, out_fp);
+
+    fprintf(out_fp, "%s</body>\n", INDENT);
+    fprintf(out_fp, "</html>");
+
     free(contents);
 
     if (in_fp != stdin) {
