@@ -11,6 +11,8 @@
 #include "cymkd.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
 
 #define USAGE_FMT "Usage: %s [markdown_file]"
 #define CONTENTS_DEFAULT_BUFSIZE 1024
@@ -26,6 +28,23 @@ main(int argc, char *argv[])
     size_t contents_len;
     size_t contents_bufsize;
     int ch;
+    int opt;
+    bool no_wrap = false;
+    char *out_file_name = NULL;
+
+    extern char *optarg;
+
+    while ((opt = getopt(argc, argv, "no:)) != -1) {
+        switch (opt) {
+        case 'n':
+            no_wrap = true;
+            break;
+        case o:
+            out_file_name = strdup(optarg);
+        default:
+            exit(EXIT_FAILURE);
+        }
+    }
 
     if (argc != 2 && argc != 1) {
         printf(USAGE_FMT, argv[0]);
@@ -43,6 +62,14 @@ main(int argc, char *argv[])
         }
     }
 
+    if (out_file_name != NULL) {
+        out_fp = fopen(out_file_name, "w");
+        if (out_fp == NULL) {
+            fprintf("ERROR: Could not open for writing: %s\n", out_file_name);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     contents_bufsize = CONTENTS_DEFAULT_BUFSIZE;
     contents = malloc(contents_bufsize + 1);
     while ((ch = fgetc(in_fp)) != EOF) {
@@ -55,22 +82,32 @@ main(int argc, char *argv[])
     }
     contents[contents_len] = '\0';
 
-    fprintf(out_fp, "<!DOCTYPE html>\n");
-    fprintf(out_fp, "<html>\n");
-    fprintf(out_fp, "%s<head>\n", INDENT);
-    fprintf(out_fp, "%s%s<meta charset=\"utf-8\">\n", INDENT, INDENT);
-    fprintf(out_fp, "%s</head>\n", INDENT);
-    fprintf(out_fp, "%s<body>\n", INDENT);
+    if (!no_wrap) {
+        fprintf(out_fp, "<!DOCTYPE html>\n");
+        fprintf(out_fp, "<html>\n");
+        fprintf(out_fp, "%s<head>\n", INDENT);
+        fprintf(out_fp, "%s%s<meta charset=\"utf-8\">\n", INDENT, INDENT);
+        fprintf(out_fp, "%s</head>\n", INDENT);
+        fprintf(out_fp, "%s<body>\n", INDENT);
+    }
 
     cymkd_render(contents, contents_len, out_fp);
 
-    fprintf(out_fp, "%s</body>\n", INDENT);
-    fprintf(out_fp, "</html>");
+    if (!no_wrap) {
+        fprintf(out_fp, "%s</body>\n", INDENT);
+        fprintf(out_fp, "</html>");
+    }
 
+    /* Cleanup */
     free(contents);
-
     if (in_fp != stdin) {
         fclose(in_fp);
+    }
+    if (out_fp != stdout) {
+        fclose(out_fp);
+    }
+    if (out_file_name != NULL) {
+        free(out_file_name);
     }
 
     return 0;
