@@ -64,6 +64,15 @@ match(struct cymkd_parser *parser, char ch)
     }
 }
 
+static int
+consume(struct cymkd_parser *parser)
+{
+    int ch;
+    ch = *(parser->str_pos);
+    (parser->str_pos)++;
+    return ch;
+}
+
 static bool
 paragraph(struct cymkd_parser *parser)
 {
@@ -72,7 +81,7 @@ paragraph(struct cymkd_parser *parser)
 }
 
 static bool
-header_prefix(struct cymkd_parser *parser)
+header_prefix(struct cymkd_parser *parser, int *header_level_ptr)
 {
     int header_level = 0;
     while (match(parser, '#')) {
@@ -82,19 +91,27 @@ header_prefix(struct cymkd_parser *parser)
         return false;
     }
     parser_emit_string(parser, "<h%d>", header_level);
-    // TODO
-    parser_emit_string(parser, "</h%d>", header_level);
-    // TODO
-    return false;
+    *header_level_ptr = header_level;
+    return true;
 }
 
 static bool
 header(struct cymkd_parser *parser)
 {
-    if (header_prefix(parser)) {
-        // TODO
+    int ch;
+    int header_level;
+    if (header_prefix(parser, &header_level)) {
+        while ((ch = consume(parser)) != '\n') {
+            parser_emit_char(parser, ch);
+        }
+        ch = consume(parser);
+        if (ch != '\n') {
+            printf("ERROR: Header must end with two newlines\n");
+            return false;
+        }
+        parser_emit_string(parser, "</h%d>", header_level);
     }
-    return false;
+    return true;
 }
 
 static bool
