@@ -17,8 +17,7 @@ AM_INIT_AUTOMAKE([-Wall foreign])
 AC_PROG_CC
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lctache':
-AC_CHECK_LIB([ctache], [main])
+AC_CHECK_LIB([ctache], [ctache_render_string])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
