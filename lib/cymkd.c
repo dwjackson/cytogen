@@ -142,7 +142,32 @@ bold(struct cymkd_parser *parser)
 static bool
 italics(struct cymkd_parser *parser)
 {
-    // TODO
+    bool sucess;
+    int start_ch;
+    int ch;
+
+    success = match(parser, '*');
+    if (success) {
+        start_ch = '*';
+    } else {
+        success = match(parser, '_');
+        if (success) {
+            start_ch = '_';
+        }
+    }
+    if (!success) {
+        return false;
+    }
+
+    parser_emit_string(parser, "<em>");
+    while ((ch = consume(parser)) != start_ch && ch >= 0) {
+        parser_emit_char(parser, ch);
+    }
+    if (ch == start_ch) {
+        parser_emit_string(parser, "</em>");
+        return true;
+    }
+    return false;
 }
 
 static bool
