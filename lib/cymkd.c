@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 struct cymkd_parser {
     const char *str_pos;
@@ -38,13 +39,15 @@ struct cymkd_parser {
 };
 
 static void
-parser_emit_string(struct cymkd_parser *parser, const char *str)
+parser_emit_string(struct cymkd_parser *parser, const char *fmt, ...)
 {
-    fprintf(parser->out_fp, "%s", str);
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(parser->out_fp, fmt, ap);
 }
 
 static void
-parser_emit_string(struct cymkd_parser *parser, int ch)
+parser_emit_char(struct cymkd_parser *parser, int ch)
 {
     fprintf(parser->out_fp, "%c", ch);
 }
@@ -52,7 +55,7 @@ parser_emit_string(struct cymkd_parser *parser, int ch)
 static bool
 match(struct cymkd_parser *parser, char ch)
 {
-    if (parser->str_pos == ch) {
+    if (*(parser->str_pos) == ch) {
         (parser->str_pos)++;
         return true;
     } else {
@@ -65,6 +68,7 @@ static bool
 paragraph(struct cymkd_parser *parser)
 {
     // TODO
+    return false;
 }
 
 static bool
@@ -81,6 +85,7 @@ header_prefix(struct cymkd_parser *parser)
     // TODO
     parser_emit_string(parser, "</h%d>", header_level);
     // TODO
+    return false;
 }
 
 static bool
@@ -103,6 +108,13 @@ block(struct cymkd_parser *parser)
     return success;
 }
 
+static bool
+more_blocks(struct cymkd_parser *parser)
+{
+    // TODO
+    return false;
+}
+
 static bool 
 document(struct cymkd_parser *parser)
 {
@@ -120,7 +132,7 @@ cymkd_parse(const char *str, size_t str_len, FILE *out_fp)
     struct cymkd_parser parser;
     parser.str_pos = str;
     parser.out_fp = out_fp;
-    if (!document(parser)) {
+    if (!document(&parser)) {
         fprintf(stderr, "ERROR\n");
     }
 }
