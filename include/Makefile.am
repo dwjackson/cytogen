@@ -4,5 +4,4 @@
 
 # Copyright (c) 2016 David Jackson
 
-lib_LTLIBRARIES = libcymkd.la
-libcymkd_la_SOURCES = cymkd.c
+include_HEADERS = cymkd.h
