@@ -35,6 +35,8 @@
 
 struct cymkd_parser {
     const char *str_pos;
+    size_t str_len;
+    int str_index;
     FILE *out_fp;
 };
 
@@ -55,8 +57,12 @@ parser_emit_char(struct cymkd_parser *parser, int ch)
 static bool
 match(struct cymkd_parser *parser, char ch)
 {
+    if (parser->str_index >= parser->str_len) {
+        return -1;
+    }
     if (*(parser->str_pos) == ch) {
         (parser->str_pos)++;
+        (parser->str_index)++;
         return true;
     } else {
         fprintf(stderr, "ERROR\n");
@@ -68,8 +74,12 @@ static int
 consume(struct cymkd_parser *parser)
 {
     int ch;
+    if (parser->str_index >= parser->str_len) {
+        return -1;
+    }
     ch = *(parser->str_pos);
     (parser->str_pos)++;
+    (parser->str_index)++;
     return ch;
 }
 
@@ -89,10 +99,96 @@ is_inline_start(int ch)
 }
 
 static bool
-paragraph(struct cymkd_parser *parser)
+bold(struct cymkd_parser *parser)
+{
+    bool success;
+    int start_ch;
+    int ch;
+
+    success = match(parser, '*');
+    if (!success) {
+        success = match(parser, '_');
+        if (!success) {
+            return false;
+        }
+        success = match(parser, '_');
+        if (!success) {
+            return false;
+        }
+        start_ch = '_';
+    } else {
+        success = match(parser, '*');
+        if (!success) {
+            return false;
+        }
+        start_ch = '*';
+    }
+
+    parser_emit_string(parser, "<strong>");
+    while ((ch = consume(parser)) != start_ch && ch) {
+        parser_emit_char(parser, ch);
+    }
+
+    if (!match(parser, start_ch)) {
+        return false;
+    }
+    success = match(parser, start_ch);
+    if (success) {
+        parser_emit_string(parser, "</strong>");
+    }
+    return success;
+}
+
+static bool
+italics(struct cymkd_parser *parser)
 {
     // TODO
-    return false;
+}
+
+static bool
+inline_code(struct cymkd_parser *parser)
+{
+    int ch;
+    if (!match(parser, '`')) {
+        return false;
+    }
+    // TODO
+}
+
+static bool
+inline(struct cymkd_parser *parser)
+{
+    if (!bold(parser)) {
+        if (!italics(parser)) {
+            if (!inline_code(parser)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+static bool
+paragraph(struct cymkd_parser *parser)
+{
+    int ch;
+    parser_emit_string(parser, "<p>");
+    while (true) {
+        while ((ch = consume(parser)) != '\n' && ch) {
+            if (is_inline_start(ch)) {
+                if (!inline(parser)) {
+                    return false;
+                }
+            } else {
+                parser_emit_char(parser, ch);
+            }
+        }
+        if (match(parser, '\n')) {
+            parser_emit_string(parser, "</p>");
+            break;
+        }
+    }
+    return true;
 }
 
 static bool
@@ -163,6 +259,8 @@ cymkd_render(const char *str, size_t str_len, FILE *out_fp)
 {
     struct cymkd_parser parser;
     parser.str_pos = str;
+    parser.str_len = str_len;
+    parser.str_index = 0;
     parser.out_fp = out_fp;
     if (!document(&parser)) {
         fprintf(stderr, "ERROR\n");
