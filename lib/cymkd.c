@@ -77,6 +77,9 @@ header_prefix(struct cymkd_parser *parser)
     if (header_level == 0) {
         return false;
     }
+    parser_emit_string(parser, "<h%d>", header_level);
+    // TODO
+    parser_emit_string(parser, "</h%d>", header_level);
     // TODO
 }
 
