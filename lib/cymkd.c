@@ -22,6 +22,10 @@
  * header = header prefix, " ", string
  * header prefix = { "#" }, string | string, "\n", underline
  * underline = { "-" } | { "=" }
+ * inline = italics | bold | inline code
+ * italics = ("*" | "_"), string, ("*" | "_")
+ * bold = ("**" | "__"), string, ("**" | "__")
+ * inline code = "`", string, "`"
  */
 
 #include <stdio.h>
@@ -32,6 +36,18 @@ struct cymkd_parser {
     const char *str_pos;
     FILE *out_fp;
 };
+
+static void
+parser_emit_string(struct cymkd_parser *parser, const char *str)
+{
+    fprintf(parser->out_fp, "%s", str);
+}
+
+static void
+parser_emit_string(struct cymkd_parser *parser, int ch)
+{
+    fprintf(parser->out_fp, "%c", ch);
+}
 
 static bool
 match(struct cymkd_parser *parser, char ch)
