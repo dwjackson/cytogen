@@ -74,6 +74,21 @@ consume(struct cymkd_parser *parser)
 }
 
 static bool
+is_inline_start(int ch)
+{
+    bool is_inline;
+    switch(ch) {
+    case '*':
+    case '_':
+    case '`':
+        is_inline = true;
+        break;
+    default:
+        is_inline = false;
+    }
+}
+
+static bool
 paragraph(struct cymkd_parser *parser)
 {
     // TODO
