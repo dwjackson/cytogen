@@ -4,4 +4,4 @@
 
 # Copyright (c) 2016 David Jackson
 
-SUBDIRS = src man lib include
+SUBDIRS = lib src man include
