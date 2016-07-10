@@ -127,7 +127,7 @@ document(struct cymkd_parser *parser)
 }
 
 void
-cymkd_parse(const char *str, size_t str_len, FILE *out_fp)
+cymkd_render(const char *str, size_t str_len, FILE *out_fp)
 {
     struct cymkd_parser parser;
     parser.str_pos = str;

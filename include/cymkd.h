@@ -15,6 +15,6 @@
 #include <stdlib.h>
 
 void
-cymkd_parse(const char *str, size_t str_len, FILE *out_fp);
+cymkd_render(const char *str, size_t str_len, FILE *out_fp);
 
 #endif /* CYMKD_H */
