@@ -52,9 +52,25 @@ paragraph(struct cymkd_parser *parser)
 }
 
 static bool
+header_prefix(struct cymkd_parser *parser)
+{
+    int header_level = 0;
+    while (match(parser, '#')) {
+        header_level++;
+    }
+    if (header_level == 0) {
+        return false;
+    }
+    // TODO
+}
+
+static bool
 header(struct cymkd_parser *parser)
 {
-    // TODO
+    if (header_prefix(parser)) {
+        // TODO
+    }
+    return false;
 }
 
 static bool
