@@ -4,6 +4,10 @@
 
 # Copyright (c) 2016 David Jackson
 
-bin_PROGRAMS = cyto
+AM_CFLAGS = -I$(top_srcdir)/include 
+
+bin_PROGRAMS = cyto cymkd
 cyto_SOURCES = main.c layout.c cytoplasm_header.c string_util.c
 cyto_LDADD = -lctache
+cymkd_SOURCES = cymkd.c
+cymkd_LDADD = $(top_srcdir)/lib/libcymkd.la
