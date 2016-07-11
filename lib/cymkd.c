@@ -140,7 +140,7 @@ bold(struct cymkd_parser *parser)
     }
 
     parser_emit_string(parser, "<strong>");
-    while ((ch = consume(parser)) != start_ch && ch) {
+    while ((ch = consume(parser)) != start_ch && ch != -1) {
         parser_emit_char(parser, ch);
     }
 
