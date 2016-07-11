@@ -218,7 +218,7 @@ paragraph(struct cymkd_parser *parser)
     int ch;
     parser_emit_string(parser, "<p>");
     while (true) {
-        while ((ch = consume(parser)) != '\n' && ch) {
+        while ((ch = consume(parser)) != '\n' && ch != -1) {
             if (is_inline_start(ch)) {
                 if (!inline_section(parser)) {
                     return false;
