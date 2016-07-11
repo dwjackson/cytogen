@@ -229,6 +229,8 @@ paragraph(struct cymkd_parser *parser)
                 if (!inline_section(parser)) {
                     fprintf(stderr, "Invalid inline section\n");
                     return false;
+                } else {
+                    parser_emit_char(parser, next(parser));
                 }
             } else {
                 parser_emit_char(parser, ch);
