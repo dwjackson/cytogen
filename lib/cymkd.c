@@ -238,6 +238,8 @@ paragraph(struct cymkd_parser *parser)
             consume(parser);
             parser_emit_string(parser, "</p>");
             break;
+        } else if (next(parser) == -1) {
+            return false;
         } else {
             parser_emit_char(parser, '\n');
         }
@@ -296,10 +298,24 @@ block(struct cymkd_parser *parser)
 }
 
 static bool
+newlines(struct cymkd_parser *parser)
+{
+    if (next(parser) == '\n') {
+        consume(parser);
+        return true;
+    }
+    return false;
+}
+
+static bool
 more_blocks(struct cymkd_parser *parser)
 {
     if (next(parser) != -1) {
         block(parser);
+        while (newlines(parser)) {
+            parser_emit_char(parser, '\n');
+        }
+        return more_blocks(parser);
     }
     return true;
 }
