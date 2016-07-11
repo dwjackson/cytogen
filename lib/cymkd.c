@@ -269,8 +269,9 @@ header(struct cymkd_parser *parser)
             return false;
         }
         parser_emit_string(parser, "</h%d>", header_level);
+        return true;
     }
-    return true;
+    return false;
 }
 
 static bool
