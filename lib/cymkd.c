@@ -107,6 +107,7 @@ is_inline_start(int ch)
     default:
         is_inline = false;
     }
+    return is_inline;
 }
 
 static bool
@@ -153,7 +154,7 @@ bold(struct cymkd_parser *parser)
 static bool
 italics(struct cymkd_parser *parser)
 {
-    bool sucess;
+    bool success;
     int start_ch;
     int ch;
 
@@ -200,7 +201,7 @@ inline_code(struct cymkd_parser *parser)
 }
 
 static bool
-inline(struct cymkd_parser *parser)
+inline_section(struct cymkd_parser *parser)
 {
     if (!bold(parser)) {
         if (!italics(parser)) {
@@ -220,7 +221,7 @@ paragraph(struct cymkd_parser *parser)
     while (true) {
         while ((ch = consume(parser)) != '\n' && ch) {
             if (is_inline_start(ch)) {
-                if (!inline(parser)) {
+                if (!inline_section(parser)) {
                     return false;
                 }
             } else {

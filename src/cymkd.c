@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
 
 #define USAGE_FMT "Usage: %s [markdown_file]"
@@ -35,15 +36,17 @@ main(int argc, char *argv[])
     extern char *optarg;
     extern int optind;
 
-    while ((opt = getopt(argc, argv, "no:)) != -1) {
+    while ((opt = getopt(argc, argv, "no:")) != -1) {
         switch (opt) {
         case 'n':
             no_wrap = true;
             break;
-        case o:
+        case 'o':
             out_file_name = strdup(optarg);
+            break;
         default:
             exit(EXIT_FAILURE);
+            break;
         }
     }
 
@@ -66,7 +69,8 @@ main(int argc, char *argv[])
     if (out_file_name != NULL) {
         out_fp = fopen(out_file_name, "w");
         if (out_fp == NULL) {
-            fprintf("ERROR: Could not open for writing: %s\n", out_file_name);
+            char *err_fmt = "ERROR: Could not open for writing: %s\n";
+            fprintf(stderr, err_fmt, out_file_name);
             exit(EXIT_FAILURE);
         }
     }
