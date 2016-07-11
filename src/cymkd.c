@@ -99,7 +99,7 @@ main(int argc, char *argv[])
     cymkd_render(contents, contents_len, out_fp);
 
     if (!no_wrap) {
-        fprintf(out_fp, "%s</body>\n", INDENT);
+        fprintf(out_fp, "\n%s</body>\n", INDENT);
         fprintf(out_fp, "</html>");
     }
 

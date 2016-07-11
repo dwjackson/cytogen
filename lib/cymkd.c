@@ -65,7 +65,6 @@ match(struct cymkd_parser *parser, char ch)
         (parser->str_index)++;
         return true;
     } else {
-        fprintf(stderr, "ERROR: Expected %c, got %c\n", ch, *(parser->str_pos));
         return false;
     }
 }
@@ -246,6 +245,10 @@ header_prefix(struct cymkd_parser *parser, int *header_level_ptr)
     if (header_level == 0) {
         return false;
     }
+    if (!match(parser, ' ')) {
+        fprintf(stderr, "ERROR: Expected space after #\n");
+        return false;
+    }
     parser_emit_string(parser, "<h%d>", header_level);
     *header_level_ptr = header_level;
     return true;
@@ -274,9 +277,9 @@ static bool
 block(struct cymkd_parser *parser)
 {
     bool success;
-    success = paragraph(parser);
+    success = header(parser);
     if (!success) {
-        success = header(parser);
+        success = paragraph(parser);
     }
     return success;
 }
