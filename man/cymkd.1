@@ -1,0 +1,33 @@
+.\" This Source Code Form is subject to the terms of the Mozilla Public
+.\" License, v. 2.0. If a copy of the MPL was not distributed with this
+.\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.\"
+.\" Copyright (c) 2016 David Jackson
+.Dd July 10, 2016
+.Dt CYMKD 1
+.Os
+.Sh NAME
+.Nm cymkd
+.Op Fl n
+.Op Fl o Ar output_file
+.Ar input_file
+.Nd markdown parser for Cytoplasm
+.Sh SYNOPSIS
+.Nm
+.Sh DESCRIPTION
+The cymkd program is a programmatic interface to the libcymkd library that
+Cytoplasm uses to parse markdown files. If no file name is given on execution,
+it assumes that input is coming from standard input. The possible command-line
+arguments for
+.Nm
+are as follows:
+.Bl -tag -width Ds
+.It Fl n
+No-wrap: do not wrap the output with HTML boilerplate such that it forms a
+self-contained valid HTML5 document
+.It Fl o Ar output_file
+Specify a file into which to write the output HTML
+.El
+.Sh SEE ALSO
+.Xr cyto 1
+.Xr cytoplasm.1
