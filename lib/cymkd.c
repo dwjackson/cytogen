@@ -65,7 +65,7 @@ match(struct cymkd_parser *parser, char ch)
         (parser->str_index)++;
         return true;
     } else {
-        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "ERROR: Expected %c, got %c\n", ch, *(parser->str_pos));
         return false;
     }
 }
@@ -310,6 +310,6 @@ cymkd_render(const char *str, size_t str_len, FILE *out_fp)
     parser.str_index = 0;
     parser.out_fp = out_fp;
     if (!document(&parser)) {
-        fprintf(stderr, "ERROR\n");
+        fprintf(stderr, "ERROR: Markdown document is invalid\n");
     }
 }
