@@ -177,7 +177,15 @@ inline_code(struct cymkd_parser *parser)
     if (!match(parser, '`')) {
         return false;
     }
-    // TODO
+    parser_emit_string(parser, "<pre><code>");
+    while ((ch = consume(parser)) != '`' && ch != -1) {
+        parser_emit_char(parser, ch);
+    }
+    if (ch != '`') {
+        return false;
+    }
+    parser_emit_string(parser, "</pre></code>");
+    return true;
 }
 
 static bool
