@@ -83,6 +83,17 @@ consume(struct cymkd_parser *parser)
     return ch;
 }
 
+static int
+next(struct cymkd_parser *parser)
+{
+    int ch;
+    if (parser->str_index >= parser->str_len) {
+        return -1;
+    }
+    ch = *(parser->str_pos);
+    return ch;
+}
+
 static bool
 is_inline_start(int ch)
 {
@@ -272,8 +283,10 @@ block(struct cymkd_parser *parser)
 static bool
 more_blocks(struct cymkd_parser *parser)
 {
-    // TODO
-    return false;
+    if (next(parser) != -1) {
+        block(parser);
+    }
+    return true;
 }
 
 static bool 
