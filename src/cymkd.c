@@ -15,7 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define USAGE_FMT "Usage: %s [markdown_file]"
+#define USAGE_FMT "Usage: %s [markdown_file]\n"
 #define CONTENTS_DEFAULT_BUFSIZE 1024
 #define INDENT "    "
 
