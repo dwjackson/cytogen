@@ -115,21 +115,25 @@ bold(struct cymkd_parser *parser)
     bool success;
     int start_ch;
     int ch;
+    const char *str_pos = parser->str_pos;
 
     success = match(parser, '*');
     if (!success) {
         success = match(parser, '_');
         if (!success) {
+            parser->str_pos = str_pos; /* Go back */
             return false;
         }
         success = match(parser, '_');
         if (!success) {
+            parser->str_pos = str_pos; /* Go back */
             return false;
         }
         start_ch = '_';
     } else {
         success = match(parser, '*');
         if (!success) {
+            parser->str_pos = str_pos; /* Go back */
             return false;
         }
         start_ch = '*';
@@ -141,6 +145,7 @@ bold(struct cymkd_parser *parser)
     }
 
     if (!match(parser, start_ch)) {
+        parser->str_pos = str_pos; /* Go back */
         return false;
     }
     success = match(parser, start_ch);
@@ -218,14 +223,16 @@ paragraph(struct cymkd_parser *parser)
     int ch;
     parser_emit_string(parser, "<p>");
     while (true) {
-        while ((ch = consume(parser)) != '\n' && ch != -1) {
+        while ((ch = next(parser)) != '\n' && ch != -1) {
             if (is_inline_start(ch)) {
                 if (!inline_section(parser)) {
+                    fprintf(stderr, "Invalid inline section\n");
                     return false;
                 }
             } else {
                 parser_emit_char(parser, ch);
             }
+            consume(parser); /* Move to the next input character */
         }
         if (match(parser, '\n')) {
             parser_emit_string(parser, "</p>");
