@@ -116,6 +116,38 @@ static char
     return content;
 }
 
+static char
+*file_extension(const char *file_name)
+{
+    size_t file_name_len;
+    int i;
+    char ch;
+    size_t extension_len;
+    char *extension;
+    int start_index;
+
+    file_name_len = strlen(file_name);
+    extension_len = 0;
+    for (i = file_name_len - 1; i >= 0; i--) {
+        ch = file_name[i];
+        if (ch != '.') {
+            extension_len++;
+        } else {
+            start_index = i;
+            break;
+        }
+    }
+
+    extension = malloc(extension_len + 1);
+    memset(extension, 0, extension_len + 1);
+    for (i = start_index; i < file_name_len; i++) {
+        ch = file_name[i];
+        extension[i - start_index] = ch;
+    }
+
+    return extension;
+}
+
 struct process_file_args {
     int start_index;
     int end_index;
@@ -134,9 +166,11 @@ static void
     int i;
     const char *site_dir = args->site_dir;
     char *in_file_name;
+    char *in_file_extension;
     char *out_file_name;
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
+        in_file_extension = file_extension(in_file_name);
         out_file_name = malloc(strlen(site_dir) + 1 + strlen(in_file_name) + 1);
         strcpy(out_file_name, site_dir);
         strcat(out_file_name, "/");
@@ -201,6 +235,7 @@ static void
             fprintf(stderr, "ERROR: Could not open %s\n", in_file_name);
         }
         free(out_file_name);
+        free(in_file_extension);
     }
 
     return NULL;
