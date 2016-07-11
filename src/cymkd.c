@@ -103,6 +103,9 @@ main(int argc, char *argv[])
         fprintf(out_fp, "</html>");
     }
 
+    /* Add a final newline */
+    fprintf(out_fp, "\n");
+
     /* Cleanup */
     free(contents);
     if (in_fp != stdin) {
