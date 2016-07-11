@@ -234,9 +234,12 @@ paragraph(struct cymkd_parser *parser)
             }
             consume(parser); /* Move to the next input character */
         }
-        if (match(parser, '\n')) {
+        if (match(parser, '\n') && next(parser) == '\n') {
+            consume(parser);
             parser_emit_string(parser, "</p>");
             break;
+        } else {
+            parser_emit_char(parser, '\n');
         }
     }
     return true;
