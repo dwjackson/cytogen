@@ -242,10 +242,8 @@ static void
 }
 
 static void
-cmd_generate(const char *curr_dir_name, const char *site_dir)
+_generate(const char *curr_dir_name, const char *site_dir)
 {
-    mkdir(site_dir, 0770);
-
     char **file_names;
     int num_files;
     char **directories;
@@ -306,7 +304,7 @@ cmd_generate(const char *curr_dir_name, const char *site_dir)
         strcpy(site_subdir, site_dir);
         strcat(site_subdir, "/");
         strcat(site_subdir, subdir);
-        cmd_generate(subdir, site_subdir);
+        _generate(subdir, site_subdir);
 
         free(site_subdir);
         free(subdir);
@@ -321,6 +319,13 @@ cmd_generate(const char *curr_dir_name, const char *site_dir)
     }
     free(file_names);
     free(directories);
+}
+
+static void
+cmd_generate(const char *curr_dir_name, const char *site_dir)
+{
+    mkdir(site_dir, 0770);
+    _generate(curr_dir_name, site_dir);
 }
 
 static void
