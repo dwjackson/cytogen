@@ -5,3 +5,4 @@
 # Copyright (c) 2016 David Jackson
 
 man1_MANS = cyto.1 cytoplasm.1 cymkd.1
+man3_MANS = cymkd.3

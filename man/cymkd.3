@@ -1,0 +1,23 @@
+.\" This Source Code Form is subject to the terms of the Mozilla Public
+.\" License, v. 2.0. If a copy of the MPL was not distributed with this
+.\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.\"
+.\" Copyright (c) 2016 David Jackson
+.Dd July 10, 2016
+.Dt CYMKD 3
+.Os
+.Sh NAME
+.Nm cymkd_render
+.Sh LIBRARY
+.Lb libctache
+.Sh SYNOPSIS
+.In cymkd.h
+.Ft void
+.Fo cymkd_render
+.Fa "const char *str" "size_t str_len" "FILE *out_fp"
+.Fc
+.Sh DESCRIPTION
+The cymkd_render function is used to render a string that contains markdown
+markup data to an HTML file.
+.Sh SEE ALSO
+.Xr cymkd 1
