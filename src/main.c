@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include <libgen.h>
+#include <ftw.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
 
@@ -366,6 +367,26 @@ cmd_initialize(const char *project_name)
         fprintf(stderr, err_fmt, project_name);
     }
 }
+
+int
+_clean(const char *path, const struct stat *stat, int flag, struct FTW *ftw_ptr)
+{
+    if (flag == FTW_DP) {
+        rmdir(path);
+    } else if (flag == FTW_F) {
+        unlink(path);
+    } else {
+        fprintf(stderr, "Unrecognized file type for %s\n", path);
+        return -1;
+    }
+    return 0;
+}
+
+void
+cmd_clean()
+{
+    nftw(SITE_DIR, _clean, 1000, FTW_DEPTH); 
+}
     
 int
 main(int argc, char *argv[])
@@ -388,6 +409,8 @@ main(int argc, char *argv[])
             fprintf(stderr, "ERROR: No project name given\n");
             exit(EXIT_FAILURE);
         }
+    } else if (strcmp(cmd, "clean") == 0) {
+        cmd_clean();
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
