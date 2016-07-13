@@ -8,6 +8,9 @@
  * Copyright (c) 2016 David Jackson
  */
 
+#include "layout.h"
+#include "cytoplasm_header.h"
+#include "string_util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,9 +20,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <ctache/ctache.h>
-#include "layout.h"
-#include "cytoplasm_header.h"
-#include "string_util.h"
+#include <libgen.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
 
@@ -46,8 +47,12 @@ get_file_list(const char *dir_name,
     struct dirent *de;
     struct stat statbuf;
     while ((de = readdir(dir)) != NULL) {
+        char *file_path = malloc(strlen(dir_name) + 1 + de->d_namlen + 1);
+        strcpy(file_path, dir_name);
+        strcat(file_path, "/");
+        strcat(file_path, de->d_name);
         char *file_name = de->d_name;
-        if (stat(file_name, &statbuf) == -1) {
+        if (stat(file_path, &statbuf) == -1) {
             fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
             exit(EXIT_FAILURE);
         }
@@ -60,6 +65,7 @@ get_file_list(const char *dir_name,
                    && file_name[0] != '.') {
             num_directories++;
         }
+        free(file_path);
     }
     *num_files_ptr = num_files;
     *num_directories_ptr = num_directories;
@@ -70,15 +76,19 @@ get_file_list(const char *dir_name,
     int index = 0;
     int dir_index = 0;
     while ((de = readdir(dir)) != NULL) {
+        char *file_path = malloc(strlen(dir_name) + 1 + de->d_namlen + 1);
+        strcpy(file_path, dir_name);
+        strcat(file_path, "/");
+        strcat(file_path, de->d_name);
         char *file_name = de->d_name;
-        if (stat(file_name, &statbuf) == -1) {
+        if (stat(file_path, &statbuf) == -1) {
             fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
             exit(EXIT_FAILURE);
         }
         if (!S_ISDIR(statbuf.st_mode)
             && file_name[0] != '_'
             && file_name[0] != '.') {
-            file_names[index] = strdup(file_name);
+            file_names[index] = strdup(file_path);
             index++;
         } else if (S_ISDIR(statbuf.st_mode)
                    && file_name[0] != '_'
@@ -86,6 +96,7 @@ get_file_list(const char *dir_name,
             directory_names[dir_index] = strdup(file_name);
             dir_index++;
         }
+        free(file_path);
     }
 
     closedir(dir);
@@ -171,14 +182,20 @@ static void
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
         in_file_extension = file_extension(in_file_name);
-        out_file_name = malloc(strlen(site_dir) + 1 + strlen(in_file_name) + 1);
+
+        char *in_file_name_dup = strdup(in_file_name);
+        char *in_file_base_name = basename(in_file_name_dup);
+        size_t out_file_name_len;
+        out_file_name_len = strlen(site_dir) + 1 + strlen(in_file_base_name);
+        out_file_name = malloc(out_file_name_len + 1);
         strcpy(out_file_name, site_dir);
         strcat(out_file_name, "/");
-        strcat(out_file_name, in_file_name);
+        strcat(out_file_name, in_file_base_name);
         if (out_file_name == NULL) {
             fprintf(stderr, "ERROR: Could not malloc()\n");
             break;
         }
+
         FILE *in_fp = fopen(in_file_name, "r");
         if (in_fp != NULL) {
             ctache_data_t *file_data = ctache_data_create_hash();
@@ -225,17 +242,20 @@ static void
                 fclose(out_fp);
                 out_fp = NULL;
             } else {
-                fprintf(stderr, "ERROR: Could not open %s\n", out_file_name);
+                char *err_fmt = "ERROR: Could not open output file: %s\n";
+                fprintf(stderr, err_fmt, out_file_name);
             }
             fclose(in_fp);
             pthread_mutex_lock(args->data_mutex);
             ctache_data_hash_table_set(args->data, in_file_name, file_data);
             pthread_mutex_unlock(args->data_mutex);
         } else {
-            fprintf(stderr, "ERROR: Could not open %s\n", in_file_name);
+            char *err_fmt = "ERROR: Could not open input file %s\n";
+            fprintf(stderr, err_fmt, in_file_name);
         }
         free(out_file_name);
         free(in_file_extension);
+        free(in_file_name_dup);
     }
 
     return NULL;
@@ -244,6 +264,8 @@ static void
 static void
 _generate(const char *curr_dir_name, const char *site_dir)
 {
+    mkdir(site_dir, 0770);
+
     char **file_names;
     int num_files;
     char **directories;
@@ -299,11 +321,11 @@ _generate(const char *curr_dir_name, const char *site_dir)
         strcat(subdir, "/");
         strcat(subdir, directory);
 
-        size_t site_subdir_len = strlen(site_dir) + 1 + strlen(subdir);
+        size_t site_subdir_len = strlen(site_dir) + 1 + strlen(directory);
         char *site_subdir = malloc(site_subdir_len + 1);
         strcpy(site_subdir, site_dir);
         strcat(site_subdir, "/");
-        strcat(site_subdir, subdir);
+        strcat(site_subdir, directory);
         _generate(subdir, site_subdir);
 
         free(site_subdir);
@@ -324,7 +346,6 @@ _generate(const char *curr_dir_name, const char *site_dir)
 static void
 cmd_generate(const char *curr_dir_name, const char *site_dir)
 {
-    mkdir(site_dir, 0770);
     _generate(curr_dir_name, site_dir);
 }
 
