@@ -165,6 +165,7 @@ struct process_file_args {
     char **file_names;
     ctache_data_t *data;
     pthread_mutex_t *data_mutex;
+    pthread_mutex_t *basename_mutex;
     struct layout *layouts;
     int num_layouts;
     const char *site_dir;
@@ -184,7 +185,9 @@ static void
         in_file_extension = file_extension(in_file_name);
 
         char *in_file_name_dup = strdup(in_file_name);
+        pthread_mutex_lock(args->basename_mutex);
         char *in_file_base_name = basename(in_file_name_dup);
+        pthread_mutex_unlock(args->basename_mutex);
         size_t out_file_name_len;
         out_file_name_len = strlen(site_dir) + 1 + strlen(in_file_base_name);
         out_file_name = malloc(out_file_name_len + 1);
@@ -283,6 +286,10 @@ _generate(const char *curr_dir_name, const char *site_dir)
     pthread_mutex_t data_mutex;
     pthread_mutex_init(&data_mutex, NULL);
 
+    /* Set up the basename(3) mutex */
+    pthread_mutex_t basename_mutex;
+    pthread_mutex_init(&basename_mutex, NULL);
+
     int files_per_worker = num_files / NUM_WORKERS;
     pthread_t thr_pool[NUM_WORKERS];
     struct process_file_args threads_args[NUM_WORKERS];
@@ -300,6 +307,7 @@ _generate(const char *curr_dir_name, const char *site_dir)
         threads_args[i].file_names = file_names;
         threads_args[i].data = data;
         threads_args[i].data_mutex = &data_mutex;
+        threads_args[i].basename_mutex = &basename_mutex;
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
         threads_args[i].site_dir = site_dir;
@@ -334,6 +342,7 @@ _generate(const char *curr_dir_name, const char *site_dir)
 
     /* Cleanup */
     pthread_mutex_destroy(&data_mutex);
+    pthread_mutex_destroy(&basename_mutex);
     ctache_data_destroy(data);
     layouts_destroy(layouts, num_layouts);
     for (i = 0; i < num_files; i++) {
