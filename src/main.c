@@ -148,7 +148,7 @@ static char
         if (ch != '.') {
             extension_len++;
         } else {
-            start_index = i;
+            start_index = i + 1;
             break;
         }
     }
@@ -174,6 +174,12 @@ struct process_file_args {
     int num_layouts;
     const char *site_dir;
 };
+
+static bool
+extension_implies_markdown(const char *extension)
+{
+    return (strcmp(extension, "md") == 0 || strcmp(extension, "mkd") == 0);
+}
 
 static void
 *process_file(void *args_ptr)
@@ -255,10 +261,10 @@ static void
             fclose(in_fp);
 
             /* If necessary render the output file as markdown */
-            if (strcmp(in_file_extension, "md") == 0
-                    || strcmp(in_file_extension, "mkd") == 0) {
+            if (extension_implies_markdown(in_file_extension)) {
                 int in_fd = open(out_file_name, O_RDONLY);
-                int tmp_fd = mkstemp("cymkdtempXXXXX");
+                char template[] = "/tmp/cymkd.XXXXXX";
+                int tmp_fd = mkstemp(template);
                 cymkd_render_fd(in_fd, tmp_fd);
                 close(in_fd);
                 lseek(tmp_fd, 0, SEEK_SET); /* Rewind the output file */
@@ -271,7 +277,9 @@ static void
                                      MAP_PRIVATE,
                                      tmp_fd,
                                      0);
-                FILE *fp = fopen(out_file_name, "w");
+                char *html_file_name;
+                asprintf(&html_file_name, "%s.html", out_file_name);
+                FILE *fp = fopen(html_file_name, "w");
                 if (fp == NULL) {
                     char *err_fmt = "ERROR: Could not open output file: %s\n";
                     fprintf(stderr, err_fmt, out_file_name);
@@ -283,6 +291,8 @@ static void
                         fputc(ch, fp);
                     }
                 }
+                unlink(out_file_name);
+                free(html_file_name);
                 munmap(content, content_len);
                 close(tmp_fd);
             }
