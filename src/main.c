@@ -11,6 +11,7 @@
 #include "layout.h"
 #include "cytoplasm_header.h"
 #include "string_util.h"
+#include "cymkd.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,8 @@
 #include <ctache/ctache.h>
 #include <libgen.h>
 #include <ftw.h>
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
 
@@ -242,7 +245,7 @@ static void
                     free(layout_name);
                 }
 
-                /* Clean up the file pointer */
+                /* Clean up the output file pointer */
                 fclose(out_fp);
                 out_fp = NULL;
             } else {
@@ -250,6 +253,40 @@ static void
                 fprintf(stderr, err_fmt, out_file_name);
             }
             fclose(in_fp);
+
+            /* If necessary render the output file as markdown */
+            if (strcmp(in_file_extension, "md") == 0
+                    || strcmp(in_file_extension, "mkd") == 0) {
+                int in_fd = open(out_file_name, O_RDONLY);
+                int tmp_fd = mkstemp("cymkdtempXXXXX");
+                cymkd_render_fd(in_fd, tmp_fd);
+                close(in_fd);
+                lseek(tmp_fd, 0, SEEK_SET); /* Rewind the output file */
+                struct stat statbuf;
+                fstat(tmp_fd, &statbuf);
+                size_t content_len = statbuf.st_size;
+                char *content = mmap(NULL,
+                                     content_len,
+                                     PROT_READ,
+                                     MAP_PRIVATE,
+                                     tmp_fd,
+                                     0);
+                FILE *fp = fopen(out_file_name, "w");
+                if (fp == NULL) {
+                    char *err_fmt = "ERROR: Could not open output file: %s\n";
+                    fprintf(stderr, err_fmt, out_file_name);
+                } else {
+                    int i;
+                    int ch;
+                    for (i = 0; i < content_len; i++) {
+                        ch = content[i];
+                        fputc(ch, fp);
+                    }
+                }
+                munmap(content, content_len);
+                close(tmp_fd);
+            }
+
             pthread_mutex_lock(args->data_mutex);
             ctache_data_hash_table_set(args->data, in_file_name, file_data);
             pthread_mutex_unlock(args->data_mutex);

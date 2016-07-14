@@ -20,10 +20,16 @@
 .Fo cymkd_render_file
 .Fa "FILE *in_fp" "FILE *out_fp"
 .Fc
+.Ft void
+.Fo cymkd_render_fd
+.Fa "int in_fd" "int out_fd"
+.Fc
 .Sh DESCRIPTION
 The cymkd_render function is used to render a string that contains markdown
 markup data to an HTML file. Similarly, the cymkd_render_file function is used
 to render a file directly from a FILE pointer. Internally it will read the
-file into a string and render the string.
+file into a string and render the string. The cymkd_render_fd function is
+similar to cymkd_render_file, except it takes a file descriptors for input and
+output. Note that the input file descriptor cannot correspond to stdin.
 .Sh SEE ALSO
 .Xr cymkd 1

@@ -30,8 +30,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 
 #define BUFSIZE 1024
 
@@ -40,6 +46,7 @@ struct cymkd_parser {
     size_t str_len;
     int str_index;
     FILE *out_fp;
+    int out_fd;
 };
 
 static void
@@ -47,13 +54,24 @@ parser_emit_string(struct cymkd_parser *parser, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(parser->out_fp, fmt, ap);
+    if (parser->out_fp != NULL) {
+        vfprintf(parser->out_fp, fmt, ap);
+    } else {
+        char *str;
+        vasprintf(&str, fmt, ap);
+        write(parser->out_fd, str, strlen(str));
+        free(str);
+    }
 }
 
 static void
 parser_emit_char(struct cymkd_parser *parser, int ch)
 {
-    fprintf(parser->out_fp, "%c", ch);
+    if (parser->out_fp != NULL) {
+        fprintf(parser->out_fp, "%c", ch);
+    } else {
+        write(parser->out_fd, &ch, 1);
+    }
 }
 
 static bool
@@ -336,6 +354,14 @@ document(struct cymkd_parser *parser)
     return success;
 }
 
+static void
+_cymkd_render(struct cymkd_parser *parser)
+{
+    if (!document(parser)) {
+        fprintf(stderr, "ERROR: Markdown document is invalid\n");
+    }
+}
+
 void
 cymkd_render(const char *str, size_t str_len, FILE *out_fp)
 {
@@ -344,9 +370,8 @@ cymkd_render(const char *str, size_t str_len, FILE *out_fp)
     parser.str_len = str_len;
     parser.str_index = 0;
     parser.out_fp = out_fp;
-    if (!document(&parser)) {
-        fprintf(stderr, "ERROR: Markdown document is invalid\n");
-    }
+    parser.out_fd = -1;
+    _cymkd_render(&parser);
 }
 
 void
@@ -371,4 +396,30 @@ cymkd_render_file(FILE *in_fp, FILE *out_fp)
     content[content_len] = '\0';
     cymkd_render(content, content_len, out_fp);
     free(content);
+}
+
+void
+cymkd_render_fd(int in_fd, int out_fd)
+{
+    struct stat statbuf;
+    char *content;
+    size_t content_len;
+
+    if (in_fd == STDIN_FILENO) {
+        char *msg = "ERROR: Cannot use stdin for input to cymkd_render_fd()";
+        fprintf(stderr, "%s\n", msg);
+        return;
+    }
+
+    fstat(in_fd, &statbuf);
+    content_len = statbuf.st_size;
+    content = mmap(NULL, content_len, PROT_READ, MAP_PRIVATE, in_fd, 0);
+    struct cymkd_parser parser;
+    parser.str_pos = content;
+    parser.str_len = content_len;
+    parser.str_index = 0;
+    parser.out_fp = NULL;
+    parser.out_fd = out_fd;
+    _cymkd_render(&parser);
+    munmap(content, content_len);
 }
