@@ -17,4 +17,7 @@
 void
 cymkd_render(const char *str, size_t str_len, FILE *out_fp);
 
+void
+cymkd_render_file(FILE *in_fp, FILE *out_fp);
+
 #endif /* CYMKD_H */

@@ -8,6 +8,7 @@
  * Copyright (c) 2016 David Jackson
  */
 
+#define _XOPEN_SOURCE 500
 #include "layout.h"
 #include "cytoplasm_header.h"
 #include "string_util.h"
@@ -48,11 +49,11 @@ get_file_list(const char *dir_name,
     struct dirent *de;
     struct stat statbuf;
     while ((de = readdir(dir)) != NULL) {
-        char *file_path = malloc(strlen(dir_name) + 1 + de->d_namlen + 1);
+        char *file_name = de->d_name;
+        char *file_path = malloc(strlen(dir_name) + 1 + strlen(file_name) + 1);
         strcpy(file_path, dir_name);
         strcat(file_path, "/");
-        strcat(file_path, de->d_name);
-        char *file_name = de->d_name;
+        strcat(file_path, file_name);
         if (stat(file_path, &statbuf) == -1) {
             fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
             exit(EXIT_FAILURE);
@@ -77,11 +78,11 @@ get_file_list(const char *dir_name,
     int index = 0;
     int dir_index = 0;
     while ((de = readdir(dir)) != NULL) {
-        char *file_path = malloc(strlen(dir_name) + 1 + de->d_namlen + 1);
+        char *file_name = de->d_name;
+        char *file_path = malloc(strlen(dir_name) + 1 + strlen(file_name) + 1);
         strcpy(file_path, dir_name);
         strcat(file_path, "/");
-        strcat(file_path, de->d_name);
-        char *file_name = de->d_name;
+        strcat(file_path, file_name);
         if (stat(file_path, &statbuf) == -1) {
             fprintf(stderr, "ERROR: Could not stat %s\n", file_name);
             exit(EXIT_FAILURE);

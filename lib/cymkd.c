@@ -33,6 +33,8 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#define BUFSIZE 1024
+
 struct cymkd_parser {
     const char *str_pos;
     size_t str_len;
@@ -345,4 +347,28 @@ cymkd_render(const char *str, size_t str_len, FILE *out_fp)
     if (!document(&parser)) {
         fprintf(stderr, "ERROR: Markdown document is invalid\n");
     }
+}
+
+void
+cymkd_render_file(FILE *in_fp, FILE *out_fp)
+{
+    int ch;
+    char *content;
+    size_t content_len;
+    size_t content_bufsize;
+
+    content_bufsize = BUFSIZE;
+    content = malloc(content_bufsize);
+    content_len = 0;
+    while ((ch = fgetc(in_fp)) != EOF) {
+        if (content_len + 1 >= content_bufsize) {
+            content_bufsize *= 2;
+            content = realloc(content, content_bufsize); 
+        }
+        content[content_len] = ch;
+        content_len++;
+    }
+    content[content_len] = '\0';
+    cymkd_render(content, content_len, out_fp);
+    free(content);
 }
