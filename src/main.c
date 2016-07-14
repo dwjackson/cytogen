@@ -8,7 +8,6 @@
  * Copyright (c) 2016 David Jackson
  */
 
-#define _XOPEN_SOURCE 500
 #include "layout.h"
 #include "cytoplasm_header.h"
 #include "string_util.h"
