@@ -302,7 +302,7 @@ paragraph(struct cymkd_parser *parser)
                 if (!inline_section(parser)) {
                     fprintf(stderr, "Invalid inline section\n");
                     return false;
-                } else {
+                } else if (next(parser) >= 0) {
                     parser_emit_char(parser, next(parser));
                 }
             } else {
@@ -315,7 +315,8 @@ paragraph(struct cymkd_parser *parser)
             parser_emit_string(parser, "</p>");
             break;
         } else if (next(parser) == -1) {
-            return false;
+            parser_emit_string(parser, "</p>");
+            break;
         } else {
             parser_emit_char(parser, '\n');
         }
