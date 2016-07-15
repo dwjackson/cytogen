@@ -8,4 +8,4 @@ formatted text.
 
 ## Subhead
 
-Here's another paragraph.
+Here's another paragraph. This has a [link](http://google.com) in it.

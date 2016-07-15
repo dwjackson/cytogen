@@ -17,15 +17,15 @@
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
- * inline = "`", string, "`"
  * more text and inline = "\n", text and inline, more text and inline
  * header = header prefix, " ", string
  * header prefix = { "#" }, string | string, "\n", underline
  * underline = { "-" } | { "=" }
- * inline = italics | bold | inline code
+ * inline = italics | bold | inline code | link
  * italics = ("*" | "_"), string, ("*" | "_")
  * bold = ("**" | "__"), string, ("**" | "__")
  * inline code = "`", string, "`"
+ * link = "[", string, "]", "(", string, ")"
  */
 
 #include <stdio.h>
@@ -121,6 +121,7 @@ is_inline_start(int ch)
     case '*':
     case '_':
     case '`':
+    case '[':
         is_inline = true;
         break;
     default:
@@ -226,14 +227,66 @@ inline_code(struct cymkd_parser *parser)
 }
 
 static bool
+a_link(struct cymkd_parser *parser)
+{
+    int ch;
+    int len;
+    int bufsize;
+    char *link_text;
+    char *link_href;
+
+    if (!match(parser, '[')) {
+        return false;
+    }
+    bufsize = 10;
+    len = 0;
+    link_text = malloc(bufsize);
+    while ((ch = next(parser)) != ']') {
+        if (len + 1 >= bufsize) {
+            bufsize *= 2;
+            link_text = realloc(link_text, bufsize);
+        }
+        link_text[len] = ch;
+        len++;
+        consume(parser);
+    }
+    link_text[len] = '\0';
+    if (!match(parser, ']')) {
+        return false;
+    }
+    if (!match(parser, '(')) {
+        return false;
+    }
+    bufsize = 10;
+    len = 0;
+    link_href = malloc(bufsize);
+    while ((ch = next(parser)) != ')') {
+        if (len + 1 >= bufsize) {
+            bufsize *= 2;
+            link_href = realloc(link_href, bufsize);
+        }
+        link_href[len] = ch;
+        len++;
+        consume(parser);
+    }
+    link_href[len] = '\0';
+    if (!match(parser, ')')) {
+        return false;
+    }
+    parser_emit_string(parser, "<a href=\"%s\">%s</a>", link_href, link_text);
+    free(link_href);
+    free(link_text);
+    return true;
+}
+
+static bool
 inline_section(struct cymkd_parser *parser)
 {
-    if (!bold(parser)) {
-        if (!italics(parser)) {
-            if (!inline_code(parser)) {
-                return false;
-            }
-        }
+    if (!bold(parser) 
+            && !italics(parser)
+            && !inline_code(parser)
+            && !a_link(parser)) {
+        return false;
     }
     return true;
 }
