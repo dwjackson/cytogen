@@ -78,3 +78,35 @@ get_file_list(const char *dir_name,
     *file_names_ptr = file_names;
     *directories_ptr = directory_names;
 }
+
+char
+*file_extension(const char *file_name)
+{
+    size_t file_name_len;
+    int i;
+    char ch;
+    size_t extension_len;
+    char *extension;
+    int start_index;
+
+    file_name_len = strlen(file_name);
+    extension_len = 0;
+    for (i = file_name_len - 1; i >= 0; i--) {
+        ch = file_name[i];
+        if (ch != '.') {
+            extension_len++;
+        } else {
+            start_index = i + 1;
+            break;
+        }
+    }
+
+    extension = malloc(extension_len + 1);
+    memset(extension, 0, extension_len + 1);
+    for (i = start_index; i < file_name_len; i++) {
+        ch = file_name[i];
+        extension[i - start_index] = ch;
+    }
+
+    return extension;
+}
