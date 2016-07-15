@@ -12,6 +12,7 @@
 #include "cytoplasm_header.h"
 #include "string_util.h"
 #include "cymkd.h"
+#include "files.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
