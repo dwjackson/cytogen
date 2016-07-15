@@ -34,7 +34,6 @@ main(int argc, char *argv[])
     char *out_file_name = NULL;
 
     extern char *optarg;
-    extern int optind;
 
     while ((opt = getopt(argc, argv, "no:")) != -1) {
         switch (opt) {
@@ -48,11 +47,6 @@ main(int argc, char *argv[])
             exit(EXIT_FAILURE);
             break;
         }
-    }
-
-    if (optind >= argc) {
-        printf(USAGE_FMT, argv[0]);
-        exit(EXIT_FAILURE);
     }
 
     if (argc == 1) {
