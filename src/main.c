@@ -30,31 +30,7 @@
 
 #define NUM_WORKERS 4
 #define SITE_DIR "_site"
-#define DEFAULT_CONTENT_LENGTH 1024
 #define LAYOUT "layout"
-
-static char
-*read_file_contents(FILE *fp)
-{
-    char *content;
-    size_t content_length;
-    size_t content_bufsize;
-    int ch;
-
-    content_bufsize = DEFAULT_CONTENT_LENGTH ;
-    content = malloc(content_bufsize);
-    content_length = 0;
-    while ((ch = fgetc(fp)) != EOF) {
-        if (content_length + 1 >= content_bufsize) {
-            content_bufsize *= 2;
-            content = realloc(content, content_bufsize);
-        }
-        content[content_length] = ch;
-        content_length++;
-    }
-    content[content_length] = '\0';
-    return content;
-}
 
 struct process_file_args {
     int start_index;
@@ -67,12 +43,6 @@ struct process_file_args {
     int num_layouts;
     const char *site_dir;
 };
-
-static bool
-extension_implies_markdown(const char *extension)
-{
-    return (strcmp(extension, "md") == 0 || strcmp(extension, "mkd") == 0);
-}
 
 static void
 *process_file(void *args_ptr)
