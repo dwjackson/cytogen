@@ -31,12 +31,12 @@
 
 #define USAGE "Usage: cyto [COMMAND]"
 
-#define NUM_WORKERS 4
+#define DEFAULT_NUM_WORKERS 4
 #define SITE_DIR "_site"
 #define POSTS_DIR "_posts"
 
 static void
-_generate(const char *curr_dir_name, const char *site_dir)
+_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
     mkdir(site_dir, 0770);
 
@@ -68,15 +68,16 @@ _generate(const char *curr_dir_name, const char *site_dir)
     pthread_mutex_t basename_mutex;
     pthread_mutex_init(&basename_mutex, NULL);
 
-    int files_per_worker = num_files / NUM_WORKERS;
-    pthread_t thr_pool[NUM_WORKERS];
-    struct process_file_args threads_args[NUM_WORKERS];
+    int files_per_worker = num_files / num_workers;
+    pthread_t *thr_pool = malloc(sizeof(pthread_t) * num_workers);
+    size_t arr_size = sizeof(struct process_file_args) * num_workers;
+    struct process_file_args *threads_args = malloc(arr_size);
 
     /* Create workers */
     int i;
-    for (i = 0; i < NUM_WORKERS; i++) {
+    for (i = 0; i < num_workers; i++) {
         threads_args[i].start_index = i * files_per_worker;
-        if (i + 1 < NUM_WORKERS) {
+        if (i + 1 < num_workers) {
             threads_args[i].end_index = threads_args[i].start_index
                 + files_per_worker;
         } else {
@@ -93,7 +94,7 @@ _generate(const char *curr_dir_name, const char *site_dir)
     }
 
     /* Wait for workers to finish */
-    for (i = 0; i < NUM_WORKERS; i++) {
+    for (i = 0; i < num_workers; i++) {
         pthread_join(thr_pool[i], NULL);
     }
 
@@ -112,13 +113,15 @@ _generate(const char *curr_dir_name, const char *site_dir)
         strcpy(site_subdir, site_dir);
         strcat(site_subdir, "/");
         strcat(site_subdir, directory);
-        _generate(subdir, site_subdir);
+        _generate(subdir, site_subdir, num_workers);
 
         free(site_subdir);
         free(subdir);
     }
 
     /* Cleanup */
+    free(threads_args);
+    free(thr_pool);
     pthread_mutex_destroy(&data_mutex);
     pthread_mutex_destroy(&basename_mutex);
     ctache_data_destroy(data);
@@ -131,9 +134,9 @@ _generate(const char *curr_dir_name, const char *site_dir)
 }
 
 static void
-cmd_generate(const char *curr_dir_name, const char *site_dir)
+cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
-    _generate(curr_dir_name, site_dir);
+    _generate(curr_dir_name, site_dir, num_workers);
 }
 
 static void
@@ -168,17 +171,33 @@ cmd_clean()
 int
 main(int argc, char *argv[])
 {
-    if (argc < 2) {
-        fprintf(stderr, "%s\n", USAGE);
-        exit(EXIT_FAILURE);
+    int num_workers;
+    char **args;
+
+    int opt;
+    extern char *optarg;
+    extern int optind;
+    while ((opt = getopt(argc, argv, "w:")) != -1) {
+        switch (opt) {
+        case 'w':
+            num_workers = atoi(optarg);
+            break;
+        default:
+            exit(EXIT_FAILURE);
+        }
+    }
+    args = argv + optind;
+
+    if (num_workers < 1) {
+        num_workers = DEFAULT_NUM_WORKERS;
     }
 
-    char *cmd = argv[1];
+    char *cmd = args[0];
     if (string_matches_any(cmd, 3, "g", "gen", "generate")) {
-        cmd_generate(".", SITE_DIR);
+        cmd_generate(".", SITE_DIR, num_workers);
     } else if (string_matches_any(cmd, 1, "init")) {
         if (argc == 3) {
-            char *proj_name = argv[2];
+            char *proj_name = args[1];
             cmd_initialize(proj_name);
         } else {
             fprintf(stderr, "ERROR: No project name given\n");
