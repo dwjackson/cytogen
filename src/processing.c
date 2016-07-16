@@ -1,7 +1,15 @@
 #include "layout.h"
 #include "processing.h"
+#include "files.h"
+#include "string_util.h"
 #include <pthread.h>
 #include <ctache/ctache.h>
+#include <string.h>
+#include <libgen.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+#define LAYOUT "layout"
 
 char
 *determine_out_file_name(const char *in_file_name,

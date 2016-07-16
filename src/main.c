@@ -15,7 +15,6 @@
 
 #include "layout.h"
 #include "cytoplasm_header.h"
-#include "string_util.h"
 #include "cymkd.h"
 #include "files.h"
 #include "processing.h"
@@ -27,16 +26,12 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <ctache/ctache.h>
-#include <libgen.h>
 #include <ftw.h>
-#include <sys/mman.h>
-#include <fcntl.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
 
 #define NUM_WORKERS 4
 #define SITE_DIR "_site"
-#define LAYOUT "layout"
 
 static void
 _generate(const char *curr_dir_name, const char *site_dir)
