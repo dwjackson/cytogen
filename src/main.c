@@ -49,21 +49,20 @@ struct process_file_args {
     const char *site_dir;
 };
 
-static void
-process_file(const char *in_file_name, struct process_file_args *args)
+char
+*determine_out_file_name(const char *in_file_name,
+                         const char *site_dir,
+                         pthread_mutex_t *basename_mtx)
 {
-    char *in_file_extension;
+    char *in_file_name_dup;
     char *out_file_name;
-    const char *site_dir = args->site_dir;
-
-    in_file_extension = file_extension(in_file_name);
-
-    /* Determine the output file name */
-    char *in_file_name_dup = strdup(in_file_name);
-    pthread_mutex_lock(args->basename_mutex);
-    char *in_file_base_name = basename(in_file_name_dup);
-    pthread_mutex_unlock(args->basename_mutex);
     size_t out_file_name_len;
+
+    in_file_name_dup = strdup(in_file_name);
+    pthread_mutex_lock(basename_mtx);
+    char *in_file_base_name = basename(in_file_name_dup);
+    pthread_mutex_unlock(basename_mtx);
+
     out_file_name_len = strlen(site_dir) + 1 + strlen(in_file_base_name);
     out_file_name = malloc(out_file_name_len + 1);
     strcpy(out_file_name, site_dir);
@@ -73,8 +72,24 @@ process_file(const char *in_file_name, struct process_file_args *args)
         fprintf(stderr, "ERROR: Could not malloc() for out_file_name\n");
         return;
     }
+
     free(in_file_name_dup);
 
+    return out_file_name;
+}
+
+static void
+process_file(const char *in_file_name, struct process_file_args *args)
+{
+    char *in_file_extension;
+    char *out_file_name;
+    const char *site_dir = args->site_dir;
+
+    in_file_extension = file_extension(in_file_name);
+    out_file_name = determine_out_file_name(in_file_name,
+                                            site_dir,
+                                            args->basename_mutex);
+    
     FILE *in_fp = fopen(in_file_name, "r");
     if (in_fp != NULL) {
         ctache_data_t *file_data = ctache_data_create_hash();
