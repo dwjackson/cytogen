@@ -8,6 +8,10 @@
  * Copyright (c) 2016 David Jackson
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include "layout.h"
 #include "cytoplasm_header.h"
 #include "string_util.h"
@@ -45,7 +49,7 @@ struct process_file_args {
 };
 
 static void
-*process_file(void *args_ptr)
+*process_files(void *args_ptr)
 {
     struct process_file_args *args = (struct process_file_args *)args_ptr;
     int i;
@@ -222,7 +226,7 @@ _generate(const char *curr_dir_name, const char *site_dir)
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
         threads_args[i].site_dir = site_dir;
-        pthread_create(&(thr_pool[i]), NULL, process_file, &(threads_args[i]));
+        pthread_create(&(thr_pool[i]), NULL, process_files, &(threads_args[i]));
     }
 
     /* Wait for workers to finish */
