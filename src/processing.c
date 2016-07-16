@@ -54,6 +54,43 @@ char
     return out_file_name;
 }
 
+static void
+render_markdown(const char *file_name)
+{
+    int in_fd = open(file_name, O_RDONLY);
+    char template[] = "/tmp/cymkd.XXXXXX";
+    int tmp_fd = mkstemp(template);
+    cymkd_render_fd(in_fd, tmp_fd);
+    close(in_fd);
+    lseek(tmp_fd, 0, SEEK_SET); /* Rewind the output file */
+    struct stat statbuf;
+    fstat(tmp_fd, &statbuf);
+    size_t content_len = statbuf.st_size;
+    char *content = mmap(NULL,
+                         content_len,
+                         PROT_READ,
+                         MAP_PRIVATE,
+                         tmp_fd,
+                         0);
+    char *html_file_name;
+    asprintf(&html_file_name, "%s.html", file_name);
+    FILE *fp = fopen(html_file_name, "w");
+    if (fp == NULL) {
+        char *err_fmt = "ERROR: Could not open output file: %s\n";
+        fprintf(stderr, err_fmt, file_name);
+    } else {
+        int i;
+        int ch;
+        for (i = 0; i < content_len; i++) {
+            ch = content[i];
+            fputc(ch, fp);
+        }
+    }
+    free(html_file_name);
+    munmap(content, content_len);
+    close(tmp_fd);
+}
+
 void
 process_file(const char *in_file_name,
              struct process_file_args *args,
@@ -120,39 +157,8 @@ process_file(const char *in_file_name,
 
         /* If necessary render the output file as markdown */
         if (extension_implies_markdown(in_file_extension)) {
-            int in_fd = open(out_file_name, O_RDONLY);
-            char template[] = "/tmp/cymkd.XXXXXX";
-            int tmp_fd = mkstemp(template);
-            cymkd_render_fd(in_fd, tmp_fd);
-            close(in_fd);
-            lseek(tmp_fd, 0, SEEK_SET); /* Rewind the output file */
-            struct stat statbuf;
-            fstat(tmp_fd, &statbuf);
-            size_t content_len = statbuf.st_size;
-            char *content = mmap(NULL,
-                                 content_len,
-                                 PROT_READ,
-                                 MAP_PRIVATE,
-                                 tmp_fd,
-                                 0);
-            char *html_file_name;
-            asprintf(&html_file_name, "%s.html", out_file_name);
-            FILE *fp = fopen(html_file_name, "w");
-            if (fp == NULL) {
-                char *err_fmt = "ERROR: Could not open output file: %s\n";
-                fprintf(stderr, err_fmt, out_file_name);
-            } else {
-                int i;
-                int ch;
-                for (i = 0; i < content_len; i++) {
-                    ch = content[i];
-                    fputc(ch, fp);
-                }
-            }
+            render_markdown(out_file_name);
             unlink(out_file_name);
-            free(html_file_name);
-            munmap(content, content_len);
-            close(tmp_fd);
         }
 
         pthread_mutex_lock(args->data_mutex);
