@@ -18,6 +18,7 @@
 #include "cymkd.h"
 #include "files.h"
 #include "processing.h"
+#include "string_util.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@
 
 #define NUM_WORKERS 4
 #define SITE_DIR "_site"
+#define POSTS_DIR "_posts"
 
 static void
 _generate(const char *curr_dir_name, const char *site_dir)
@@ -54,6 +56,13 @@ _generate(const char *curr_dir_name, const char *site_dir)
     ctache_data_t *data = ctache_data_create_hash();
     pthread_mutex_t data_mutex;
     pthread_mutex_init(&data_mutex, NULL);
+
+    /* Set up the posts data */
+    struct stat statbuf;
+    if (stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR) {
+        ctache_data_t *posts_array = ctache_data_create_array(0);
+        ctache_data_hash_table_set(data, "posts", posts_array);
+    }
 
     /* Set up the basename(3) mutex */
     pthread_mutex_t basename_mutex;

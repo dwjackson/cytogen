@@ -33,7 +33,9 @@ char
                          pthread_mutex_t *basename_mtx);
 
 void
-process_file(const char *in_file_name, struct process_file_args *args);
+process_file(const char *in_file_name,
+             struct process_file_args *args,
+             ctache_data_t *file_data);
 
 void
 *process_files(void *args_ptr);

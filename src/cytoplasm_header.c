@@ -17,7 +17,8 @@
 #define CYTO_HEADER_BORDER "---"
 
 static char *reserved_words[] = {
-    "content"
+    "content",
+    "posts"
 };
 #define NUM_RESERVED_WORDS 1
 

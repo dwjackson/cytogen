@@ -12,12 +12,16 @@
 #include "processing.h"
 #include "files.h"
 #include "string_util.h"
+#include "cytoplasm_header.h"
+#include "cymkd.h"
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include <string.h>
 #include <libgen.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #define LAYOUT "layout"
 
@@ -42,7 +46,7 @@ char
     strcat(out_file_name, in_file_base_name);
     if (out_file_name == NULL) {
         fprintf(stderr, "ERROR: Could not malloc() for out_file_name\n");
-        return;
+        return NULL;
     }
 
     free(in_file_name_dup);
@@ -51,7 +55,9 @@ char
 }
 
 void
-process_file(const char *in_file_name, struct process_file_args *args)
+process_file(const char *in_file_name,
+             struct process_file_args *args,
+             ctache_data_t *file_data)
 {
     char *in_file_extension;
     char *out_file_name;
@@ -64,7 +70,6 @@ process_file(const char *in_file_name, struct process_file_args *args)
     
     FILE *in_fp = fopen(in_file_name, "r");
     if (in_fp != NULL) {
-        ctache_data_t *file_data = ctache_data_create_hash();
         cytoplasm_header_read(in_fp, file_data);
         FILE *out_fp = fopen(out_file_name, "w");
         if (out_fp != NULL) {
@@ -169,8 +174,27 @@ void
     char *in_file_name;
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
-        process_file(in_file_name, args);
+        ctache_data_t *file_data = ctache_data_create_hash();
+        process_file(in_file_name, args, file_data);
     }
 
+    return NULL;
+}
+
+void
+*process_post_files(void *args_ptr)
+{
+    struct process_file_args *args = (struct process_file_args *)args_ptr;
+    ctache_data_t *posts_arr = ctache_data_hash_table_get(args->data, "posts");
+    int i;
+    char *in_file_name;
+    for (i = args->start_index; i < args->end_index; i++) {
+        in_file_name = (args->file_names)[i];
+        ctache_data_t *file_data = ctache_data_create_hash();
+        process_file(in_file_name, args, file_data);
+        ctache_data_t *post_data = ctache_data_create_hash();
+        // TODO: Fill in posts data to posts array
+        ctache_data_array_append(posts_arr, post_data);
+    }
     return NULL;
 }
