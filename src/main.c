@@ -58,6 +58,7 @@ process_file(const char *in_file_name, struct process_file_args *args)
 
     in_file_extension = file_extension(in_file_name);
 
+    /* Determine the output file name */
     char *in_file_name_dup = strdup(in_file_name);
     pthread_mutex_lock(args->basename_mutex);
     char *in_file_base_name = basename(in_file_name_dup);
@@ -69,9 +70,10 @@ process_file(const char *in_file_name, struct process_file_args *args)
     strcat(out_file_name, "/");
     strcat(out_file_name, in_file_base_name);
     if (out_file_name == NULL) {
-        fprintf(stderr, "ERROR: Could not malloc()\n");
+        fprintf(stderr, "ERROR: Could not malloc() for out_file_name\n");
         return;
     }
+    free(in_file_name_dup);
 
     FILE *in_fp = fopen(in_file_name, "r");
     if (in_fp != NULL) {
@@ -170,7 +172,6 @@ process_file(const char *in_file_name, struct process_file_args *args)
     }
     free(out_file_name);
     free(in_file_extension);
-    free(in_file_name_dup);
 }
 
 static void
