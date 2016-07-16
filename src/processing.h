@@ -1,0 +1,31 @@
+#ifndef PROCESSING_H
+#define PROCESSING_H
+
+#include "layout.h"
+#include <pthread.h>
+#include <ctache/ctache.h>
+
+struct process_file_args {
+    int start_index;
+    int end_index;
+    char **file_names;
+    ctache_data_t *data;
+    pthread_mutex_t *data_mutex;
+    pthread_mutex_t *basename_mutex;
+    struct layout *layouts;
+    int num_layouts;
+    const char *site_dir;
+};
+
+char
+*determine_out_file_name(const char *in_file_name,
+                         const char *site_dir,
+                         pthread_mutex_t *basename_mtx);
+
+void
+process_file(const char *in_file_name, struct process_file_args *args);
+
+void
+*process_files(void *args_ptr);
+
+#endif /* PROCESSING_H */
