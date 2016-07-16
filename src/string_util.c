@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdarg.h>
+#include <string.h>
 #include "string_util.h"
 
 static bool
@@ -63,4 +65,26 @@ char
         trimmed_str[i - begin_index] = ch;
     }
     return trimmed_str;
+}
+
+bool
+string_matches_any(const char *str, int num_possible_matches, ...)
+{
+    bool match_found;
+    int i;
+    char *s;
+    va_list ap;
+
+    match_found = false;
+    va_start(ap, num_possible_matches);
+    for (i = 0; i < num_possible_matches; i++) {
+        s = va_arg(ap, char*);
+        if (strcmp(str, s) == 0) {
+            match_found = true;
+            break;
+        }
+    }
+    va_end(ap);
+
+    return match_found;
 }

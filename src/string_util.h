@@ -11,7 +11,13 @@
 #ifndef CYTOPLASM_STRING_UTIL
 #define CYTOPLASM_STRING_UTIL
 
+#include <stdbool.h>
+#include <stdarg.h>
+
 char
 *string_trim(const char *str);
+
+bool
+string_matches_any(const char *str, int num_possible_matches, ...);
 
 #endif /* CYTOPLASM_STRING_UTIL */

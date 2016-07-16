@@ -325,7 +325,7 @@ cmd_clean()
 {
     nftw(SITE_DIR, _clean, 1000, FTW_DEPTH); 
 }
-    
+
 int
 main(int argc, char *argv[])
 {
@@ -335,11 +335,9 @@ main(int argc, char *argv[])
     }
 
     char *cmd = argv[1];
-    if (strcmp(cmd, "g") == 0
-        || strcmp(cmd, "gen") == 0
-        || strcmp(cmd, "generate") == 0) {
+    if (string_matches_any(cmd, 3, "g", "gen", "generate")) {
         cmd_generate(".", SITE_DIR);
-    } else if (strcmp(cmd, "init") == 0) {
+    } else if (string_matches_any(cmd, 1, "init")) {
         if (argc == 3) {
             char *proj_name = argv[2];
             cmd_initialize(proj_name);
@@ -347,7 +345,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "ERROR: No project name given\n");
             exit(EXIT_FAILURE);
         }
-    } else if (strcmp(cmd, "clean") == 0) {
+    } else if (string_matches_any(cmd, 1, "clean")) { 
         cmd_clean();
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
