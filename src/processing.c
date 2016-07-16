@@ -17,11 +17,10 @@
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include <string.h>
-#include <libgen.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <libgen.h>
 
 #define LAYOUT "layout"
 
@@ -58,37 +57,22 @@ static void
 render_markdown(const char *file_name)
 {
     int in_fd = open(file_name, O_RDONLY);
-    char template[] = "/tmp/cymkd.XXXXXX";
-    int tmp_fd = mkstemp(template);
-    cymkd_render_fd(in_fd, tmp_fd);
-    close(in_fd);
-    lseek(tmp_fd, 0, SEEK_SET); /* Rewind the output file */
-    struct stat statbuf;
-    fstat(tmp_fd, &statbuf);
-    size_t content_len = statbuf.st_size;
-    char *content = mmap(NULL,
-                         content_len,
-                         PROT_READ,
-                         MAP_PRIVATE,
-                         tmp_fd,
-                         0);
+    if (in_fd < 0) {
+        fprintf(stderr, "ERROR: Could not open for reading: %s", file_name);
+        return;
+    }
+
     char *html_file_name;
     asprintf(&html_file_name, "%s.html", file_name);
-    FILE *fp = fopen(html_file_name, "w");
-    if (fp == NULL) {
-        char *err_fmt = "ERROR: Could not open output file: %s\n";
-        fprintf(stderr, err_fmt, file_name);
-    } else {
-        int i;
-        int ch;
-        for (i = 0; i < content_len; i++) {
-            ch = content[i];
-            fputc(ch, fp);
-        }
+    int out_fd = open(html_file_name, O_CREAT | O_TRUNC | O_WRONLY, 0660);
+    if (out_fd < 0) {
+        char *err_fmt = "ERROR: Could not open for writing: %s\n";
+        fprintf(stderr, err_fmt, html_file_name);
+        perror(NULL);
     }
-    free(html_file_name);
-    munmap(content, content_len);
-    close(tmp_fd);
+    cymkd_render_fd(in_fd, out_fd);
+    close(in_fd);
+    close(out_fd);
 }
 
 void
