@@ -87,6 +87,9 @@ process_file(const char *in_file_name,
     out_file_name = determine_out_file_name(in_file_name,
                                             site_dir,
                                             args->basename_mutex);
+
+    bool is_markdown = false;
+    is_markdown = extension_implies_markdown(in_file_extension);
     
     FILE *in_fp = fopen(in_file_name, "r");
     if (in_fp != NULL) {
@@ -139,7 +142,7 @@ process_file(const char *in_file_name,
         fclose(in_fp);
 
         /* If necessary render the output file as markdown */
-        if (extension_implies_markdown(in_file_extension)) {
+        if (is_markdown) {
             render_markdown(out_file_name);
             unlink(out_file_name);
         }
