@@ -206,6 +206,36 @@ date_from_file_name(const char *file_name)
     return date;
 }
 
+char
+*post_url(const char *file_name, pthread_mutex_t *basename_mtx)
+{
+    char *url;
+    time_t date;
+    char *file_name_base;
+    char *file_name_dup;
+    char url_date[11]; /* YYYY/mm/dd */
+    struct tm date_tm;
+
+    date = date_from_file_name(file_name);
+    localtime_r(&date, &date_tm);
+
+    file_name_dup = strdup(file_name);
+    pthread_mutex_lock(basename_mtx);
+    file_name_base = basename(file_name_dup);
+    pthread_mutex_unlock(basename_mtx);
+
+    url = malloc(strlen("/posts/YYYY/mm/dd/") + strlen(file_name_base) + 1);
+    strftime(url_date, 10, "%Y/%m/%d", &date_tm);
+    strcpy(url, "/posts/");
+    strcat(url, url_date);
+    strcat(url, "/");
+    strcat(url, file_name_base);
+
+    free(file_name_dup);
+
+    return url;
+}
+
 void
 *process_post_files(void *args_ptr)
 {
@@ -214,6 +244,7 @@ void
     int i;
     char *in_file_name;
     time_t date;
+    char *url;
     ctache_data_t *tmp_data;
 
     for (i = args->start_index; i < args->end_index; i++) {
@@ -235,7 +266,10 @@ void
         tmp_data = ctache_data_create_time(date);
         ctache_data_hash_table_set(post_data, "date", tmp_data);
 
-        // TODO: Post URL
+        /* Post URL */
+        url = post_url(in_file_name, args->basename_mutex);
+        tmp_data = ctache_data_create_string(url, strlen(url));
+        ctache_data_hash_table_set(post_data, "url", tmp_data);
 
         /* Add the post data to the posts array */
         ctache_data_array_append(posts_arr, post_data);
