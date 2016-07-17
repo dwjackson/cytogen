@@ -221,7 +221,8 @@ char
 
     file_name_dup = strdup(file_name);
     pthread_mutex_lock(basename_mtx);
-    file_name_base = basename(file_name_dup);
+    /* file_name_base is the file name after the date */
+    file_name_base = basename(file_name_dup) + strlen("YYYY-MM-DD");
     pthread_mutex_unlock(basename_mtx);
 
     url = malloc(strlen("/posts/YYYY/mm/dd/") + strlen(file_name_base) + 1);
@@ -234,6 +235,55 @@ char
     free(file_name_dup);
 
     return url;
+}
+
+static
+char *prepare_post_directory(const char *site_dir,
+                             const char *post_file_name,
+                             pthread_mutex_t *basename_mtx)
+{
+    time_t date;
+    struct tm date_tm;
+    int year, month, day;
+    struct stat statbuf;
+    char *dir;
+
+    date = date_from_file_name(post_file_name);
+    localtime_r(&date, &date_tm);
+    year = date_tm.tm_year + 1900;
+    month = date_tm.tm_mon + 1;
+    day = date_tm.tm_mday;
+
+    /* Create the base directory if it doesn't exist */
+    asprintf(&dir, "%s/posts", site_dir);
+    mkdir(dir, 0770);
+    free(dir);
+
+    /* Create the year directory if it doesn't exist */
+    asprintf(&dir, "%s/posts/%4d", site_dir, year);
+    mkdir(dir, 0770);
+    free(dir);
+
+    /* Create the month directory if it doesn't exist */
+    asprintf(&dir, "%s/posts/%4d/%2d", site_dir, year, month);
+    mkdir(dir, 0770);
+    free(dir);
+
+    /* Create the day directory if it doesn't exist */
+    asprintf(&dir, "%s/posts/%4d/%2d/%2d", site_dir, year, month, day);
+    mkdir(dir, 0770);
+    free(dir);
+
+    /* Create the post directory if it doesn't exist */
+    char *file_name_dup = strdup(post_file_name);
+    pthread_mutex_lock(basename_mtx);
+    char *post = basename(file_name_dup) + strlen("YYYY-MM-DD");
+    pthread_mutex_unlock(basename_mtx);
+    asprintf(&dir, "%s/posts/%4d/%2d/%2d/%s", site_dir, year, month, day, post);
+    mkdir(dir, 0770);
+    free(file_name_dup);
+
+    return dir;
 }
 
 void
