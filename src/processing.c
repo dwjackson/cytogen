@@ -145,7 +145,8 @@ process_file(const char *in_file_name,
     bool is_markdown = false;
     is_markdown = extension_implies_markdown(in_file_extension);
     
-    FILE *in_fp = fopen(in_file_name, "r");
+    const char *ctache_file_name = in_file_name;
+    FILE *in_fp = fopen(ctache_file_name, "r");
     if (in_fp != NULL) {
         cytoplasm_header_read(in_fp, file_data);
 
@@ -166,7 +167,7 @@ process_file(const char *in_file_name,
         }
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
-        fprintf(stderr, err_fmt, in_file_name);
+        fprintf(stderr, err_fmt, ctache_file_name);
     }
 
     /* Final cleanup */
