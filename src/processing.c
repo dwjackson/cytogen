@@ -17,7 +17,6 @@
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <libgen.h>
@@ -56,23 +55,23 @@ char
 static void
 render_markdown(const char *file_name)
 {
-    int in_fd = open(file_name, O_RDONLY);
-    if (in_fd < 0) {
+    FILE *in_fp = fopen(file_name, "r");
+    if (in_fp == NULL) {
         fprintf(stderr, "ERROR: Could not open for reading: %s", file_name);
         return;
     }
 
     char *html_file_name;
     asprintf(&html_file_name, "%s.html", file_name);
-    int out_fd = open(html_file_name, O_CREAT | O_TRUNC | O_WRONLY, 0660);
-    if (out_fd < 0) {
+    FILE *out_fp = fopen(html_file_name, "w");
+    if (out_fp == NULL) {
         char *err_fmt = "ERROR: Could not open for writing: %s\n";
         fprintf(stderr, err_fmt, html_file_name);
         perror(NULL);
     }
-    cymkd_render_fd(in_fd, out_fd);
-    close(in_fd);
-    close(out_fd);
+    cymkd_render_file(in_fp, out_fp);
+    fclose(in_fp);
+    fclose(out_fp);
 }
 
 void
