@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#include <time.h>
 
 #define LAYOUT "layout"
 
@@ -195,6 +196,16 @@ void
     return NULL;
 }
 
+time_t
+date_from_file_name(const char *file_name)
+{
+    time_t date;
+    struct tm date_tm;
+    strptime(file_name, "%Y-%m-%d", &date_tm);
+    date = mktime(&date_tm);
+    return date;
+}
+
 void
 *process_post_files(void *args_ptr)
 {
@@ -202,15 +213,34 @@ void
     ctache_data_t *posts_arr = ctache_data_hash_table_get(args->data, "posts");
     int i;
     char *in_file_name;
+    time_t date;
+    ctache_data_t *tmp_data;
+
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
         ctache_data_t *file_data = ctache_data_create_hash();
         process_file(in_file_name, args, file_data);
-        ctache_data_destroy(file_data);
 
         ctache_data_t *post_data = ctache_data_create_hash();
-        // TODO: Fill in posts data to posts array
+        if (!ctache_data_hash_table_has_key(file_data, "title")) {
+            fprintf(stderr, "ERROR: Post has no title: %s\n", in_file_name);
+        }
+
+        /* Post Title */
+        tmp_data = ctache_data_hash_table_get(file_data, "title");
+        ctache_data_hash_table_set(post_data, "title", tmp_data);
+        date = date_from_file_name(in_file_name);
+
+        /* Post Creation Date */
+        tmp_data = ctache_data_create_time(date);
+        ctache_data_hash_table_set(post_data, "date", tmp_data);
+
+        // TODO: Post URL
+
+        /* Add the post data to the posts array */
         ctache_data_array_append(posts_arr, post_data);
+
+        ctache_data_destroy(file_data);
     }
     return NULL;
 }
