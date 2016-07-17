@@ -144,29 +144,32 @@ process_file(const char *in_file_name,
     if (in_fp != NULL) {
         cytoplasm_header_read(in_fp, file_data);
 
+        /* If necessary render the output file as markdown */
+        char *html_file_name = NULL;
+        if (is_markdown) {
+            char *markdown_file_name = out_file_name;
+            render_markdown(in_fp, markdown_file_name, &html_file_name);
+
+            fclose(in_fp);
+            unlink(out_file_name);
+            free(html_file_name);
+
+            in_fp = fopen(html_file_name, "r");
+        }
+
         render_ctache_file(in_fp,
                            out_file_name,
                            args->layouts,
                            args->num_layouts,
                            file_data);
 
-        fclose(in_fp);
-
-        /* If necessary render the output file as markdown */
+        /* Clean up files created by the markdown rendering */
         if (is_markdown) {
-            char *markdown_file_name = out_file_name;
-            char *html_file_name;
-            FILE *markdown_fp = fopen(out_file_name, "r");
-            if (markdown_fp == NULL) {
-                char *err_fmt = "ERROR: Could not open for reading: %s";
-                fprintf(stderr, err_fmt, markdown_file_name);
-                return;
-            }
-            render_markdown(markdown_fp, markdown_file_name, &html_file_name);
-            fclose(markdown_fp);
-            unlink(out_file_name);
-            free(html_file_name);
+            unlink(html_file_name);
+            rename(out_file_name, html_file_name);
         }
+
+        fclose(in_fp); 
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
         fprintf(stderr, err_fmt, ctache_file_name);
