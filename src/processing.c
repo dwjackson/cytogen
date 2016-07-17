@@ -162,11 +162,6 @@ process_file(const char *in_file_name,
             render_markdown(out_file_name);
             unlink(out_file_name);
         }
-
-        /* Add file data hash to the main data hash */
-        pthread_mutex_lock(args->data_mutex);
-        ctache_data_hash_table_set(args->data, in_file_name, file_data);
-        pthread_mutex_unlock(args->data_mutex);
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
         fprintf(stderr, err_fmt, in_file_name);
@@ -187,6 +182,7 @@ void
         in_file_name = (args->file_names)[i];
         ctache_data_t *file_data = ctache_data_create_hash();
         process_file(in_file_name, args, file_data);
+        ctache_data_destroy(file_data);
     }
     return NULL;
 }
@@ -202,6 +198,8 @@ void
         in_file_name = (args->file_names)[i];
         ctache_data_t *file_data = ctache_data_create_hash();
         process_file(in_file_name, args, file_data);
+        ctache_data_destroy(file_data);
+
         ctache_data_t *post_data = ctache_data_create_hash();
         // TODO: Fill in posts data to posts array
         ctache_data_array_append(posts_arr, post_data);
