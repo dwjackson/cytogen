@@ -53,7 +53,7 @@ char
 }
 
 static void
-render_markdown(const char *file_name)
+render_markdown(const char *file_name, char **html_file_name_ptr)
 {
     FILE *in_fp = fopen(file_name, "r");
     if (in_fp == NULL) {
@@ -61,8 +61,8 @@ render_markdown(const char *file_name)
         return;
     }
 
-    char *html_file_name;
-    asprintf(&html_file_name, "%s.html", file_name);
+    asprintf(html_file_name_ptr, "%s.html", file_name);
+    char *html_file_name = *html_file_name_ptr;
     FILE *out_fp = fopen(html_file_name, "w");
     if (out_fp == NULL) {
         char *err_fmt = "ERROR: Could not open for writing: %s\n";
@@ -159,8 +159,10 @@ process_file(const char *in_file_name,
 
         /* If necessary render the output file as markdown */
         if (is_markdown) {
-            render_markdown(out_file_name);
+            char *html_file_name;
+            render_markdown(out_file_name, &html_file_name);
             unlink(out_file_name);
+            free(html_file_name);
         }
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
