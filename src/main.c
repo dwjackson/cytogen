@@ -203,7 +203,7 @@ main(int argc, char *argv[])
             fprintf(stderr, "ERROR: No project name given\n");
             exit(EXIT_FAILURE);
         }
-    } else if (string_matches_any(cmd, 1, "clean")) { 
+    } else if (string_matches_any(cmd, 2, "c", "clean")) { 
         cmd_clean();
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
