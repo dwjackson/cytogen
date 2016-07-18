@@ -300,7 +300,14 @@ void
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
         ctache_data_t *file_data = ctache_data_create_hash();
+
+        const char *site_dir = args->site_dir;
+        char *post_dir = prepare_post_directory(site_dir,
+                                                in_file_name,
+                                                args->basename_mutex);
+        args->site_dir = post_dir;
         process_file(in_file_name, args, file_data);
+        args->site_dir = site_dir;
 
         ctache_data_t *post_data = ctache_data_create_hash();
         if (!ctache_data_hash_table_has_key(file_data, "title")) {
