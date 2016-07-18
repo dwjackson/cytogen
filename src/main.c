@@ -98,6 +98,12 @@ _generate(const char *curr_dir_name, const char *site_dir, int num_workers)
         pthread_join(thr_pool[i], NULL);
     }
 
+    /* Threads Cleanup */
+    free(threads_args);
+    free(thr_pool);
+    pthread_mutex_destroy(&data_mutex);
+    pthread_mutex_destroy(&basename_mutex);
+
     /* Process the subdirectories, recursively */
     for (i = 0; i < num_directories; i++) {
         char *directory = directories[i];
@@ -118,12 +124,8 @@ _generate(const char *curr_dir_name, const char *site_dir, int num_workers)
         free(site_subdir);
         free(subdir);
     }
-
-    /* Cleanup */
-    free(threads_args);
-    free(thr_pool);
-    pthread_mutex_destroy(&data_mutex);
-    pthread_mutex_destroy(&basename_mutex);
+    
+    /* Final Cleanup */
     ctache_data_destroy(data);
     layouts_destroy(layouts, num_layouts);
     for (i = 0; i < num_files; i++) {
