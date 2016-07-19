@@ -35,16 +35,28 @@
 #define SITE_DIR "_site"
 #define POSTS_DIR "_posts"
 
-static void
-_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
-{
-    mkdir(site_dir, 0770);
+struct generate_arguments {
+    const char *curr_dir_name;
+    const char *site_dir;
+    int num_workers;
+};
 
+static void
+_generate(struct generate_arguments *args)
+{
+    const char *site_dir;
+    const char *curr_dir_name;
     char **file_names;
     int num_files;
     char **directories;
     int num_directories;
-    get_file_list(curr_dir_name,
+
+    site_dir = args->site_dir;
+    curr_dir_name = args->curr_dir_name;
+
+    mkdir(site_dir, 0770);
+
+    get_file_list(args->curr_dir_name,
                   &file_names,
                   &num_files,
                   &directories,
@@ -68,6 +80,7 @@ _generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     pthread_mutex_t basename_mutex;
     pthread_mutex_init(&basename_mutex, NULL);
 
+    int num_workers = args->num_workers;
     int files_per_worker = num_files / num_workers;
     pthread_t *thr_pool = malloc(sizeof(pthread_t) * num_workers);
     size_t arr_size = sizeof(struct process_file_args) * num_workers;
@@ -119,7 +132,12 @@ _generate(const char *curr_dir_name, const char *site_dir, int num_workers)
         strcpy(site_subdir, site_dir);
         strcat(site_subdir, "/");
         strcat(site_subdir, directory);
-        _generate(subdir, site_subdir, num_workers);
+
+        struct generate_arguments args_r; /* Recursive call args */
+        args_r.curr_dir_name = subdir;
+        args_r.site_dir = site_subdir;
+        args_r.num_workers = num_workers;
+        _generate(&args_r);
 
         free(site_subdir);
         free(subdir);
@@ -138,7 +156,11 @@ _generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 static void
 cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
-    _generate(curr_dir_name, site_dir, num_workers);
+    struct generate_arguments args;
+    args.curr_dir_name = curr_dir_name;
+    args.site_dir = site_dir;
+    args.num_workers = num_workers;
+    _generate(&args);
 }
 
 static void
