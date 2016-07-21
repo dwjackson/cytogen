@@ -39,6 +39,8 @@ struct generate_arguments {
     const char *curr_dir_name;
     const char *site_dir;
     int num_workers;
+    ctache_data_t *data;
+    pthread_mutex_t *data_mutex;
 };
 
 static void
@@ -64,18 +66,6 @@ _generate(struct generate_arguments *args)
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
 
-    /* Set up the data */
-    ctache_data_t *data = ctache_data_create_hash();
-    pthread_mutex_t data_mutex;
-    pthread_mutex_init(&data_mutex, NULL);
-
-    /* Set up the posts data */
-    struct stat statbuf;
-    if (stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR) {
-        ctache_data_t *posts_array = ctache_data_create_array(0);
-        ctache_data_hash_table_set(data, "posts", posts_array);
-    }
-
     /* Set up the basename(3) mutex */
     pthread_mutex_t basename_mutex;
     pthread_mutex_init(&basename_mutex, NULL);
@@ -97,8 +87,8 @@ _generate(struct generate_arguments *args)
             threads_args[i].end_index = num_files;
         }
         threads_args[i].file_names = file_names;
-        threads_args[i].data = data;
-        threads_args[i].data_mutex = &data_mutex;
+        threads_args[i].data = args->data;
+        threads_args[i].data_mutex = args->data_mutex;
         threads_args[i].basename_mutex = &basename_mutex;
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
@@ -114,7 +104,6 @@ _generate(struct generate_arguments *args)
     /* Threads Cleanup */
     free(threads_args);
     free(thr_pool);
-    pthread_mutex_destroy(&data_mutex);
     pthread_mutex_destroy(&basename_mutex);
 
     /* Process the subdirectories, recursively */
@@ -144,7 +133,6 @@ _generate(struct generate_arguments *args)
     }
     
     /* Final Cleanup */
-    ctache_data_destroy(data);
     layouts_destroy(layouts, num_layouts);
     for (i = 0; i < num_files; i++) {
         free(file_names[i]);
@@ -156,11 +144,30 @@ _generate(struct generate_arguments *args)
 static void
 cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
+    /* Set up the data */
+    ctache_data_t *data = ctache_data_create_hash();
+    pthread_mutex_t data_mutex;
+    pthread_mutex_init(&data_mutex, NULL);
+
+    /* Set up the posts data */
+    struct stat statbuf;
+    if (stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR) {
+        ctache_data_t *posts_array = ctache_data_create_array(0);
+        ctache_data_hash_table_set(data, "posts", posts_array);
+    }
+
     struct generate_arguments args;
     args.curr_dir_name = curr_dir_name;
     args.site_dir = site_dir;
     args.num_workers = num_workers;
+    args.data = data;
+    args.data_mutex = &data_mutex;
+
     _generate(&args);
+
+    /* Clean up */
+    pthread_mutex_destroy(&data_mutex);
+    ctache_data_destroy(data);
 }
 
 static void
