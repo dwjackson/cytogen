@@ -65,7 +65,6 @@ render_markdown(FILE *in_fp, const char *file_name, char **html_file_name_ptr)
         perror(NULL);
     }
     cymkd_render_file(in_fp, out_fp);
-    fclose(in_fp);
     fclose(out_fp);
 }
 
