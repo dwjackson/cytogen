@@ -227,10 +227,11 @@ main(int argc, char *argv[])
 {
     int num_workers;
     char **args;
-
     int opt;
     extern char *optarg;
     extern int optind;
+
+    num_workers = 0;
     while ((opt = getopt(argc, argv, "w:")) != -1) {
         switch (opt) {
         case 'w':
