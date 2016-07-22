@@ -44,33 +44,20 @@ struct generate_arguments {
 };
 
 static void
-_generate(struct generate_arguments *args)
+_generate(int num_workers,
+          const char *site_dir,
+          int num_files,
+          char **file_names,
+          struct layout *layouts,
+          int num_layouts,
+          ctache_data_t *data,
+          pthread_mutex_t *data_mutex,
+          void *(*process)(void*))
 {
-    const char *site_dir;
-    const char *curr_dir_name;
-    char **file_names;
-    int num_files;
-    char **directories;
-    int num_directories;
-
-    site_dir = args->site_dir;
-    curr_dir_name = args->curr_dir_name;
-
-    mkdir(site_dir, 0770);
-
-    get_file_list(args->curr_dir_name,
-                  &file_names,
-                  &num_files,
-                  &directories,
-                  &num_directories);
-    int num_layouts;
-    struct layout *layouts = get_layouts(&num_layouts);
-
     /* Set up the basename(3) mutex */
     pthread_mutex_t basename_mutex;
     pthread_mutex_init(&basename_mutex, NULL);
 
-    int num_workers = args->num_workers;
     int files_per_worker = num_files / num_workers;
     pthread_t *thr_pool = malloc(sizeof(pthread_t) * num_workers);
     size_t arr_size = sizeof(struct process_file_args) * num_workers;
@@ -87,13 +74,13 @@ _generate(struct generate_arguments *args)
             threads_args[i].end_index = num_files;
         }
         threads_args[i].file_names = file_names;
-        threads_args[i].data = args->data;
-        threads_args[i].data_mutex = args->data_mutex;
+        threads_args[i].data = data;
+        threads_args[i].data_mutex = data_mutex;
         threads_args[i].basename_mutex = &basename_mutex;
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
         threads_args[i].site_dir = site_dir;
-        pthread_create(&(thr_pool[i]), NULL, process_files, &(threads_args[i]));
+        pthread_create(&(thr_pool[i]), NULL, process, &(threads_args[i]));
     }
 
     /* Wait for workers to finish */
@@ -105,8 +92,43 @@ _generate(struct generate_arguments *args)
     free(threads_args);
     free(thr_pool);
     pthread_mutex_destroy(&basename_mutex);
+}
+
+static void
+generate(struct generate_arguments *args)
+{
+    const char *site_dir;
+    const char *curr_dir_name;
+    char **file_names;
+    int num_files;
+    char **directories;
+    int num_directories;
+
+    get_file_list(args->curr_dir_name,
+                  &file_names,
+                  &num_files,
+                  &directories,
+                  &num_directories);
+    int num_layouts;
+    struct layout *layouts = get_layouts(&num_layouts);
+
+    site_dir = args->site_dir;
+    curr_dir_name = args->curr_dir_name;
+
+    mkdir(site_dir, 0770);
+
+    _generate(args->num_workers,
+              site_dir,
+              num_files,
+              file_names,
+              layouts,
+              num_layouts,
+              args->data,
+              args->data_mutex,
+              process_files); // TODO
 
     /* Process the subdirectories, recursively */
+    int i;
     for (i = 0; i < num_directories; i++) {
         char *directory = directories[i];
 
@@ -125,8 +147,8 @@ _generate(struct generate_arguments *args)
         struct generate_arguments args_r; /* Recursive call args */
         args_r.curr_dir_name = subdir;
         args_r.site_dir = site_subdir;
-        args_r.num_workers = num_workers;
-        _generate(&args_r);
+        args_r.num_workers = args->num_workers;
+        generate(&args_r);
 
         free(site_subdir);
         free(subdir);
@@ -163,7 +185,7 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     args.data = data;
     args.data_mutex = &data_mutex;
 
-    _generate(&args);
+    generate(&args);
 
     /* Clean up */
     pthread_mutex_destroy(&data_mutex);
