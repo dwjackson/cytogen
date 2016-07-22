@@ -126,7 +126,7 @@ generate(struct generate_arguments *args)
               num_layouts,
               args->data,
               args->data_mutex,
-              process_files); // TODO
+              process_files);
 
     /* Process the subdirectories, recursively */
     int i;
