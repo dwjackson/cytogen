@@ -153,7 +153,6 @@ process_file(const char *in_file_name,
 
             fclose(in_fp);
             unlink(out_file_name);
-            free(html_file_name);
 
             in_fp = fopen(html_file_name, "r");
         }
@@ -170,6 +169,7 @@ process_file(const char *in_file_name,
             rename(out_file_name, html_file_name);
         }
 
+        free(html_file_name);
         fclose(in_fp); 
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
