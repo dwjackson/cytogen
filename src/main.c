@@ -43,6 +43,7 @@ struct generate_arguments {
     pthread_mutex_t *data_mutex;
 };
 
+/* Set up the threads to process files, process them, tear down threads */
 static void
 _generate(int num_workers,
           const char *site_dir,
