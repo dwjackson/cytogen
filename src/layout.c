@@ -66,13 +66,13 @@ struct layout
                 strcat(file_path, "/");
                 strcat(file_path, file_name);
                 struct stat statbuf; 
-                if (stat(file_path, &statbuf) < 0) {
-                    fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
-                    exit(EXIT_FAILURE);
-                }
                 int fd = open(file_path, O_RDONLY);
                 if (fd < 0) {
                     fprintf(stderr, "ERROR: Could not open %s\n", file_path);
+                    exit(EXIT_FAILURE);
+                }
+                if (fstat(fd, &statbuf) < 0) {
+                    fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
                     exit(EXIT_FAILURE);
                 }
                 void *r; /* Region */
