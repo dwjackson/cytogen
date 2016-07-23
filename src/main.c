@@ -191,7 +191,7 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     args.data = data;
     args.data_mutex = &data_mutex;
 
-    /* Perform the generation
+    /* Perform the generation */
     if (has_posts) {
         args.curr_dir_name = POSTS_DIR;
         generate(&args);
