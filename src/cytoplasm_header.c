@@ -87,7 +87,9 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
                 continue; /* Skip empty lines */
             }
             key = malloc(line_len + 1);
+            memset(key, 0, line_len + 1);
             value = malloc(line_len + 1);
+            memset(value, 0, line_len + 1);
             for (i = 0; i < line_len; i++) {
                 ch = line[i];
                 if (ch == ':') {
