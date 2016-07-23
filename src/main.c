@@ -167,25 +167,36 @@ generate(struct generate_arguments *args)
 static void
 cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
-    /* Set up the data */
-    ctache_data_t *data = ctache_data_create_hash();
+    ctache_data_t *data;
     pthread_mutex_t data_mutex;
+    struct stat statbuf;
+    bool has_posts;
+    struct generate_arguments args;
+
+    /* Set up the data */
+    data = ctache_data_create_hash();
     pthread_mutex_init(&data_mutex, NULL);
 
     /* Set up the posts data */
-    struct stat statbuf;
-    if (stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR) {
+    has_posts = stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR;
+    if (has_posts) {
         ctache_data_t *posts_array = ctache_data_create_array(0);
         ctache_data_hash_table_set(data, "posts", posts_array);
     }
 
-    struct generate_arguments args;
+    /* Set up the generation arguments */
     args.curr_dir_name = curr_dir_name;
     args.site_dir = site_dir;
     args.num_workers = num_workers;
     args.data = data;
     args.data_mutex = &data_mutex;
 
+    /* Perform the generation
+    if (has_posts) {
+        args.curr_dir_name = POSTS_DIR;
+        generate(&args);
+        args.curr_dir_name = curr_dir_name;
+    }
     generate(&args);
 
     /* Clean up */
