@@ -9,6 +9,7 @@
  */
 
 #include "cymkd.h"
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -35,13 +36,17 @@ main(int argc, char *argv[])
 
     extern char *optarg;
 
-    while ((opt = getopt(argc, argv, "no:")) != -1) {
+    while ((opt = getopt(argc, argv, "no:V")) != -1) {
         switch (opt) {
         case 'n':
             no_wrap = true;
             break;
         case 'o':
             out_file_name = strdup(optarg);
+            break;
+        case 'V':
+            printf("cymkd %s\n", PACKAGE_VERSION);
+            exit(EXIT_SUCCESS);
             break;
         default:
             exit(EXIT_FAILURE);

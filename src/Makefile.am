@@ -4,7 +4,7 @@
 
 ## Copyright (c) 2016 David Jackson
 
-AM_CFLAGS = -I$(top_srcdir)/include 
+AM_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)
 
 bin_PROGRAMS = cyto cymkd
 cyto_SOURCES = main.c layout.c cytoplasm_header.c string_util.c files.c \

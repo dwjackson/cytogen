@@ -19,6 +19,7 @@
 #include "files.h"
 #include "processing.h"
 #include "string_util.h"
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -243,8 +244,12 @@ main(int argc, char *argv[])
     extern int optind;
 
     num_workers = 0;
-    while ((opt = getopt(argc, argv, "w:")) != -1) {
+    while ((opt = getopt(argc, argv, "Vw:")) != -1) {
         switch (opt) {
+        case 'V':
+            printf("cyto %s\n", PACKAGE_VERSION);
+            exit(EXIT_SUCCESS);
+            break;
         case 'w':
             num_workers = atoi(optarg);
             break;
