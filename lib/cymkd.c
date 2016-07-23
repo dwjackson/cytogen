@@ -13,13 +13,16 @@
  *
  * document = block, more blocks
  * more blocks = block end, block, more blocks | ""
- * block = paragraph | header
+ * block = paragraph | header | unordered list
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
  * more text and inline = "\n", text and inline, more text and inline
  * header = header prefix, " ", string
  * header prefix = { "#" }, string | string, "\n", underline
+ * unordered list = unordered list line, more unordered list lines
+ * unordered list line = ("*" | "-") text and inline
+ * more unordered list lines = "\n", unordered list line, more unordered list lines
  * underline = { "-" } | { "=" }
  * inline = italics | bold | inline code | link
  * italics = ("*" | "_"), string, ("*" | "_")
@@ -364,12 +367,49 @@ header(struct cymkd_parser *parser)
 }
 
 static bool
+unordered_list_line(struct cymkd_parser *parser)
+{
+    int ch;
+    if (match(parser, '*') || match(parser, '-')) {
+        parser_emit_string(parser, "<li>");
+        while ((ch = next(parser)) != '\n' && ch != EOF) {
+            parser_emit_char(parser, ch);
+            consume(parser); // Move past the character
+        }
+        parser_emit_string(parser, "</li>");
+        return true;
+    }
+    return false;
+}
+
+static bool
+unordered_list(struct cymkd_parser *parser)
+{
+    if (next(parser) == '*' || next(parser) == '-') {
+        parser_emit_string(parser, "<ul>");
+        if (unordered_list_line(parser)) {
+            while (match(parser, '\n')
+                   && unordered_list_line(parser)
+                   && next(parser) >= 0) {
+                ; // Loop until list is finished
+            }
+            parser_emit_string(parser, "</ul>");
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool
 block(struct cymkd_parser *parser)
 {
     bool success;
     success = header(parser);
     if (!success) {
-        success = paragraph(parser);
+        success = unordered_list(parser);
+        if (!success) {
+            success = paragraph(parser);
+        }
     }
     return success;
 }
