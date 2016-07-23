@@ -4,6 +4,10 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
 
+<!--
+Copyright (c) 2016 David Jackson
+-->
+
 # Cytoplasm: static site generator
 
 Cytoplasm (or `cyto`) is a static site generator written in C.
