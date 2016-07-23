@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "cytoplasm_header.h"
+#include "string_util.h"
 
 #define CYTO_HEADER_BORDER "---"
 
@@ -106,9 +107,11 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
             if (!ctache_data_hash_table_has_key(data, key)
                     && !is_reserved(key)) {
                 ctache_data_t *str_data;
-                size_t value_len = strlen(value);
-                str_data = ctache_data_create_string(value, value_len);
+                char *value_trimmed = string_trim(value);
+                size_t value_len = strlen(value_trimmed);
+                str_data = ctache_data_create_string(value_trimmed, value_len);
                 ctache_data_hash_table_set(data, key, str_data);
+                free(value);
             }
 
             value = NULL;
