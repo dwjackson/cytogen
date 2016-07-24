@@ -189,9 +189,11 @@ void
     char *in_file_name;
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
-        ctache_data_t *file_data = ctache_data_create_hash();
+        ctache_data_t *empty = ctache_data_create_hash();
+        ctache_data_t *file_data = ctache_data_merge_hashes(args->data, empty);
         process_file(in_file_name, args, file_data);
         ctache_data_destroy(file_data);
+        ctache_data_destroy(empty);
     }
     return NULL;
 }
