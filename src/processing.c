@@ -239,10 +239,10 @@ char
     return url;
 }
 
-static
-char *prepare_post_directory(const char *site_dir,
-                             const char *post_file_name,
-                             pthread_mutex_t *basename_mtx)
+static char
+*prepare_post_directory(const char *site_dir,
+                        const char *post_file_name,
+                        pthread_mutex_t *basename_mtx)
 {
     time_t date;
     struct tm date_tm;
