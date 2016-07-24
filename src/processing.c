@@ -30,17 +30,15 @@
 
 char
 *determine_out_file_name(const char *in_file_name,
-                         const char *site_dir,
-                         pthread_mutex_t *basename_mtx)
+                         const char *site_dir)
 {
     char *in_file_name_dup;
     char *out_file_name;
     size_t out_file_name_len;
+    char in_file_base_name[MAXPATHLEN];
 
     in_file_name_dup = strdup(in_file_name);
-    pthread_mutex_lock(basename_mtx);
-    char *in_file_base_name = basename(in_file_name_dup);
-    pthread_mutex_unlock(basename_mtx);
+    basename_r(in_file_name_dup, in_file_base_name);
 
     out_file_name_len = strlen(site_dir) + 1 + strlen(in_file_base_name);
     out_file_name = malloc(out_file_name_len + 1);
@@ -138,8 +136,7 @@ process_file(const char *in_file_name,
 
     in_file_extension = file_extension(in_file_name);
     out_file_name = determine_out_file_name(in_file_name,
-                                            site_dir,
-                                            args->basename_mutex);
+                                            site_dir);
 
     bool is_markdown = false;
     is_markdown = extension_implies_markdown(in_file_extension);
@@ -222,11 +219,12 @@ date_from_file_name(const char *file_name)
 }
 
 char
-*post_url(const char *file_name, pthread_mutex_t *basename_mtx)
+*post_url(const char *file_name)
 {
     char *url;
     time_t date;
-    char *file_name_base;
+    char file_name_base[MAXPATHLEN];
+    char *file_name_without_date;
     char *file_name_dup;
     char url_date[11]; /* YYYY/mm/dd */
     struct tm date_tm;
@@ -235,17 +233,17 @@ char
     localtime_r(&date, &date_tm);
 
     file_name_dup = strdup(file_name);
-    pthread_mutex_lock(basename_mtx);
     /* file_name_base is the file name after the date */
-    file_name_base = basename(file_name_dup) + strlen("YYYY-MM-DD");
-    pthread_mutex_unlock(basename_mtx);
+    basename_r(file_name_dup, file_name_base);
+    file_name_without_date = file_name_base + strlen("YYYY-MM-DD");
 
-    url = malloc(strlen("/posts/YYYY/mm/dd/") + strlen(file_name_base) + 1);
+    char parent_dir[] = "/posts/YYYY/mm/dd/";
+    url = malloc(strlen(parent_dir) + strlen(file_name_without_date) + 1);
     strftime(url_date, 10, "%Y/%m/%d", &date_tm);
     strcpy(url, "/posts/");
     strcat(url, url_date);
     strcat(url, "/");
-    strcat(url, file_name_base);
+    strcat(url, file_name_without_date);
 
     free(file_name_dup);
 
@@ -254,8 +252,7 @@ char
 
 static char
 *prepare_post_directory(const char *site_dir,
-                        const char *post_file_name,
-                        pthread_mutex_t *basename_mtx)
+                        const char *post_file_name)
 {
     time_t date;
     struct tm date_tm;
@@ -291,9 +288,10 @@ static char
 
     /* Create the post directory if it doesn't exist */
     char *file_name_dup = strdup(post_file_name);
-    pthread_mutex_lock(basename_mtx);
-    char *post = basename(file_name_dup) + strlen("YYYY-MM-DD");
-    pthread_mutex_unlock(basename_mtx);
+    char *post;
+    char file_name_base[MAXPATHLEN];
+    basename_r(file_name_dup, file_name_base);
+    post = file_name_base + strlen("YYYY-MM-DD");
     char fmt[] = "%s/posts/%4d/%02d/%02d/%s";
     asprintf(&dir, fmt, site_dir, year, month, day, post);
     mkdir(dir, 0770);
@@ -319,8 +317,7 @@ void
 
         const char *site_dir = args->site_dir;
         char *post_dir = prepare_post_directory(site_dir,
-                                                in_file_name,
-                                                args->basename_mutex);
+                                                in_file_name);
         args->site_dir = post_dir;
         process_file(in_file_name, args, file_data);
         args->site_dir = site_dir;
@@ -340,7 +337,7 @@ void
         ctache_data_hash_table_set(post_data, "date", tmp_data);
 
         /* Post URL */
-        url = post_url(in_file_name, args->basename_mutex);
+        url = post_url(in_file_name);
         tmp_data = ctache_data_create_string(url, strlen(url));
         ctache_data_hash_table_set(post_data, "url", tmp_data);
 

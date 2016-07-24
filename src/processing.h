@@ -21,7 +21,6 @@ struct process_file_args {
     char **file_names;
     ctache_data_t *data;
     pthread_mutex_t *data_mutex;
-    pthread_mutex_t *basename_mutex;
     struct layout *layouts;
     int num_layouts;
     const char *site_dir;
@@ -29,8 +28,7 @@ struct process_file_args {
 
 char
 *determine_out_file_name(const char *in_file_name,
-                         const char *site_dir,
-                         pthread_mutex_t *basename_mtx);
+                         const char *site_dir);
 
 void
 process_file(const char *in_file_name,

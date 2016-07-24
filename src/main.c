@@ -57,10 +57,6 @@ _generate(int num_workers,
           pthread_mutex_t *data_mutex,
           void *(*process)(void*))
 {
-    /* Set up the basename(3) mutex */
-    pthread_mutex_t basename_mutex;
-    pthread_mutex_init(&basename_mutex, NULL);
-
     int files_per_worker = num_files / num_workers;
     pthread_t *thr_pool = malloc(sizeof(pthread_t) * num_workers);
     size_t arr_size = sizeof(struct process_file_args) * num_workers;
@@ -79,7 +75,6 @@ _generate(int num_workers,
         threads_args[i].file_names = file_names;
         threads_args[i].data = data;
         threads_args[i].data_mutex = data_mutex;
-        threads_args[i].basename_mutex = &basename_mutex;
         threads_args[i].layouts = layouts;
         threads_args[i].num_layouts = num_layouts;
         threads_args[i].site_dir = site_dir;
@@ -94,7 +89,6 @@ _generate(int num_workers,
     /* Threads Cleanup */
     free(threads_args);
     free(thr_pool);
-    pthread_mutex_destroy(&basename_mutex);
 }
 
 static void
