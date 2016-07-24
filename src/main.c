@@ -150,6 +150,8 @@ generate(struct generate_arguments *args)
         args_r.curr_dir_name = subdir;
         args_r.site_dir = site_subdir;
         args_r.num_workers = args->num_workers;
+        args_r.data = args->data;
+        args_r.data_mutex = args->data_mutex;
         generate(&args_r);
 
         free(site_subdir);
