@@ -110,6 +110,7 @@ render_ctache_file(FILE *in_fp,
                                  out_fp,
                                  file_data,
                                  ESCAPE_HTML);
+            free(content);
             free(layout_name);
         }
 
@@ -330,6 +331,7 @@ void
         /* Add the post data to the posts array */
         ctache_data_array_append(posts_arr, post_data);
 
+        free(url);
         ctache_data_destroy(file_data);
     }
     return NULL;

@@ -111,6 +111,7 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
                 size_t value_len = strlen(value_trimmed);
                 str_data = ctache_data_create_string(value_trimmed, value_len);
                 ctache_data_hash_table_set(data, key, str_data);
+                free(value_trimmed);
                 free(value);
             }
 
