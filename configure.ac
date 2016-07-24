@@ -31,7 +31,7 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([memset mkdir munmap rmdir strdup])
+AC_CHECK_FUNCS([memset mkdir munmap rmdir strdup basename_r])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile

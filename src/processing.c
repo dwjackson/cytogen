@@ -21,6 +21,10 @@
 #include <sys/stat.h>
 #include <libgen.h>
 #include <time.h>
+#include <sys/param.h>
+#ifdef HAVE_BASENAME_R
+#include <libgen.h>
+#endif /* HAVE_BASENAME_R */
 
 #define LAYOUT "layout"
 
@@ -203,8 +207,17 @@ date_from_file_name(const char *file_name)
 {
     time_t date;
     struct tm date_tm;
-    strptime(file_name, "%Y-%m-%d", &date_tm);
+    char file_name_base[MAXPATHLEN];
+    char *file_name_date_portion;
+
+    basename_r(file_name, file_name_base);
+    file_name_date_portion = strdup(file_name_base);
+    file_name_date_portion[10] = '\0'; /* First 10 chars are YYYY-MM-DD */
+    strptime(file_name_date_portion, "%Y-%m-%d", &date_tm);
     date = mktime(&date_tm);
+
+    free(file_name_date_portion);
+
     return date;
 }
 
@@ -267,12 +280,12 @@ static char
     free(dir);
 
     /* Create the month directory if it doesn't exist */
-    asprintf(&dir, "%s/posts/%4d/%2d", site_dir, year, month);
+    asprintf(&dir, "%s/posts/%4d/%02d", site_dir, year, month);
     mkdir(dir, 0770);
     free(dir);
 
     /* Create the day directory if it doesn't exist */
-    asprintf(&dir, "%s/posts/%4d/%2d/%2d", site_dir, year, month, day);
+    asprintf(&dir, "%s/posts/%4d/%02d/%02d", site_dir, year, month, day);
     mkdir(dir, 0770);
     free(dir);
 
@@ -281,7 +294,8 @@ static char
     pthread_mutex_lock(basename_mtx);
     char *post = basename(file_name_dup) + strlen("YYYY-MM-DD");
     pthread_mutex_unlock(basename_mtx);
-    asprintf(&dir, "%s/posts/%4d/%2d/%2d/%s", site_dir, year, month, day, post);
+    char fmt[] = "%s/posts/%4d/%02d/%02d/%s";
+    asprintf(&dir, fmt, site_dir, year, month, day, post);
     mkdir(dir, 0770);
     free(file_name_dup);
 

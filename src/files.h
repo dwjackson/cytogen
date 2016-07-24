@@ -30,4 +30,9 @@ char
 bool
 extension_implies_markdown(const char *extension);
 
+#ifndef HAVE_BASENAME_R
+char
+*basename_r(const char *path, char *bname);
+#endif /* HAVE_BASENAME_R */
+
 #endif /* FILES_H */

@@ -152,3 +152,34 @@ extension_implies_markdown(const char *extension)
 {
     return (strcmp(extension, "md") == 0 || strcmp(extension, "mkd") == 0);
 }
+
+#ifndef HAVE_BASENAME_R
+char
+*basename_r(const char *path, char *bname)
+{
+    size_t path_len;
+    int i;
+    int ch;
+    int slash_index;
+    size_t bname_len;
+
+    path_len = strlen(path);
+
+    /* Find the index of the final directory separator ("/") */
+    for (i = 0; i < path_len; i++) {
+        ch = path[i];
+        if (ch == '/') {
+            slash_index = i;
+        }
+    }
+
+    bname_len = 0;
+    for (i = slash_index + 1; i < path_len; i++) {
+        *bname++ = path[i];
+        bname_len++;
+    }
+    bname[bname_len] = '\0';
+
+    return bname;
+}
+#endif /* HAVE_BASENAME_R */
