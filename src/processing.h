@@ -40,4 +40,7 @@ process_file(const char *in_file_name,
 void
 *process_files(void *args_ptr);
 
+void
+*process_post_files(void *args_ptr);
+
 #endif /* PROCESSING_H */

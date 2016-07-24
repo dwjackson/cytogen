@@ -42,6 +42,7 @@ struct generate_arguments {
     int num_workers;
     ctache_data_t *data;
     pthread_mutex_t *data_mutex;
+    void *(*process)(void*);
 };
 
 /* Set up the threads to process files, process them, tear down threads */
@@ -127,7 +128,7 @@ generate(struct generate_arguments *args)
               num_layouts,
               args->data,
               args->data_mutex,
-              process_files);
+              args->process);
 
     /* Process the subdirectories, recursively */
     int i;
@@ -197,7 +198,11 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     /* Perform the generation */
     if (has_posts) {
         args.curr_dir_name = POSTS_DIR;
+        args.process = process_post_files;
+
         generate(&args);
+
+        args.process = process_files;
         args.curr_dir_name = curr_dir_name;
     }
     generate(&args);
