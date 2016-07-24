@@ -142,11 +142,9 @@ generate(struct generate_arguments *args)
         strcat(site_subdir, directory);
 
         struct generate_arguments args_r; /* Recursive call args */
+        args_r = *args;
         args_r.curr_dir_name = subdir;
         args_r.site_dir = site_subdir;
-        args_r.num_workers = args->num_workers;
-        args_r.data = args->data;
-        args_r.data_mutex = args->data_mutex;
         generate(&args_r);
 
         free(site_subdir);
@@ -188,6 +186,7 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     args.num_workers = num_workers;
     args.data = data;
     args.data_mutex = &data_mutex;
+    args.process = process_files;
 
     /* Perform the generation */
     if (has_posts) {
