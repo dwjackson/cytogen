@@ -250,6 +250,31 @@ char
     return url;
 }
 
+static void
+get_post_directory(const char *post_file_name, char *post_dir)
+{
+    size_t datestamp_len = strlen("YYYY-MM-DD-"); /* Assumes trailing '-' */
+    const char *post = post_file_name + datestamp_len;
+    int extension_start = -1;
+    size_t post_file_name_len = strlen(post_file_name);
+    int ch;
+    int i;
+    for (i = post_file_name_len - 1; i >= 0; i--) {
+        ch = post_file_name[i];
+        if (ch == '.') {
+            extension_start = i;
+            break;
+        }
+    }
+    if (extension_start < 0) {
+        extension_start = post_file_name_len;
+    }
+    for (i = datestamp_len; i < extension_start; i++) {
+        *post_dir++ = post_file_name[i];
+    }
+    *post_dir = '\0';
+}
+
 static char
 *prepare_post_directory(const char *site_dir,
                         const char *post_file_name)
@@ -288,10 +313,10 @@ static char
 
     /* Create the post directory if it doesn't exist */
     char *file_name_dup = strdup(post_file_name);
-    char *post;
+    char post[MAXPATHLEN];
     char file_name_base[MAXPATHLEN];
     basename_r(file_name_dup, file_name_base);
-    post = file_name_base + strlen("YYYY-MM-DD");
+    get_post_directory(file_name_base, post);
     char fmt[] = "%s/posts/%4d/%02d/%02d/%s";
     asprintf(&dir, fmt, site_dir, year, month, day, post);
     mkdir(dir, 0770);
