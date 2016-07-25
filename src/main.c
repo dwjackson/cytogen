@@ -257,6 +257,10 @@ main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
     }
+    if (optind >= argc) {
+        printf("%s\n", USAGE);
+        exit(EXIT_FAILURE);
+    }
     args = argv + optind;
 
     if (num_workers < 1) {
