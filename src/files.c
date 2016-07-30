@@ -178,7 +178,7 @@ char
         *bname++ = path[i];
         bname_len++;
     }
-    bname[bname_len] = '\0';
+    *bname = '\0';
 
     return bname;
 }
