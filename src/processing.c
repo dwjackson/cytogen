@@ -218,38 +218,6 @@ date_from_file_name(const char *file_name)
     return date;
 }
 
-char
-*post_url(const char *file_name)
-{
-    char *url;
-    time_t date;
-    char file_name_base[MAXPATHLEN];
-    char *file_name_without_date;
-    char *file_name_dup;
-    char url_date[11]; /* YYYY-mm-dd */
-    struct tm date_tm;
-
-    date = date_from_file_name(file_name);
-    localtime_r(&date, &date_tm);
-
-    file_name_dup = strdup(file_name);
-    /* file_name_base is the file name after the date */
-    basename_r(file_name_dup, file_name_base);
-    file_name_without_date = file_name_base + strlen("YYYY-MM-DD");
-
-    char parent_dir[] = "/posts/YYYY/mm/dd/";
-    url = malloc(strlen(parent_dir) + strlen(file_name_without_date) + 1);
-    strftime(url_date, 10, "%Y/%m/%d", &date_tm);
-    strcpy(url, "/posts/");
-    strcat(url, url_date);
-    strcat(url, "/");
-    strcat(url, file_name_without_date);
-
-    free(file_name_dup);
-
-    return url;
-}
-
 static void
 get_post_directory(const char *post_file_name, char *post_dir)
 {
@@ -273,6 +241,40 @@ get_post_directory(const char *post_file_name, char *post_dir)
         *post_dir++ = post_file_name[i];
     }
     *post_dir = '\0';
+}
+
+char
+*post_url(const char *file_name)
+{
+    char *url;
+    time_t date;
+    char file_name_base[MAXPATHLEN];
+    char *file_name_without_date;
+    char *file_name_dup;
+    char url_date[11]; /* YYYY-mm-dd */
+    struct tm date_tm;
+
+    date = date_from_file_name(file_name);
+    localtime_r(&date, &date_tm);
+
+    file_name_dup = strdup(file_name);
+    /* file_name_base is the file name after the date */
+    basename_r(file_name_dup, file_name_base);
+    file_name_without_date = malloc(strlen(file_name_base) + 1);
+    get_post_directory(file_name_base, file_name_without_date);
+
+    char parent_dir[] = "/posts/YYYY/mm/dd/";
+    url = malloc(strlen(parent_dir) + strlen(file_name_without_date) + 1);
+    strftime(url_date, 11, "%Y/%m/%d", &date_tm);
+    strcpy(url, "/posts/");
+    strcat(url, url_date);
+    strcat(url, "/");
+    strcat(url, file_name_without_date);
+
+    free(file_name_without_date);
+    free(file_name_dup);
+
+    return url;
 }
 
 static char
