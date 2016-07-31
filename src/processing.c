@@ -210,6 +210,7 @@ date_from_file_name(const char *file_name)
     basename_r(file_name, file_name_base);
     file_name_date_portion = strdup(file_name_base);
     file_name_date_portion[10] = '\0'; /* First 10 chars are YYYY-MM-DD */
+    memset(&date_tm, 0, sizeof(struct tm));
     strptime(file_name_date_portion, "%Y-%m-%d", &date_tm);
     date = mktime(&date_tm);
 
