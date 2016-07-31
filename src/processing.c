@@ -367,7 +367,9 @@ void
         ctache_data_hash_table_set(post_data, "url", tmp_data);
 
         /* Add the post data to the posts array */
+        pthread_mutex_lock(args->data_mutex);
         ctache_data_array_append(posts_arr, post_data);
+        pthread_mutex_unlock(args->data_mutex);
 
         free(url);
         ctache_data_destroy(file_data);
