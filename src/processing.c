@@ -226,7 +226,7 @@ char
     char file_name_base[MAXPATHLEN];
     char *file_name_without_date;
     char *file_name_dup;
-    char url_date[11]; /* YYYY/mm/dd */
+    char url_date[11]; /* YYYY-mm-dd */
     struct tm date_tm;
 
     date = date_from_file_name(file_name);
