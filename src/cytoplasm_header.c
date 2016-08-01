@@ -104,7 +104,8 @@ cytoplasm_header_read(FILE *fp, ctache_data_t *data)
                 value[i - index] = ch;
             }
 
-            if (!ctache_data_hash_table_has_key(data, key)
+            if (data != NULL
+                    && !ctache_data_hash_table_has_key(data, key)
                     && !is_reserved(key)) {
                 ctache_data_t *str_data;
                 char *value_trimmed = string_trim(value);
