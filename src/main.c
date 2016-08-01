@@ -31,7 +31,7 @@
 #include <ftw.h>
 #include <libgen.h>
 
-#define USAGE "Usage: cyto [COMMAND]"
+#define USAGE "Usage: cyto [FLAGS] [COMMAND]"
 
 #define DEFAULT_NUM_WORKERS 4
 #define SITE_DIR "_site"
@@ -265,6 +265,20 @@ cmd_clean()
     nftw(SITE_DIR, _clean, 1000, FTW_DEPTH); 
 }
 
+static void
+print_help()
+{
+    printf("%s\n", USAGE);
+    printf("Flags:\n");
+    printf("\t-h Print this help message\n");
+    printf("\t-V Print the version number\n");
+    printf("\t-w [THREADS] Set number of worker threads (default is 4)\n");
+    printf("Commands:\n");
+    printf("\tgenerate - Generate a site from the current directory\n");
+    printf("\tinit [PROJECT_NAME] - Initialize a cytoplasm project\n");
+    printf("\tclean - Remove generated site files\n");
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -275,8 +289,12 @@ main(int argc, char *argv[])
     extern int optind;
 
     num_workers = 0;
-    while ((opt = getopt(argc, argv, "Vw:")) != -1) {
+    while ((opt = getopt(argc, argv, "hVw:")) != -1) {
         switch (opt) {
+        case 'h':
+            print_help();
+            exit(EXIT_SUCCESS);
+            break;
         case 'V':
             printf("cyto %s\n", PACKAGE_VERSION);
             exit(EXIT_SUCCESS);
