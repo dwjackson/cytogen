@@ -182,7 +182,7 @@ _rename_posts(const char *path,
         strcpy(out_path, dir);
         strcat(out_path, "/");
         strcat(out_path, index_html);
-        rename(in_path, out_path);
+        rename(path, out_path);
         free(out_path);
         free(in_path);
     }
