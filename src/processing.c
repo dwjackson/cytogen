@@ -144,6 +144,7 @@ process_file(const char *in_file_name,
     const char *ctache_file_name = in_file_name;
     FILE *in_fp = fopen(ctache_file_name, "r");
     if (in_fp != NULL) {
+        /* Read the header data, populate the file ctache_data_t hash */
         cytoplasm_header_read(in_fp, file_data);
 
         /* If necessary render the output file as markdown */
@@ -153,7 +154,7 @@ process_file(const char *in_file_name,
             render_markdown(in_fp, markdown_file_name, &html_file_name);
 
             fclose(in_fp);
-            unlink(out_file_name);
+            in_fp = NULL;
 
             in_fp = fopen(html_file_name, "r");
         }
