@@ -29,12 +29,15 @@
 #include <pthread.h>
 #include <ctache/ctache.h>
 #include <ftw.h>
+#include <libgen.h>
 
 #define USAGE "Usage: cyto [COMMAND]"
 
 #define DEFAULT_NUM_WORKERS 4
 #define SITE_DIR "_site"
 #define POSTS_DIR "_posts"
+#define SITE_POSTS_DIR "_site/posts"
+#define MAXFDS 100
 
 struct generate_arguments {
     const char *curr_dir_name;
@@ -160,6 +163,33 @@ generate(struct generate_arguments *args)
     free(directories);
 }
 
+/* NOTE: This function is not thread-safe */
+static int
+_rename_posts(const char *path,
+              const struct stat *stat_ptr,
+              int flag,
+              struct FTW *ftw)
+{
+    char *in_path;
+    char *dir;
+    char index_html[] = "index.html";
+    char *out_path;
+
+    if (flag == FTW_F) {
+        in_path = strdup(path);
+        dir = dirname(in_path);
+        out_path = malloc(strlen(dir) + 1 + strlen(index_html) + 1);
+        strcpy(out_path, dir);
+        strcat(out_path, "/");
+        strcat(out_path, index_html);
+        rename(in_path, out_path);
+        free(out_path);
+        free(in_path);
+    }
+
+    return 0;
+}
+
 static void
 cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
 {
@@ -194,6 +224,7 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
         args.process = process_post_files;
 
         generate(&args);
+        nftw(SITE_POSTS_DIR, _rename_posts, MAXFDS, 0);
 
         args.process = process_files;
         args.curr_dir_name = curr_dir_name;
