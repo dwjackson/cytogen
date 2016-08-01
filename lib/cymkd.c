@@ -285,10 +285,28 @@ a_link(struct cymkd_parser *parser)
 static bool
 inline_section(struct cymkd_parser *parser)
 {
+    int ch = next(parser);
+    char *inline_type;
+    switch (ch) {
+    case '*':
+    case '_':
+        inline_type = "emphasis";
+        break;
+    case '`':
+        inline_type = "code";
+        break;
+    case '[':
+        inline_type = "link";
+        break;
+    default:
+        inline_type = "unknown";
+        break;
+    }
     if (!bold(parser) 
             && !italics(parser)
             && !inline_code(parser)
             && !a_link(parser)) {
+        fprintf(stderr, "Invalid inline section of type: %s\n", inline_type);
         return false;
     }
     return true;
@@ -303,7 +321,6 @@ paragraph(struct cymkd_parser *parser)
         while ((ch = next(parser)) != '\n' && ch != -1) {
             if (is_inline_start(ch)) {
                 if (!inline_section(parser)) {
-                    fprintf(stderr, "Invalid inline section\n");
                     return false;
                 } else if (next(parser) >= 0) {
                     parser_emit_char(parser, next(parser));
