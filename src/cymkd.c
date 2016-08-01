@@ -23,7 +23,7 @@
 int
 main(int argc, char *argv[])
 {
-    char *file_name;
+    char *file_name = NULL;
     FILE *in_fp;
     FILE *out_fp = stdout;
     char *contents;
@@ -95,7 +95,11 @@ main(int argc, char *argv[])
         fprintf(out_fp, "%s<body>\n", INDENT);
     }
 
-    cymkd_render(contents, contents_len, out_fp);
+    if (file_name != NULL) {
+        cymkd_render(file_name, contents, contents_len, out_fp);
+    } else {
+        cymkd_render("stdin", contents, contents_len, out_fp);
+    }
 
     if (!no_wrap) {
         fprintf(out_fp, "\n%s</body>\n", INDENT);

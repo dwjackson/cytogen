@@ -15,12 +15,15 @@
 #include <stdlib.h>
 
 void
-cymkd_render(const char *str, size_t str_len, FILE *out_fp);
+cymkd_render(const char *file_name,
+             const char *str,
+             size_t str_len,
+             FILE *out_fp);
 
 void
-cymkd_render_file(FILE *in_fp, FILE *out_fp);
+cymkd_render_file(const char *file_name, FILE *in_fp, FILE *out_fp);
 
 void
-cymkd_render_fd(int in_fd, int out_fd);
+cymkd_render_fd(const char *file_name, int in_fd, int out_fd);
 
 #endif /* CYMKD_H */

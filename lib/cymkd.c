@@ -41,6 +41,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <stdarg.h>
 
 #define BUFSIZE 1024
 
@@ -50,7 +51,26 @@ struct cymkd_parser {
     int str_index;
     FILE *out_fp;
     int out_fd;
+    int line;
+    int col;
+    const char *file_name;
 };
+
+static void
+cymkd_error(struct cymkd_parser *parser, const char *err_fmt, ...)
+{
+    const char *file_name = parser->file_name;
+    int line = parser->line;
+    int col = parser->col;
+    char *err_str;
+    va_list ap;
+    va_start(ap, err_fmt);
+    vasprintf(&err_str, err_fmt, ap);
+    va_end(ap);
+    char fmt[] = "Error in %s at line %d, col %d: %s";
+    fprintf(stderr, fmt, file_name, line, col, err_str);
+    free(err_str);
+}
 
 static void
 parser_emit_string(struct cymkd_parser *parser, const char *fmt, ...)
@@ -86,6 +106,12 @@ match(struct cymkd_parser *parser, char ch)
     if (*(parser->str_pos) == ch) {
         (parser->str_pos)++;
         (parser->str_index)++;
+        if (ch == '\n') {
+            parser->line++;
+            parser->col = 1;
+        } else {
+            parser->col++;
+        }
         return true;
     } else {
         return false;
@@ -102,6 +128,12 @@ consume(struct cymkd_parser *parser)
     ch = *(parser->str_pos);
     (parser->str_pos)++;
     (parser->str_index)++;
+    if (ch == '\n') {
+        parser->line++;
+        parser->col = 1;
+    } else {
+        parser->col++;
+    }
     return ch;
 }
 
@@ -306,7 +338,8 @@ inline_section(struct cymkd_parser *parser)
             && !italics(parser)
             && !inline_code(parser)
             && !a_link(parser)) {
-        fprintf(stderr, "Invalid inline section of type: %s\n", inline_type);
+        char err_fmt[] = "Invalid inline section of type: %s\n";
+        cymkd_error(parser, err_fmt, inline_type);
         return false;
     }
     return true;
@@ -474,7 +507,10 @@ _cymkd_render(struct cymkd_parser *parser)
 }
 
 void
-cymkd_render(const char *str, size_t str_len, FILE *out_fp)
+cymkd_render(const char *file_name,
+             const char *str,
+             size_t str_len,
+             FILE *out_fp)
 {
     struct cymkd_parser parser;
     parser.str_pos = str;
@@ -482,11 +518,14 @@ cymkd_render(const char *str, size_t str_len, FILE *out_fp)
     parser.str_index = 0;
     parser.out_fp = out_fp;
     parser.out_fd = -1;
+    parser.line = 1;
+    parser.col = 1;
+    parser.file_name = file_name;
     _cymkd_render(&parser);
 }
 
 void
-cymkd_render_file(FILE *in_fp, FILE *out_fp)
+cymkd_render_file(const char *file_name, FILE *in_fp, FILE *out_fp)
 {
     int ch;
     char *content;
@@ -505,12 +544,12 @@ cymkd_render_file(FILE *in_fp, FILE *out_fp)
         content_len++;
     }
     content[content_len] = '\0';
-    cymkd_render(content, content_len, out_fp);
+    cymkd_render(file_name, content, content_len, out_fp);
     free(content);
 }
 
 void
-cymkd_render_fd(int in_fd, int out_fd)
+cymkd_render_fd(const char *file_name, int in_fd, int out_fd)
 {
     struct stat statbuf;
     char *content;
@@ -531,6 +570,9 @@ cymkd_render_fd(int in_fd, int out_fd)
     parser.str_index = 0;
     parser.out_fp = NULL;
     parser.out_fd = out_fd;
+    parser.line = 1;
+    parser.col = 1;
+    parser.file_name = file_name;
     _cymkd_render(&parser);
     munmap(content, content_len);
 }
