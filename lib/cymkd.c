@@ -13,7 +13,7 @@
  *
  * document = block, more blocks
  * more blocks = block end, block, more blocks | ""
- * block = paragraph | header | unordered list
+ * block = paragraph | header | unordered list | block quote
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
@@ -23,6 +23,9 @@
  * unordered list = unordered list line, more unordered list lines
  * unordered list line = ("*" | "-") text and inline
  * more unordered list lines = "\n", unordered list line, more unordered list lines
+ * block quote = block quote line, more block quote lines
+ * block quote line = ">" string
+ * more block quote lines = "\n", block quote line, more block quote lines | ""
  * underline = { "-" } | { "=" }
  * inline = italics | bold | inline code | link
  * italics = ("*" | "_"), string, ("*" | "_")
@@ -451,6 +454,51 @@ unordered_list(struct cymkd_parser *parser)
 }
 
 static bool
+block_quote_line(struct cymkd_parser *parser)
+{
+    if (!match(parser, '>')) {
+        return false;
+    }
+    int ch;
+    while (next(parser) == ' ') { /* skip whitespace */
+        consume(parser);
+    }
+    while ((ch = next(parser)) != '\n' && ch >= 0) {
+        parser_emit_char(parser, ch);
+        consume(parser);
+    }
+    return true;
+}
+
+static bool
+more_block_quote_lines(struct cymkd_parser *parser)
+{
+    if (next(parser) == '\n') {
+        consume(parser);
+        parser_emit_char(parser, ' ');
+        if (block_quote_line(parser)) {
+            return more_block_quote_lines(parser);
+        }
+        return false;
+    }
+    parser_emit_string(parser, "</blockquote>");
+    return true;
+}
+
+static bool
+block_quote(struct cymkd_parser *parser)
+{
+    if (next(parser) == '>') {
+        parser_emit_string(parser, "<blockquote>");
+        if (block_quote_line(parser)) {
+            return more_block_quote_lines(parser);
+        }
+        return false;
+    }
+    return false;
+}
+
+static bool
 block(struct cymkd_parser *parser)
 {
     bool success;
@@ -458,7 +506,10 @@ block(struct cymkd_parser *parser)
     if (!success) {
         success = unordered_list(parser);
         if (!success) {
-            success = paragraph(parser);
+            success = block_quote(parser);
+            if (!success) {
+                success = paragraph(parser);
+            }
         }
     }
     return success;
