@@ -47,6 +47,7 @@
 #include <stdarg.h>
 
 #define BUFSIZE 1024
+#define ESCAPE_CHAR '\\'
 
 struct cymkd_parser {
     const char *str_pos;
@@ -355,7 +356,11 @@ paragraph(struct cymkd_parser *parser)
     parser_emit_string(parser, "<p>");
     while (true) {
         while ((ch = next(parser)) != '\n' && ch != -1) {
-            if (is_inline_start(ch)) {
+            if (ch == ESCAPE_CHAR) {
+                consume(parser);
+                ch = next(parser);
+                parser_emit_char(parser, ch);
+            } else if (is_inline_start(ch)) {
                 if (!inline_section(parser)) {
                     return false;
                 } else if (next(parser) >= 0) {
@@ -464,6 +469,10 @@ block_quote_line(struct cymkd_parser *parser)
         consume(parser);
     }
     while ((ch = next(parser)) != '\n' && ch >= 0) {
+        if (ch == ESCAPE_CHAR) {
+            consume(parser);
+            ch = next(parser);
+        }
         parser_emit_char(parser, ch);
         consume(parser);
     }
