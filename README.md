@@ -43,6 +43,25 @@ To create a new Cytoplasm site:
 cyto init [project_name]
 ```
 
+To generate the static site files:
+
+```sh
+cyto generate
+```
+
+To clean up (i.e. remove) the generated site files:
+
+```sh
+cyto clean
+```
+
+Note: Most `cyto` commands are usable just by typing their first letter (this
+works in cases where a specific command is the only one that begins with that
+letter).
+
+A more complete reference can be found in the `cytoplasm(1)` and `cyto(1)` man 
+pages.
+
 ## License
 
 Cytoplasm is licensed under the
