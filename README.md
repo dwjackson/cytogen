@@ -11,7 +11,12 @@ Copyright (c) 2016 David Jackson
 # Cytoplasm: static site generator
 
 Cytoplasm (or `cyto`) is a static site generator written in C. It has built-in
-support for templating, Markdown-esque markup, and blog posting.
+support for templating, Markdown-esque markup, and blog posting. A "static-site
+generator" is a program you can use to take a bunch of files (e.g. HTML and
+Markdown) and generate a static website. The advantage here is that you can
+imitate dynamic sites through templating and transformation without having any
+extra code that has to run on the server. This means for example that your site
+loads quickly and has less attack surface than a more dynamic website would.
 
 ## Building and Installing
 
