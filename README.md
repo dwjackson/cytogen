@@ -10,7 +10,8 @@ Copyright (c) 2016 David Jackson
 
 # Cytoplasm: static site generator
 
-Cytoplasm (or `cyto`) is a static site generator written in C.
+Cytoplasm (or `cyto`) is a static site generator written in C. It has built-in
+support for templating, Markdown-esque markup, and blog posting.
 
 ## Building and Installing
 
