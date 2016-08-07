@@ -480,29 +480,21 @@ block_quote_line(struct cymkd_parser *parser)
 }
 
 static bool
-more_block_quote_lines(struct cymkd_parser *parser)
-{
-    if (next(parser) == '\n') {
-        consume(parser);
-        parser_emit_char(parser, ' ');
-        if (block_quote_line(parser)) {
-            return more_block_quote_lines(parser);
-        }
-        return false;
-    }
-    parser_emit_string(parser, "</blockquote>");
-    return true;
-}
-
-static bool
 block_quote(struct cymkd_parser *parser)
 {
     if (next(parser) == '>') {
         parser_emit_string(parser, "<blockquote>");
-        if (block_quote_line(parser)) {
-            return more_block_quote_lines(parser);
+        while (block_quote_line(parser)) {
+            if (!match(parser, '\n')) {
+                return false;
+            }
+            if (next(parser) == '\n' || next(parser) < 0) {
+                parser_emit_string(parser, "</blockquote>");
+                return true;
+            }
+            parser_emit_char(parser, ' ');
         }
-        return false;
+        return true;
     }
     return false;
 }
