@@ -63,6 +63,19 @@ letter).
 A more complete reference can be found in the `cytoplasm(1)` and `cyto(1)` man 
 pages.
 
+## cymkd
+
+Cymkd is a Markdown-like dialect that aspires to conform to the
+[CommonMark](http://commonmark.org/) specification. It is included in Cytoplasm
+in the form of a shared library `libcymkd.so` -- see `cymkd(3)` for usage
+information -- and as a standalone executable, `cymkd(1)`.
+
+To use the `cymkd(1)` executable:
+
+```sh
+cymkd [file_name]
+```
+
 ## License
 
 Cytoplasm is licensed under the
