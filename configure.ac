@@ -18,7 +18,8 @@ LT_INIT
 AC_PROG_CC
 
 # Checks for libraries.
-AC_CHECK_LIB([ctache], [ctache_render_string])
+AC_CHECK_LIB([ctache], [ctache_render_string], [],
+             [AC_MSG_ERROR([Could not find required library 'ctache'])])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h unistd.h])
