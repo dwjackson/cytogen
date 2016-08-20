@@ -13,7 +13,7 @@
  *
  * document = block, more blocks
  * more blocks = block end, block, more blocks | ""
- * block = paragraph | header | unordered list | block quote
+ * block = paragraph | header | unordered list | block quote | code block
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
@@ -25,6 +25,7 @@
  * more unordered list lines = "\n", unordered list line, more unordered list lines
  * block quote = block quote line, more block quote lines
  * block quote line = ">" string
+ * code block = "```", { string }, "\n", code line, more code lines, "\n", "```"
  * more block quote lines = "\n", block quote line, more block quote lines | ""
  * underline = { "-" } | { "=" }
  * inline = italics | bold | inline code | link
@@ -141,6 +142,17 @@ consume(struct cymkd_parser *parser)
     return ch;
 }
 
+/* Go backward in the parser by one byte */
+static void
+unconsume(struct cymkd_parser *parser)
+{
+    if (parser->str_index <= 0) {
+        return;
+    }
+    (parser->str_pos)--;
+    (parser->str_index)--;
+}
+
 static int
 next(struct cymkd_parser *parser)
 {
@@ -153,13 +165,22 @@ next(struct cymkd_parser *parser)
 }
 
 static bool
-is_inline_start(int ch)
+is_inline_start(struct cymkd_parser *parser)
 {
     bool is_inline;
+    int ch = next(parser);
     switch(ch) {
     case '*':
     case '_':
     case '`':
+        consume(parser);
+        if (next(parser) == '`') {
+            is_inline = false;
+        } else {
+            is_inline = true;
+        }
+        unconsume(parser);
+        break;
     case '[':
         is_inline = true;
         break;
@@ -254,14 +275,14 @@ inline_code(struct cymkd_parser *parser)
     if (!match(parser, '`')) {
         return false;
     }
-    parser_emit_string(parser, "<pre><code>");
+    parser_emit_string(parser, "<code>");
     while ((ch = consume(parser)) != '`' && ch != -1) {
         parser_emit_char(parser, ch);
     }
     if (ch != '`') {
         return false;
     }
-    parser_emit_string(parser, "</pre></code>");
+    parser_emit_string(parser, "</code>");
     return true;
 }
 
@@ -360,7 +381,7 @@ paragraph(struct cymkd_parser *parser)
                 consume(parser);
                 ch = next(parser);
                 parser_emit_char(parser, ch);
-            } else if (is_inline_start(ch)) {
+            } else if (is_inline_start(parser)) {
                 if (!inline_section(parser)) {
                     return false;
                 } else if (next(parser) >= 0) {
@@ -500,6 +521,59 @@ block_quote(struct cymkd_parser *parser)
 }
 
 static bool
+code_line(struct cymkd_parser *parser)
+{
+    int ch;
+    while ((ch = next(parser)) != '\n') {
+        parser_emit_char(parser, ch);
+        consume(parser);
+    }
+    return true;
+}
+
+static bool
+code_block(struct cymkd_parser *parser)
+{
+    int i;
+    for (i = 0; i < 3; i++) {
+        if (!match(parser, '`')) {
+            return false;
+        }
+    }
+    /* Skip past the source type */
+    while (next(parser) != '\n') {
+        consume(parser);
+    }
+    if (!match(parser, '\n')) {
+        return false;
+    }
+    parser_emit_string(parser, "<pre><code>");
+    while (code_line(parser)) {
+        if (!match(parser, '\n')) {
+            return false;
+        }
+        parser_emit_char(parser, '\n');
+        if (next(parser) == '`') {
+            bool done = true;
+            for (i = 0; i < 3; i++) {
+                if (!match(parser, '`')) {
+                    done = false;
+                    break;
+                }
+            }
+            if (!match(parser, '\n')) {
+                return false;
+            }
+            if (done) {
+                break;
+            }
+        }
+    }
+    parser_emit_string(parser, "</pre></code>");
+    return true;
+}
+
+static bool
 block(struct cymkd_parser *parser)
 {
     bool success;
@@ -509,7 +583,10 @@ block(struct cymkd_parser *parser)
         if (!success) {
             success = block_quote(parser);
             if (!success) {
-                success = paragraph(parser);
+                success = code_block(parser);
+                if (!success) {
+                    success = paragraph(parser);
+                }
             }
         }
     }
