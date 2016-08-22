@@ -61,6 +61,11 @@ struct cymkd_parser {
     const char *file_name;
 };
 
+struct cymkd_parser_position {
+    const char *str_pos;
+    int str_index;
+};
+
 static void
 cymkd_error(struct cymkd_parser *parser, const char *err_fmt, ...)
 {
@@ -164,6 +169,23 @@ next(struct cymkd_parser *parser)
     return ch;
 }
 
+static struct cymkd_parser_position
+save_position(struct cymkd_parser *parser)
+{
+    struct cymkd_parser_position position;
+    position.str_index = parser->str_index;
+    position.str_pos = parser->str_pos;
+    return position;
+}
+
+static void
+restore_position(struct cymkd_parser *parser,
+                 struct cymkd_parser_position position)
+{
+    parser->str_index = position.str_index;
+    parser->str_pos = position.str_pos;
+}
+
 static bool
 is_inline_start(struct cymkd_parser *parser)
 {
@@ -196,25 +218,25 @@ bold(struct cymkd_parser *parser)
     bool success;
     int start_ch;
     int ch;
-    const char *str_pos = parser->str_pos;
+    struct cymkd_parser_position position = save_position(parser);
 
     success = match(parser, '*');
     if (!success) {
         success = match(parser, '_');
         if (!success) {
-            parser->str_pos = str_pos; /* Go back */
+            restore_position(parser, position); /* Go back */
             return false;
         }
         success = match(parser, '_');
         if (!success) {
-            parser->str_pos = str_pos; /* Go back */
+            restore_position(parser, position); /* Go back */
             return false;
         }
         start_ch = '_';
     } else {
         success = match(parser, '*');
         if (!success) {
-            parser->str_pos = str_pos; /* Go back */
+            restore_position(parser, position); /* Go back */
             return false;
         }
         start_ch = '*';
@@ -227,7 +249,7 @@ bold(struct cymkd_parser *parser)
     }
 
     if (!match(parser, start_ch)) {
-        parser->str_pos = str_pos; /* Go back */
+        restore_position(parser, position); /* Go back */
         return false;
     }
     success = match(parser, start_ch);
