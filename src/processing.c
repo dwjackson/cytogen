@@ -28,6 +28,9 @@
 
 #define LAYOUT "layout"
 
+#define DELIM_BEGIN "{{"
+#define DELIM_END "}}"
+
 char
 *determine_out_file_name(const char *in_file_name,
                          const char *site_dir)
@@ -81,7 +84,12 @@ render_ctache_file(FILE *in_fp,
     if (out_fp != NULL) {
         if (!ctache_data_hash_table_has_key(file_data, LAYOUT)) {
             /* Render the file as a ctache template */
-            ctache_render_file(in_fp, out_fp, file_data, ESCAPE_HTML);
+            ctache_render_file(in_fp,
+                               out_fp,
+                               file_data,
+                               ESCAPE_HTML,
+                               DELIM_BEGIN,
+                               DELIM_END);
         } else {
             /*
              * Render the layout with the file content passed as a
@@ -111,7 +119,9 @@ render_ctache_file(FILE *in_fp,
                                  layout_len,
                                  out_fp,
                                  file_data,
-                                 ESCAPE_HTML);
+                                 ESCAPE_HTML,
+                                 DELIM_BEGIN,
+                                 DELIM_END);
             free(content);
             free(layout_name);
         }
