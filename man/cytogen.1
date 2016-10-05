@@ -4,19 +4,19 @@
 .\"
 .\" Copyright (c) 2016 David Jackson
 .Dd July 7, 2016
-.Dt CYTOPLASM 1
+.Dt CYTOGEN 1
 .Sh NAME
-.Nm cytoplasm
+.Nm cytogen 
 .Nd fast and simple static-site generator
 .Sh DESCRIPTION
-Cytoplasm is a program you can use to create static websites from a series
+Cytogen is a program you can use to create static websites from a series
 of templates and contents files. It is designed to be simple to use, fast, and
 obvious (i.e. it doesn't do anything you didn't tell it to do). You interact
-with Cytoplasm via the
+with Cytogen via the
 .Sy cyto
 command. See the associated man page for more information on how it works.
 .Sh PROJECT SETUP
-Inside a Cytoplasm project directory, all files are assumed to be intended to
+Inside a Cytogen project directory, all files are assumed to be intended to
 be rendered to the static site. Your main directory should have an index.html
 file in it as the main entry point to your site. Apart from some special
 directories (all of which begin with an underscore "_"), everything in the
@@ -49,10 +49,10 @@ a very simple example in a file called
 .Ed
 You can use your layouts by specifying a
 .Qq layout
-in your actual file's cytoplasm-header.
+in your actual file's cytogen-header.
 .Ss FILE HEADERS
-To include dynamic information in your files, add a cytoplasm header to the
-top of the file. The cytoplasm header are lines delineated by "---". For
+To include dynamic information in your files, add a cytogen header to the
+top of the file. The cytogen header are lines delineated by "---". For
 example, to put some content in the layout above:
 .Bd -literal
 ---

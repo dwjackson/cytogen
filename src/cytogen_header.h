@@ -15,6 +15,6 @@
 #include <ctache/ctache.h>
 
 void
-cytoplasm_header_read(FILE *fp, ctache_data_t *data);
+cytogen_header_read(FILE *fp, ctache_data_t *data);
 
 #endif /* CYTO_HEADER_H */

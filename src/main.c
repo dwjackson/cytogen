@@ -14,7 +14,7 @@
 #endif /* __linux__ */
 
 #include "layout.h"
-#include "cytoplasm_header.h"
+#include "cytogen_header.h"
 #include "cymkd.h"
 #include "files.h"
 #include "processing.h"
@@ -275,7 +275,7 @@ print_help()
     printf("\t-w [THREADS] Set number of worker threads (default is 4)\n");
     printf("Commands:\n");
     printf("\tgenerate - Generate a site from the current directory\n");
-    printf("\tinit [PROJECT_NAME] - Initialize a cytoplasm project\n");
+    printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
     printf("\tclean - Remove generated site files\n");
 }
 

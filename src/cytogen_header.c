@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "cytoplasm_header.h"
+#include "cytogen_header.h"
 #include "string_util.h"
 
 #define CYTO_HEADER_BORDER "---"
@@ -66,7 +66,7 @@ char
 }
 
 void
-cytoplasm_header_read(FILE *fp, ctache_data_t *data)
+cytogen_header_read(FILE *fp, ctache_data_t *data)
 {
     char *line;
     size_t line_len;

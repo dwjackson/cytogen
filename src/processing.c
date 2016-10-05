@@ -12,7 +12,7 @@
 #include "processing.h"
 #include "files.h"
 #include "string_util.h"
-#include "cytoplasm_header.h"
+#include "cytogen_header.h"
 #include "cymkd.h"
 #include <pthread.h>
 #include <ctache/ctache.h>
@@ -155,7 +155,7 @@ process_file(const char *in_file_name,
     FILE *in_fp = fopen(ctache_file_name, "r");
     if (in_fp != NULL) {
         /* Read the header data, populate the file ctache_data_t hash */
-        cytoplasm_header_read(in_fp, file_data);
+        cytogen_header_read(in_fp, file_data);
 
         /* If necessary render the output file as markdown */
         char *html_file_name = NULL;

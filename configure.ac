@@ -8,8 +8,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([cytoplasm], [0.1.4], [dwjackson@users.noreply.github.com])
-AC_CONFIG_SRCDIR([src/cytoplasm_header.c])
+AC_INIT([cytogen], [0.1.4], [dwjackson@users.noreply.github.com])
+AC_CONFIG_SRCDIR([src/cytogen_header.c])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([-Wall foreign])
 LT_INIT
