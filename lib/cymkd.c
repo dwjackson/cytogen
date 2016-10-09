@@ -111,7 +111,7 @@ static bool
 match(struct cymkd_parser *parser, char ch)
 {
     if (parser->str_index >= parser->str_len) {
-        return -1;
+        return false;
     }
     if (*(parser->str_pos) == ch) {
         (parser->str_pos)++;
