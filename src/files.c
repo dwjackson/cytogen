@@ -132,7 +132,7 @@ char
     size_t content_bufsize;
     int ch;
 
-    content_bufsize = DEFAULT_CONTENT_LENGTH ;
+    content_bufsize = DEFAULT_CONTENT_LENGTH;
     content = malloc(content_bufsize);
     content_length = 0;
     while ((ch = fgetc(fp)) != EOF) {
