@@ -89,11 +89,21 @@ process_file(const char *in_file_name,
             in_fp = fopen(html_file_name, "r");
         }
 
+        /* Render the file */
+        FILE *out_fp = fopen(out_file_name, "w");
+        if (out_fp == NULL) {
+            fprintf(stderr,
+                    "ERROR: Could not open for writing: %s\n",
+                    out_file_name);
+            abort();
+        }
         render_ctache_file(in_fp,
-                           out_file_name,
+                           out_fp,
                            args->layouts,
                            args->num_layouts,
                            file_data);
+        fclose(out_fp);
+        out_fp = NULL;
 
         /* Clean up files created by the markdown rendering */
         if (is_markdown) {

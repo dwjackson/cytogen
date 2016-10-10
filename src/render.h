@@ -7,7 +7,7 @@
 
 void
 render_ctache_file(FILE *in_fp,
-                   const char *out_file_name,
+                   FILE* out_fp,
                    struct layout *layouts,
                    int num_layouts,
                    ctache_data_t *file_data);
