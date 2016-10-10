@@ -13,12 +13,11 @@
 
 #include <stdio.h>
 #include <ctache/ctache.h>
-#include <stdbool.h>
 
-bool
+int
 cytogen_header_read_from_file(FILE *fp, ctache_data_t *data);
 
-bool
+int
 cytogen_header_read_from_string(const char *str, ctache_data_t *data);
 
 #endif /* CYTO_HEADER_H */

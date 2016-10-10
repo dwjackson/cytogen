@@ -104,7 +104,7 @@ static char
     return line;
 }
 
-bool
+int
 cytogen_header_read_from_string(const char *str, ctache_data_t *data)
 {
     size_t str_len;
@@ -123,7 +123,7 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
     str_index = 0;
     line = read_line_from_string(str, str_len, str_index);
     if (line == NULL) {
-        return false; /* No line could be read */
+        return 0; /* No line could be read */
     }
     line_len = strlen(line);
     str_index += line_len + 1; /* The +1 is for the newline */
@@ -186,15 +186,22 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
     }
     free(line);
 
-    return true;
+    return str_index; /* Length of the header */
 }
 
-bool
+int
 cytogen_header_read_from_file(FILE *fp, ctache_data_t *data)
 {
     char *file_content = read_file_contents(fp);
-    bool file_has_header = false;
-    file_has_header = cytogen_header_read_from_string(file_content, data);
+    fseek(fp, 0, SEEK_SET); /* Rewind the file */
+
+    int header_length = cytogen_header_read_from_string(file_content, data);
+    bool file_has_header = header_length > 0;
+    if (file_has_header) {
+        fseek(fp, header_length, SEEK_CUR); /* Fast-forward to end of header */
+    }
+
     free(file_content);
-    return file_has_header;
+
+    return header_length;
 }
