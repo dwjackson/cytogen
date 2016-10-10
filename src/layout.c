@@ -59,12 +59,19 @@ static char
 static char
 *layout_content_read(int fd, size_t file_size)
 {
-    void *region;
-    region = mmap(NULL, file_size, PROT_READ, MAP_SHARED, fd, 0);
-    char *content = (char *)region;
+    size_t content_len = file_size + 1;
+    char *content = malloc(content_len);
+    memset(content, 0, content_len);
+    ssize_t bytes_read = read(fd, content, file_size);
     return content;
 }
-    
+
+static void
+layout_content_destroy(struct layout layout)
+{
+    free(layout.content);
+}
+
 struct layout
 *get_layouts(int *num_layouts_ptr)
 {
@@ -118,12 +125,6 @@ struct layout
     }
     *num_layouts_ptr = num_layouts;
     return layouts;
-}
-
-static void
-layout_content_destroy(struct layout layout)
-{
-    munmap(layout.content, layout.length);
 }
 
 void
