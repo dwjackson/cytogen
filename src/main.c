@@ -94,6 +94,20 @@ _generate(int num_workers,
     free(thr_pool);
 }
 
+/*
+ * Used to sort file names of posts in reverse-alphanumeric order so that the
+ * files sort most-recent to least-recent by date.
+ */
+static int
+file_name_compare(const char *file_name_1, const char *file_name_2)
+{
+    int strcmp_retval = strcmp(file_name_1, file_name_2);
+    if (strcmp_retval != 0) {
+        strcmp_retval *= -1;
+    }
+    return strcmp_retval;
+}
+
 static void
 generate(struct generate_arguments *args)
 {
@@ -109,6 +123,7 @@ generate(struct generate_arguments *args)
                   &num_files,
                   &directories,
                   &num_directories);
+    qsort(file_names, num_files, sizeof(char *), file_name_compare);
     int num_layouts;
     struct layout *layouts = get_layouts(&num_layouts);
 
