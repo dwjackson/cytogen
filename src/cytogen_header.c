@@ -116,6 +116,7 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
     char *value;
     int i;
     int index;
+    int header_length;
 
     str_len = strlen(str);
     key = NULL;
@@ -179,6 +180,9 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
             line_len = strlen(line);
             str_index += line_len + 1; /* The +1 is for the newline */
         }
+        header_length = str_index;
+    } else {
+        header_length = 0;
     }
 
     if (key != NULL) {
@@ -186,7 +190,7 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
     }
     free(line);
 
-    return str_index; /* Length of the header */
+    return header_length;
 }
 
 int
