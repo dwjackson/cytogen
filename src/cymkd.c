@@ -74,12 +74,17 @@ main(int argc, char *argv[])
         }
     }
 
+    contents_len = 0;
     contents_bufsize = CONTENTS_DEFAULT_BUFSIZE;
     contents = malloc(contents_bufsize + 1);
     while ((ch = fgetc(in_fp)) != EOF) {
         if (contents_len + 1 >= contents_bufsize) {
             contents_bufsize *= 2;
             contents = realloc(contents, contents_bufsize + 1);
+            if (contents == NULL) {
+                fprintf(stderr, "ERROR: realloc() failed\n");
+                abort();
+            }
         }
         contents[contents_len] = ch;
         contents_len++;
