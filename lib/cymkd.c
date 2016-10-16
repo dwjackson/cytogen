@@ -591,7 +591,7 @@ code_block(struct cymkd_parser *parser)
             }
         }
     }
-    parser_emit_string(parser, "</pre></code>");
+    parser_emit_string(parser, "</code></pre>");
     return true;
 }
 
