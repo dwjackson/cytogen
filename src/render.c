@@ -2,6 +2,7 @@
 #include "files.h"
 #include "layout.h"
 #include "string_util.h"
+#include "cymkd.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctache/ctache.h>
