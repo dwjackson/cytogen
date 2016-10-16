@@ -9,7 +9,7 @@ AM_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)
 bin_PROGRAMS = cyto cymkd
 cyto_SOURCES = main.c layout.c layout.h cytogen_header.c cytogen_header.h \
 			   string_util.c string_util.h files.c files.h processing.c \
-			   processing.h render.c render.h
+			   processing.h render.c render.h common.h
 cyto_LDADD = $(top_srcdir)/lib/libcymkd.la -lpthread
 
 cymkd_SOURCES = cymkd.c

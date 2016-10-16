@@ -99,9 +99,9 @@ _generate(int num_workers,
  * files sort most-recent to least-recent by date.
  */
 static int
-file_name_compare(const char *file_name_1, const char *file_name_2)
+file_name_compare(const void *file_name_1, const void *file_name_2)
 {
-    int strcmp_retval = strcmp(file_name_1, file_name_2);
+    int strcmp_retval = strcmp((char *) file_name_1, (char *)file_name_2);
     if (strcmp_retval != 0) {
         strcmp_retval *= -1;
     }
