@@ -547,7 +547,13 @@ code_line(struct cymkd_parser *parser)
 {
     int ch;
     while ((ch = next(parser)) != '\n') {
-        parser_emit_char(parser, ch);
+        if (ch == '<') {
+            parser_emit_string(parser, "&lt;");
+        } else if (ch == '>') {
+            parser_emit_string(parser, "&gt;");
+        } else {
+            parser_emit_char(parser, ch);
+        }
         consume(parser);
     }
     return true;
