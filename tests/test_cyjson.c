@@ -10,6 +10,7 @@
 
 #include "cyjson.h"
 #include <stdlib.h>
+#include <astrounit.h>
 
 ASTRO_TEST_BEGIN(test_parse_empty_object)
 {
