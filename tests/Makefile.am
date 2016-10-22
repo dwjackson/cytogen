@@ -4,4 +4,9 @@
 
 ## Copyright (c) 2016 David Jackson
 
-SUBDIRS = lib src man include tests
+TESTS = test_cyjson
+
+bin_PROGRAMS = test_cyjson
+
+test_cyjson_SOURCES = test_cyjson.c
+test_cyjson_CFLAGS = -g -Wall -lastrounit
