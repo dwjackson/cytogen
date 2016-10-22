@@ -7,6 +7,8 @@ cyjson_parser_init(cyjson_parser_t *parser, const char *json)
     parser->parent_data_type = CYJSON_NONE;
     parser->token_data_type = CYJSON_NONE;
     parser->value.null = NULL;
+
+    return 0;
 }
 
 int
@@ -28,5 +30,8 @@ cyjson_parse(cyjson_parser_t *parser)
         parser->parent_data_type = CYJSON_NONE;
     }
     // TODO
+
     (parser->json)++;
+
+    return 0;
 }

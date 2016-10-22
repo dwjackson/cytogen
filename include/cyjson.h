@@ -1,6 +1,5 @@
-
-
 #include <stdbool.h>
+#include <stdlib.h>
 
 enum cyjson_data_type {
     CYJSON_OBJECT,
@@ -16,7 +15,7 @@ enum cyjson_data_type {
 
     CYJSON_NUMBER,
     CYJSON_BOOLEAN,
-    CYJSON_NULL
+    CYJSON_NULL,
 
     CYJSON_NONE
 };
