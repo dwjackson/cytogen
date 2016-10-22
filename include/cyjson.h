@@ -1,3 +1,16 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/*
+ * Copyright (c) 2016 David Jackson
+ */
+
+#ifndef CYJSON_H
+#define CYJSON_H
+
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -44,3 +57,5 @@ cyjson_parser_init(cyjson_parser_t *parser, const char *json);
 
 int
 cyjson_parse(cyjson_parser_t *parser);
+
+#endif /* CYJSON_H */
