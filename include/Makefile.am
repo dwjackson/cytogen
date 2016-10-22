@@ -4,4 +4,4 @@
 
 ## Copyright (c) 2016 David Jackson
 
-include_HEADERS = cymkd.h
+include_HEADERS = cymkd.h cyjson.h

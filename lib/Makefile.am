@@ -4,5 +4,10 @@
 
 ## Copyright (c) 2016 David Jackson
 
-lib_LTLIBRARIES = libcymkd.la
+AM_CFLAGS = -I$(top_srcdir)/include
+
+lib_LTLIBRARIES = libcymkd.la libcyjson.la
+
 libcymkd_la_SOURCES = cymkd.c
+
+libcyjson_la_SOURCES = cyjson.c
