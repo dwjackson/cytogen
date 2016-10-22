@@ -45,3 +45,9 @@ cyjson_parse(cyjson_parser_t *parser)
 
     return 0;
 }
+
+enum cyjson_data_type
+cyjson_token_data_type(cyjson_parser_t parser)
+{
+    return parser.token_data_type;
+}

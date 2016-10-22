@@ -58,4 +58,7 @@ cyjson_parser_init(cyjson_parser_t *parser, const char *json);
 int
 cyjson_parse(cyjson_parser_t *parser);
 
+enum cyjson_data_type
+cyjson_token_data_type(cyjson_parser_t parser);
+
 #endif /* CYJSON_H */
