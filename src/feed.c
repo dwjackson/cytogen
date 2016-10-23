@@ -29,6 +29,7 @@ insert_entries(FILE *fp, ctache_data_t *posts)
         fprintf(fp, "\t\t<title>%s</title>\n", str_data->data.string);
         str_data = ctache_data_hash_table_get(post, "url");
         fprintf(fp, "\t\t<link href=\"%s\" />\n", str_data->data.string);
+        fprintf(fp, "\t\t<id>%s</id>\n", str_data->data.string);
         fprintf(fp, "\t</entry>\n");
     }
 }
@@ -57,6 +58,7 @@ generate_feed(struct cyto_config *config, ctache_data_t *posts)
     fprintf(fp, "\t<title>%s</title>\n", config->title);
     fprintf(fp, "\t<link href=\"%s\" />\n", config->url);
     fprintf(fp, "\t<updated>%s</updated>\n", now_str);
+    fprintf(fp, "\t<id>%s</id>\n", config->url);
     fprintf(fp, "\t<author>\n");
     fprintf(fp, "\t\t<name>%s</name>\n", config->author);
     fprintf(fp, "\t</author>\n");
