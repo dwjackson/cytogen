@@ -83,7 +83,7 @@ cyjson_parse(cyjson_parser_t *parser)
         (parser->json)++; /* Skip past the first quotation mark (") */
         int index = 0;
         while ((ch = *(parser->json++)) != '"') {
-            if (value->string.length + 1 < value->string.bufsize) {
+            if (value->string.length + 1 >= value->string.bufsize) {
                 size_t bufsize = value->string.bufsize * 2;
                 value->string.bufsize = bufsize;
                 value->string.buffer = realloc(value->string.buffer, bufsize);
