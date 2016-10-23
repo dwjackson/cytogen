@@ -228,14 +228,10 @@ cmd_generate(struct cyto_config *config,
 
     /* Set up the posts data */
     has_posts = stat(POSTS_DIR, &statbuf) == 0 && statbuf.st_mode & S_IFDIR;
+    ctache_data_t *posts_array = NULL;
     if (has_posts) {
-        ctache_data_t *posts_array = ctache_data_create_array(0);
+        posts_array = ctache_data_create_array(0);
         ctache_data_hash_table_set(data, "posts", posts_array);
-
-        /* Create the Atom/RSS feed file */
-        if (config != NULL) {
-            generate_feed(config, posts_array);
-        }
     }
 
     /* Set up the generation arguments */
@@ -258,6 +254,11 @@ cmd_generate(struct cyto_config *config,
         args.curr_dir_name = curr_dir_name;
     }
     generate(&args);
+
+    /* Create the Atom/RSS feed file */
+    if (config != NULL) {
+        generate_feed(config, posts_array);
+    }
 
     /* Clean up */
     pthread_mutex_destroy(&data_mutex);
@@ -347,7 +348,8 @@ main(int argc, char *argv[])
     struct cyto_config config;
     bool has_config = false;
     struct stat statbuf;
-    stat(CONFIG_FILE_NAME, &statbuf);
+    int stat_retval = stat(CONFIG_FILE_NAME, &statbuf);
+    has_config = stat_retval == 0;
     if (has_config) {
         cyto_config_read(CONFIG_FILE_NAME, &config);
     }

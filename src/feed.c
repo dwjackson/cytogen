@@ -30,7 +30,9 @@ generate_feed(struct cyto_config *config, ctache_data_t *posts)
     char feed_file_name[] = "_site/feed.xml";
     FILE *fp = fopen(feed_file_name, "w");
     if (fp == NULL) {
-        fprintf(stderr, "ERROR: Could not open file: %s\n", feed_file_name);
+        char fmt[] = "ERROR: Could not open file: %s\n";
+        fprintf(stderr, fmt, feed_file_name);
+        perror(NULL);
         return;
     }
 
