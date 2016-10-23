@@ -16,23 +16,23 @@
 
 enum cyjson_data_type {
     CYJSON_OBJECT,
-    CYJSON_OBJECT_BEGIN,
-    CYJSON_OBJECT_END,
-    CJSON_OBJECT_KEY,
-    CJSON_OBJECT_VALUE,
-
     CYJSON_ARRAY,
-    CYJSON_ARRAY_BEGIN,
-    CYJSON_ARRAY_END,
-
-    CYJSON_STRING_DELIMITER,
     CYJSON_STRING,
-
     CYJSON_NUMBER,
     CYJSON_BOOLEAN,
     CYJSON_NULL,
+    CYJSON_NONE /* Not an actual data type, used for signaling */
+};
 
-    CYJSON_NONE
+enum cyjson_event_type {
+    CYJSON_EVENT_OBJECT_BEGIN,
+    CYJSON_EVENT_OBJECT_END,
+    CYJSON_EVENT_OBJECT_KEY,
+    CYJSON_EVENT_OBJECT_VALUE,
+    CYJSON_EVENT_ARRAY_BEGIN,
+    CYJSON_EVENT_ARRAY_END,
+    CYJSON_EVENT_DATA,
+    CYJSON_EVENT_NONE
 };
 
 union cyjson_value {
@@ -48,8 +48,8 @@ union cyjson_value {
 
 struct cyjson_parser {
     const char *json;
-    enum cyjson_data_type parent_data_type;
-    enum cyjson_data_type token_data_type;
+    enum cyjson_event_type event_type;
+    enum cyjson_data_type data_type;
     union cyjson_value value;
 };
 typedef struct cyjson_parser cyjson_parser_t;
@@ -61,6 +61,12 @@ int
 cyjson_parse(cyjson_parser_t *parser);
 
 enum cyjson_data_type
-cyjson_token_data_type(cyjson_parser_t parser);
+cyjson_get_data_type(cyjson_parser_t parser);
+
+char
+*cyjson_get_string(cyjson_parser_t parser);
+
+enum cyjson_event_type
+cyjson_get_event_type(cyjson_parser_t parser);
 
 #endif /* CYJSON_H */
