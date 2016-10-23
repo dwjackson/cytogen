@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 static char
 *read_file(const char *file_name)
@@ -46,6 +47,14 @@ static char
     return buf;
 }
 
+static bool
+config_is_valid(struct cyto_config *config)
+{
+    return config->title != NULL
+        && config->url != NULL
+        && config->author != NULL;
+}
+
 int
 cyto_config_read(const char *file_name, struct cyto_config *config)
 {
@@ -55,6 +64,11 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
     int parse_ok;
     char *key;
     char *value;
+    int status;
+
+    config->title = NULL;
+    config->url = NULL;
+    config->author = NULL;
 
     json = read_file(file_name);
     if (json == NULL) {
@@ -85,16 +99,28 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
         event_type = cyjson_get_event_type(parser);
     }
 
+    if (config_is_valid(config)) {
+        status = 0;
+    } else {
+        status = -1;
+    }
+
     cyjson_parser_destroy(&parser);
     free(json);
 
-    return 0;
+    return status;
 }
 
 void
 cyto_config_destroy(struct cyto_config *config)
 {
-    free(config->title);
-    free(config->url);
-    free(config->author);
+    if (config->title != NULL) {
+        free(config->title);
+    }
+    if (config->url != NULL) {
+        free(config->url);
+    }
+    if (config->author != NULL) {
+        free(config->author);
+    }
 }
