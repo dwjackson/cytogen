@@ -8,18 +8,24 @@ insert_entries(FILE *fp, ctache_data_t *posts)
 {
     size_t posts_length;
     ctache_data_t *post;
+    ctache_data_t *str_data;
     int i;
 
     posts_length = ctache_data_length(posts);
     for (i = 0; i < posts_length; i++) {
+        post = ctache_data_array_get(posts, i);
         fprintf(fp, "\t<entry>\n");
+        str_data = ctache_data_hash_table_get(post, "title");
+        fprintf(fp, "\t\t<title>%s</title>\n", str_data->data.string);
+        str_data = ctache_data_hash_table_get(post, "url");
+        fprintf(fp, "\t\t<link href=\"%s\" />\n", str_data->data.string);
         // TODO
         fprintf(fp, "\t</entry>\n");
     }
 }
     
 void
-generate_feed(struct cyto_config config, ctache_data_t *posts)
+generate_feed(struct cyto_config *config, ctache_data_t *posts)
 {
     char feed_file_name[] = "_site/feed.xml";
     FILE *fp = fopen(feed_file_name, "w");
@@ -37,11 +43,11 @@ generate_feed(struct cyto_config config, ctache_data_t *posts)
 
     fprintf(fp, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
     fprintf(fp, "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n");
-    fprintf(fp, "\t<title>%s</title>\n", config.title);
-    fprintf(fp, "\t<link href=\"%s\" />\n", config.url);
+    fprintf(fp, "\t<title>%s</title>\n", config->title);
+    fprintf(fp, "\t<link href=\"%s\" />\n", config->url);
     fprintf(fp, "\t<updated>%s</updated>\n", now_str);
     fprintf(fp, "\t<author>\n");
-    fprintf(fp, "\t\t<name>%s</name>\n", config.author);
+    fprintf(fp, "\t\t<name>%s</name>\n", config->author);
     fprintf(fp, "\t</author>\n");
 
     insert_entries(fp, posts);

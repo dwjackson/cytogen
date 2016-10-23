@@ -21,6 +21,7 @@
 #include "string_util.h"
 #include "config.h"
 #include "cyto_config.h"
+#include "feed.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -210,7 +211,10 @@ _rename_posts(const char *path,
 }
 
 static void
-cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
+cmd_generate(struct cyto_config *config,
+             const char *curr_dir_name,
+             const char *site_dir,
+             int num_workers)
 {
     ctache_data_t *data;
     pthread_mutex_t data_mutex;
@@ -227,6 +231,11 @@ cmd_generate(const char *curr_dir_name, const char *site_dir, int num_workers)
     if (has_posts) {
         ctache_data_t *posts_array = ctache_data_create_array(0);
         ctache_data_hash_table_set(data, "posts", posts_array);
+
+        /* Create the Atom/RSS feed file */
+        if (config != NULL) {
+            generate_feed(config, posts_array);
+        }
     }
 
     /* Set up the generation arguments */
@@ -345,7 +354,11 @@ main(int argc, char *argv[])
 
     char *cmd = args[0];
     if (string_matches_any(cmd, 3, "g", "gen", "generate")) {
-        cmd_generate(".", SITE_DIR, num_workers);
+        if (has_config) {
+            cmd_generate(&config, ".", SITE_DIR, num_workers);
+        } else {
+            cmd_generate(NULL, ".", SITE_DIR, num_workers);
+        }
     } else if (string_matches_any(cmd, 1, "init")) {
         if (argc == 3) {
             char *proj_name = args[1];

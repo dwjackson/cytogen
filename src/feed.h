@@ -5,6 +5,6 @@
 #include <ctache/ctache.h>
 
 void
-generate_feed(struct cyto_config config, ctache_data_t *posts);
+generate_feed(struct cyto_config *config, ctache_data_t *posts);
 
 #endif /* FEED_H */
