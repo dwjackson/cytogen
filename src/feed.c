@@ -19,7 +19,6 @@ insert_entries(FILE *fp, ctache_data_t *posts)
         fprintf(fp, "\t\t<title>%s</title>\n", str_data->data.string);
         str_data = ctache_data_hash_table_get(post, "url");
         fprintf(fp, "\t\t<link href=\"%s\" />\n", str_data->data.string);
-        // TODO
         fprintf(fp, "\t</entry>\n");
     }
 }
