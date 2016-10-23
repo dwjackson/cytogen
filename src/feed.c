@@ -2,6 +2,21 @@
 #include <ctache/ctache.h>
 #include <stdio.h>
 #include <time.h>
+
+static void
+insert_entries(FILE *fp, ctache_data_t *posts)
+{
+    size_t posts_length;
+    ctache_data_t *post;
+    int i;
+
+    posts_length = ctache_data_length(posts);
+    for (i = 0; i < posts_length; i++) {
+        fprintf(fp, "\t<entry>\n");
+        // TODO
+        fprintf(fp, "\t</entry>\n");
+    }
+}
     
 void
 generate_feed(struct cyto_config config, ctache_data_t *posts)
@@ -28,7 +43,9 @@ generate_feed(struct cyto_config config, ctache_data_t *posts)
     fprintf(fp, "\t<author>\n");
     fprintf(fp, "\t\t<name>%s</name>\n", config.author);
     fprintf(fp, "\t</author>\n");
-    /* TODO: Intert entries for posts */
+
+    insert_entries(fp, posts);
+
     fprintf(fp, "</feed>");
 
     fclose(fp);
