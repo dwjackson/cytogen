@@ -69,6 +69,55 @@ ASTRO_TEST_BEGIN(test_parse_object_single_key)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_parse_object_multiple_keys)
+{
+    enum cyjson_event_type event_type;
+    enum cyjson_data_type data_type;
+    cyjson_parser_t parser;
+    int retval;
+
+    char json[] = "{ \"key1\": \"value1\", \"key2\": \"value2\" }";
+    cyjson_parser_init(&parser, json);
+
+    retval = cyjson_parse(&parser);
+    assert_int_eq(0, retval, "cyjson_parse() failed");
+    event_type = cyjson_get_event_type(parser);
+    assert_int_eq(CYJSON_EVENT_OBJECT_BEGIN, event_type, "Wrong event type");
+
+    retval = cyjson_parse(&parser);
+    assert_int_eq(0, retval, "cyjson_parse() failed");
+    event_type = cyjson_get_event_type(parser);
+    assert_int_eq(CYJSON_EVENT_OBJECT_KEY, event_type, "Wrong event type");
+    data_type = cyjson_get_data_type(parser);
+    assert_int_eq(CYJSON_STRING, data_type, "Wrong data type");
+    assert_str_eq("key1", cyjson_get_string(parser), "Wrong key");
+
+    retval = cyjson_parse(&parser);
+    assert_int_eq(0, retval, "cyjson_parse() failed");
+    event_type = cyjson_get_event_type(parser);
+    assert_int_eq(CYJSON_EVENT_OBJECT_VALUE, event_type, "Wrong event type");
+    data_type = cyjson_get_data_type(parser);
+    assert_int_eq(CYJSON_STRING, data_type, "Wrong data type");
+    assert_str_eq("value1", cyjson_get_string(parser), "Wrong value");
+
+    retval = cyjson_parse(&parser);
+    assert_int_eq(0, retval, "cyjson_parse() failed");
+    event_type = cyjson_get_event_type(parser);
+    assert_int_eq(CYJSON_EVENT_OBJECT_KEY, event_type, "Wrong event type");
+    data_type = cyjson_get_data_type(parser);
+    assert_int_eq(CYJSON_STRING, data_type, "Wrong data type");
+    assert_str_eq("key2", cyjson_get_string(parser), "Wrong key");
+
+    retval = cyjson_parse(&parser);
+    assert_int_eq(0, retval, "cyjson_parse() failed");
+    event_type = cyjson_get_event_type(parser);
+    assert_int_eq(CYJSON_EVENT_OBJECT_VALUE, event_type, "Wrong event type");
+    data_type = cyjson_get_data_type(parser);
+    assert_int_eq(CYJSON_STRING, data_type, "Wrong data type");
+    assert_str_eq("value2", cyjson_get_string(parser), "Wrong value");
+}
+ASTRO_TEST_END
+
 int
 main(void)
 {
