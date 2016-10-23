@@ -33,6 +33,12 @@ free_string_if_necessary(cyjson_parser_t *parser)
     }
 }
 
+void
+cyjson_parser_destroy(cyjson_parser_t *parser)
+{
+    free_string_if_necessary(parser);
+}
+
 int
 cyjson_parse(cyjson_parser_t *parser)
 {

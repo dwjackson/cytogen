@@ -57,6 +57,9 @@ typedef struct cyjson_parser cyjson_parser_t;
 int
 cyjson_parser_init(cyjson_parser_t *parser, const char *json);
 
+void
+cyjson_parser_destroy(cyjson_parser_t *parser);
+
 int
 cyjson_parse(cyjson_parser_t *parser);
 
