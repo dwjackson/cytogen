@@ -65,7 +65,7 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
     key = NULL;
     parse_ok = cyjson_parse(&parser);
     event_type = cyjson_get_event_type(parser);
-    while (parse_ok && event_type != CYJSON_EVENT_OBJECT_END) {
+    while (parse_ok != -1 && event_type != CYJSON_EVENT_OBJECT_END) {
         if (event_type == CYJSON_EVENT_OBJECT_KEY) {
             key = cyjson_get_string(parser);
         } else if (event_type == CYJSON_EVENT_OBJECT_VALUE) {
@@ -75,10 +75,10 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
                 strcpy(config->title, value);
             } else if (strcmp(key, "url") == 0) {
                 config->url = malloc(strlen(value) + 1);
-                strcpy(config->title, value);
+                strcpy(config->url, value);
             } else if (strcmp(key, "author") == 0) {
                 config->author = malloc(strlen(value) + 1);
-                strcpy(config->title, value);
+                strcpy(config->author, value);
             }
         }
         parse_ok = cyjson_parse(&parser);
@@ -86,6 +86,7 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
     }
 
     cyjson_parser_destroy(&parser);
+    free(json);
 
     return 0;
 }
