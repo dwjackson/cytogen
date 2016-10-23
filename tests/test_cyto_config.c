@@ -14,6 +14,7 @@
 
 ASTRO_TEST_BEGIN(test_read_config)
 {
+    /* TODO */
 }
 ASTRO_TEST_END
 

@@ -18,7 +18,7 @@ cyjson_parser_init(cyjson_parser_t *parser, const char *json)
     parser->json = json;
     parser->event_type = CYJSON_EVENT_NONE;
     parser->data_type = CYJSON_NONE;
-    parser->value.null = NULL;
+    parser->data.null = NULL;
 
     return 0;
 }
@@ -27,9 +27,9 @@ static void
 free_string_if_necessary(cyjson_parser_t *parser)
 {
     if (parser->data_type == CYJSON_STRING) {
-        free(parser->value.string.buffer);
-        parser->value.string.length = 0;
-        parser->value.string.bufsize = 0;
+        free(parser->data.string.buffer);
+        parser->data.string.length = 0;
+        parser->data.string.bufsize = 0;
     }
 }
 
@@ -75,23 +75,24 @@ cyjson_parse(cyjson_parser_t *parser)
         }
         parser->data_type = CYJSON_STRING;
 
-        union cyjson_value *value = &(parser->value);
-        value->string.bufsize = DEFAULT_STRING_BUFLEN;
-        value->string.length = 0;
-        value->string.buffer = malloc(parser->value.string.bufsize);
+        parser->data.string.bufsize = DEFAULT_STRING_BUFLEN;
+        parser->data.string.length = 0;
+        parser->data.string.buffer = malloc(parser->data.string.bufsize);
+        if (parser->data.string.buffer == NULL) {
+            abort();
+        }
 
         (parser->json)++; /* Skip past the first quotation mark (") */
-        int index = 0;
         while ((ch = *(parser->json++)) != '"') {
-            if (value->string.length + 1 >= value->string.bufsize) {
-                size_t bufsize = value->string.bufsize * 2;
-                value->string.bufsize = bufsize;
-                value->string.buffer = realloc(value->string.buffer, bufsize);
+            if (parser->data.string.length + 1 >= parser->data.string.bufsize) {
+                size_t bufsize = parser->data.string.bufsize * 2;
+                parser->data.string.bufsize = bufsize;
+                parser->data.string.buffer = realloc(parser->data.string.buffer, bufsize);
             }
-            (value->string.buffer)[index] = ch;
-            index++;
+            (parser->data.string.buffer)[parser->data.string.length] = ch;
+            parser->data.string.length++;
         }
-        (value->string.buffer)[index] = '\0';
+        (parser->data.string.buffer)[parser->data.string.length] = '\0';
     }
 
     (parser->json)++;
@@ -113,7 +114,7 @@ cyjson_get_data_type(cyjson_parser_t parser)
 char
 *cyjson_get_string(cyjson_parser_t parser)
 {
-    return parser.value.string.buffer;
+    return parser.data.string.buffer;
 }
 
 enum cyjson_event_type

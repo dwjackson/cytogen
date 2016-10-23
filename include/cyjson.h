@@ -35,7 +35,7 @@ enum cyjson_event_type {
     CYJSON_EVENT_NONE
 };
 
-union cyjson_value {
+union cyjson_data {
     double number;
     bool boolean;
     void *null;
@@ -50,7 +50,7 @@ struct cyjson_parser {
     const char *json;
     enum cyjson_event_type event_type;
     enum cyjson_data_type data_type;
-    union cyjson_value value;
+    union cyjson_data data;
 };
 typedef struct cyjson_parser cyjson_parser_t;
 
