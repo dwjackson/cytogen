@@ -1,6 +1,7 @@
 #ifndef FEED_H
 #define FEED_H
 
+#include "cyto_config.h"
 #include <ctache/ctache.h>
 
 void

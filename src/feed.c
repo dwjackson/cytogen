@@ -1,3 +1,4 @@
+#include "cyto_config.h"
 #include <ctache/ctache.h>
 #include <stdio.h>
 #include <time.h>
@@ -16,7 +17,7 @@ generate_feed(struct cyto_config config, ctache_data_t *posts)
     struct tm tm;
     char now_str[30];
     time(&now);
-    localtime_r(now, &tm);
+    localtime_r(&now, &tm);
     strftime(now_str, 30, "%Y-%m-%dT%H:%M:%SZ", &tm);
 
     fprintf(fp, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
