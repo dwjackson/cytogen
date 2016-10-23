@@ -81,7 +81,10 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
     event_type = cyjson_get_event_type(parser);
     while (parse_ok != -1 && event_type != CYJSON_EVENT_OBJECT_END) {
         if (event_type == CYJSON_EVENT_OBJECT_KEY) {
-            key = cyjson_get_string(parser);
+            if (key != NULL) {
+                free(key);
+            }
+            key = strdup(cyjson_get_string(parser));
         } else if (event_type == CYJSON_EVENT_OBJECT_VALUE) {
             value = cyjson_get_string(parser);
             if (strcmp(key, "title") == 0) {
@@ -97,6 +100,9 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
         }
         parse_ok = cyjson_parse(&parser);
         event_type = cyjson_get_event_type(parser);
+    }
+    if (key != NULL) {
+        free(key);
     }
 
     if (config_is_valid(config)) {

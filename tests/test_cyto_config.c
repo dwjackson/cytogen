@@ -19,7 +19,7 @@ ASTRO_TEST_BEGIN(test_read_config)
     struct cyto_config config;
     int retval = cyto_config_read(file_name, &config);
     assert_int_eq(0, retval, "Config file read failed");
-    assert_str_eq("Test", config.title, "Wrong title");
+    assert_str_eq("Test Site", config.title, "Wrong title");
     assert_str_eq("Test Author", config.author, "Wrong author name");
     assert_str_eq("http://example.com", config.url, "Wrong URL");
     cyto_config_destroy(&config);
