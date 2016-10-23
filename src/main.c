@@ -20,6 +20,7 @@
 #include "processing.h"
 #include "string_util.h"
 #include "config.h"
+#include "cyto_config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +39,7 @@
 #define POSTS_DIR "_posts"
 #define SITE_POSTS_DIR "_site/posts"
 #define MAXFDS 100
+#define CONFIG_FILE_NAME "_config.json"
 
 struct generate_arguments {
     const char *curr_dir_name;
@@ -333,6 +335,14 @@ main(int argc, char *argv[])
         num_workers = DEFAULT_NUM_WORKERS;
     }
 
+    struct cyto_config config;
+    bool has_config = false;
+    struct stat statbuf;
+    stat(CONFIG_FILE_NAME, &statbuf);
+    if (has_config) {
+        cyto_config_read(CONFIG_FILE_NAME, &config);
+    }
+
     char *cmd = args[0];
     if (string_matches_any(cmd, 3, "g", "gen", "generate")) {
         cmd_generate(".", SITE_DIR, num_workers);
@@ -349,6 +359,10 @@ main(int argc, char *argv[])
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
+    }
+
+    if (has_config) {
+        cyto_config_destroy(&config);
     }
 
     return 0;
