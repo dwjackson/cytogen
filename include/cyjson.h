@@ -35,15 +35,17 @@ enum cyjson_event_type {
     CYJSON_EVENT_NONE
 };
 
+struct cyjson_string {
+    char *buffer;
+    size_t length;
+    size_t bufsize;
+};
+
 union cyjson_data {
     double number;
     bool boolean;
     void *null;
-    union cyjson_string {
-        char *buffer;
-        size_t length;
-        size_t bufsize;
-    } string;
+    struct cyjson_string string;
 };
 
 struct cyjson_parser {
