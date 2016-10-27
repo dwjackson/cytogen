@@ -22,7 +22,7 @@ static char *reserved_words[] = {
     "content",
     "posts"
 };
-#define NUM_RESERVED_WORDS 1
+#define NUM_RESERVED_WORDS 2
 
 static bool
 is_reserved(const char *str)
