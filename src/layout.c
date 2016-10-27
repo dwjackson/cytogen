@@ -95,8 +95,10 @@ read_layout_from_file(const char *file_name, struct layout *layout)
         fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
         exit(EXIT_FAILURE);
     }
+
     size_t size = statbuf.st_size;
     char *content = layout_content_read(fd, size);
+
     struct layout l = { layout_name, content, size };
     *layout = l;
 
