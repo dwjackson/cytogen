@@ -12,7 +12,7 @@ cyto_SOURCES = main.c layout.c layout.h cytogen_header.c cytogen_header.h \
 			   processing.h render.c render.h common.h cyto_config.c \
 			   cyto_config.h feed.c feed.h
 cyto_LDADD = $(top_srcdir)/lib/libcymkd.la -lpthread \
-			 $(top_srcdir)/lib/libcyjson.la
+			 $(top_srcdir)/lib/libcyjson.a
 
 cymkd_SOURCES = cymkd.c
 cymkd_LDADD = $(top_srcdir)/lib/libcymkd.la

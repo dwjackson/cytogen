@@ -6,8 +6,8 @@
 
 AM_CFLAGS = -I$(top_srcdir)/include
 
-lib_LTLIBRARIES = libcymkd.la libcyjson.la
-
+lib_LTLIBRARIES = libcymkd.la
 libcymkd_la_SOURCES = cymkd.c
 
-libcyjson_la_SOURCES = cyjson.c
+noinst_LIBRARIES = libcyjson.a
+libcyjson_a_SOURCES = cyjson.c

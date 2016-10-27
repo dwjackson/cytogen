@@ -10,10 +10,10 @@ bin_PROGRAMS = test_cyjson test_cyto_config
 
 test_cyjson_SOURCES = test_cyjson.c
 test_cyjson_CFLAGS = -g -Wall -lastrounit -I$(top_srcdir)/include
-test_cyjson_LDADD = $(top_srcdir)/lib/libcyjson.la
+test_cyjson_LDADD = $(top_srcdir)/lib/libcyjson.a
 
 test_cyto_config_SOURCES = test_cyto_config.c $(top_srcdir)/src/cyto_config.c \
 						   $(top_srcdir)/src/cyto_config.h
 test_cyto_config_CFLAGS = -g -Wall -lastrounit -I$(top_srcdir)/include \
 						  -I$(top_srcdir)/src
-test_cyto_config_LDADD = $(top_srcdir)/lib/libcyjson.la
+test_cyto_config_LDADD = $(top_srcdir)/lib/libcyjson.a
