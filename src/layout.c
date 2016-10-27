@@ -71,6 +71,37 @@ layout_content_destroy(struct layout layout)
     free(layout.content);
 }
 
+static void
+read_layout_from_file(const char *file_name, struct layout *layout)
+{
+    size_t file_name_len = strlen(file_name);
+    char *layout_name = layout_name_from_file_name(file_name,
+                                                   file_name_len);
+    char *file_path = malloc(strlen(LAYOUTS_DIR_NAME) + 1
+                             + file_name_len
+                             + 1);
+    strcpy(file_path, LAYOUTS_DIR_NAME);
+    strcat(file_path, "/");
+    strcat(file_path, file_name);
+    struct stat statbuf;
+    int fd = open(file_path, O_RDONLY);
+    if (fd < 0) {
+        fprintf(stderr, "ERROR: Could not open %s\n", file_path);
+        exit(EXIT_FAILURE);
+    }
+    if (fstat(fd, &statbuf) < 0) {
+        fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
+        exit(EXIT_FAILURE);
+    }
+    size_t size = statbuf.st_size;
+    char *content = layout_content_read(fd, size);
+    struct layout l = { layout_name, content, size };
+    *layout = l;
+
+    close(fd);
+    free(file_path);
+}
+
 struct layout
 *get_layouts(int *num_layouts_ptr)
 {
@@ -92,31 +123,9 @@ struct layout
         while ((de = readdir(layouts_dir)) != NULL) {
             char *file_name = de->d_name;
             if (file_name[0] != '.') {
-                size_t file_name_len = strlen(file_name);
-                char *layout_name = layout_name_from_file_name(file_name,
-                                                               file_name_len);
-                char *file_path = malloc(strlen(LAYOUTS_DIR_NAME) + 1
-                                         + file_name_len
-                                         + 1);
-                strcpy(file_path, LAYOUTS_DIR_NAME);
-                strcat(file_path, "/");
-                strcat(file_path, file_name);
-                struct stat statbuf; 
-                int fd = open(file_path, O_RDONLY);
-                if (fd < 0) {
-                    fprintf(stderr, "ERROR: Could not open %s\n", file_path);
-                    exit(EXIT_FAILURE);
-                }
-                if (fstat(fd, &statbuf) < 0) {
-                    fprintf(stderr, "ERROR: Could not stat %s\n", file_path);
-                    exit(EXIT_FAILURE);
-                }
-                size_t size = statbuf.st_size;
-                char *content = layout_content_read(fd, size);
-                struct layout l = { layout_name, content, size };
-                layouts[index] = l;
-                close(fd);
-                free(file_path);
+                struct layout layout;
+                read_layout_from_file(file_name, &layout);
+                layouts[index] = layout;
                 index++;
             }
         }
