@@ -8,6 +8,10 @@
  * Copyright (c) 2016 David Jackson
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,12 +81,10 @@ read_layout_from_file(const char *file_name, struct layout *layout)
     size_t file_name_len = strlen(file_name);
     char *layout_name = layout_name_from_file_name(file_name,
                                                    file_name_len);
-    char *file_path = malloc(strlen(LAYOUTS_DIR_NAME) + 1
-                             + file_name_len
-                             + 1);
-    strcpy(file_path, LAYOUTS_DIR_NAME);
-    strcat(file_path, "/");
-    strcat(file_path, file_name);
+
+    char *file_path;
+    asprintf(&file_path, "%s/%s", LAYOUTS_DIR_NAME, file_name);
+
     struct stat statbuf;
     int fd = open(file_path, O_RDONLY);
     if (fd < 0) {
