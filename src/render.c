@@ -9,6 +9,44 @@
 
 #define DELIM_BEGIN "{{"
 #define DELIM_END "}}"
+
+/*
+ * Render the layout with the file content passed as a partial with the key
+ * "content".
+ */
+static void
+render_with_layout(FILE *in_fp,
+                   FILE *out_fp,
+                   struct layout *layouts,
+                   int num_layouts,
+                   ctache_data_t *file_data)
+{
+    char *content = read_file_contents(in_fp);
+    size_t content_len = strlen(content);
+    ctache_data_t *content_data;
+    content_data = ctache_data_create_string(content,
+                                             content_len);
+    ctache_data_hash_table_set(file_data, "content", content_data);
+    ctache_data_t *layout_data;
+    layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
+    char *layout_name = string_trim(layout_data->data.string);
+    char *layout = get_layout_content(layouts, num_layouts, layout_name);
+    if (layout == NULL) {
+        char *err_fmt = "ERROR: Layout not found: \"%s\"\n";
+        fprintf(stderr, err_fmt, layout_name);
+        abort();
+    }
+    size_t layout_len = strlen(layout);
+    ctache_render_string(layout,
+                         layout_len,
+                         out_fp,
+                         file_data,
+                         ESCAPE_HTML,
+                         DELIM_BEGIN,
+                         DELIM_END);
+    free(content);
+    free(layout_name);
+}
     
 void
 render_ctache_file(FILE *in_fp,
@@ -18,7 +56,6 @@ render_ctache_file(FILE *in_fp,
                    ctache_data_t *file_data)
 {
     if (!ctache_data_hash_table_has_key(file_data, LAYOUT)) {
-        /* Render the file as a ctache template */
         ctache_render_file(in_fp,
                            out_fp,
                            file_data,
@@ -26,39 +63,7 @@ render_ctache_file(FILE *in_fp,
                            DELIM_BEGIN,
                            DELIM_END);
     } else {
-        /*
-         * Render the layout with the file content passed as a
-         * partial with the key "content"
-         */
-        char *content = read_file_contents(in_fp);
-        size_t content_len = strlen(content);
-        ctache_data_t *content_data;
-        content_data = ctache_data_create_string(content,
-                                                 content_len);
-        ctache_data_hash_table_set(file_data,
-                                   "content",
-                                   content_data);
-        ctache_data_t *layout_data;
-        layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
-        char *layout_name = string_trim(layout_data->data.string);
-        char *layout = get_layout_content(layouts,
-                                          num_layouts,
-                                          layout_name);
-        if (layout == NULL) {
-            char *err_fmt = "ERROR: Layout not found: \"%s\"\n";
-            fprintf(stderr, err_fmt, layout_name);
-            abort();
-        }
-        size_t layout_len = strlen(layout);
-        ctache_render_string(layout,
-                             layout_len,
-                             out_fp,
-                             file_data,
-                             ESCAPE_HTML,
-                             DELIM_BEGIN,
-                             DELIM_END);
-        free(content);
-        free(layout_name);
+        render_with_layout(in_fp, out_fp, layouts, num_layouts, file_data);
     }
 }
 
