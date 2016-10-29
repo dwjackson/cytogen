@@ -19,7 +19,13 @@ test_cyto_config_CFLAGS = -g -Wall -lastrounit -I$(top_srcdir)/include \
 test_cyto_config_LDADD = $(top_srcdir)/lib/libcyjson.a
 
 test_layout_SOURCES = test_layout.c $(top_srcdir)/src/layout.c \
-					  $(top_srcdir)/src/layout.h
+					  $(top_srcdir)/src/layout.h \
+					  $(top_srcdir)/src/cytogen_header.c \
+					  $(top_srcdir)/src/cytogen_header.h \
+					  $(top_srcdir)/src/files.c $(top_srcdir)/src/files.h \
+					  $(top_srcdir)/src/string_util.c \
+					  $(top_srcdir)/src/string_util.h
+
 test_layout_CFLAGS = -g -Wall -lastrounit -I$(top_srcdir)/include \
 						  -I$(top_srcdir)/src
-test_laout_LDADD = $(top_srcdir)/lib/libcyjson.a
+test_layout_LDADD = $(top_srcdir)/lib/libcyjson.a

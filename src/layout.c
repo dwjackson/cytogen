@@ -12,6 +12,8 @@
 #define _GNU_SOURCE
 #endif /* __linux__ */
 
+#include "layout.h"
+#include "cytogen_header.h"
 #include <ctache/ctache.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +22,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "layout.h"
 
 #define LAYOUTS_DIR_NAME "_layouts"
 
