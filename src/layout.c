@@ -12,6 +12,7 @@
 #define _GNU_SOURCE
 #endif /* __linux__ */
 
+#include <ctache/ctache.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -135,6 +136,48 @@ struct layout
         }
         closedir(layouts_dir);
     }
+
+    /* Render any recursive layouts */
+    int i;
+    for (i = 0; i < num_layouts; i++) {
+        struct layout layout = layouts[i];
+        char *content = layout.content;
+        ctache_data_t *header_data = ctache_data_create_hash();
+        int header_len = cytogen_header_read_from_string(content, header_data);
+        while (header_len > 0) {
+            content += header_len; /* Skip past the header */
+            char *out;
+            if (ctache_data_hash_table_has_key(header_data, "layout")) {
+                ctache_data_t *str_data;
+                str_data = ctache_data_hash_table_get(header_data, "layout");
+                char *layout_name = str_data->data.string;
+                char *layout_content = get_layout_content(layouts,
+                                                          num_layouts,
+                                                          layout_name);
+                ctache_data_t *content_data;
+                content_data = ctache_data_create_string(content,
+                                                         strlen(content));
+                ctache_data_hash_table_set(header_data,
+                                           "content",
+                                           content_data);
+                content = layout_content;
+            }
+            ctache_render_string_to_string(content,
+                                           strlen(content),
+                                           &out,
+                                           header_data,
+                                           ESCAPE_HTML,
+                                           "{{",
+                                           "}}");
+            content = out;
+            ctache_data_destroy(header_data);
+            header_data = ctache_data_create_hash();
+            header_len = cytogen_header_read_from_string(content, header_data);
+        }
+        ctache_data_destroy(header_data);
+        layout.content = content;
+    }
+
     *num_layouts_ptr = num_layouts;
     return layouts;
 }
