@@ -24,8 +24,7 @@ render_with_layout(FILE *in_fp,
     char *content = read_file_contents(in_fp);
     size_t content_len = strlen(content);
     ctache_data_t *content_data;
-    content_data = ctache_data_create_string(content,
-                                             content_len);
+    content_data = ctache_data_create_string(content, content_len);
     ctache_data_hash_table_set(file_data, "content", content_data);
     ctache_data_t *layout_data;
     layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
