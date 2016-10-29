@@ -145,7 +145,18 @@ struct layout
         char *content = layout.content;
         ctache_data_t *header_data = ctache_data_create_hash();
         int header_len = cytogen_header_read_from_string(content, header_data);
+        int repetitions = 0;
         while (header_len > 0) {
+            /*
+             * Fail if we do more than num_layouts-squared iterations because
+             * this algorithm should be polynomial and if we do more than this
+             * something has gone wrong.
+             */
+            if (repetitions > num_layouts * num_layouts) {
+                fprintf(stderr, "Layouts overflowed maximum iterations");
+                abort();
+            }
+
             content += header_len; /* Skip past the header */
             char *out;
             if (ctache_data_hash_table_has_key(header_data, "layout")) {
@@ -174,6 +185,8 @@ struct layout
             ctache_data_destroy(header_data);
             header_data = ctache_data_create_hash();
             header_len = cytogen_header_read_from_string(content, header_data);
+
+            repetitions++;
         }
         ctache_data_destroy(header_data);
         layout.content = content;
