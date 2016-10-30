@@ -184,7 +184,7 @@ struct layout
                     out_len++;
                 } else {
                     chptr += strlen("{{>content}}");
-                    char *layout_content = layout.content;
+                    char *layout_content = layout.content + header_len;
                     while ((ch = *layout_content++) != '\0') {
                         if (out_len + 1 >= out_bufsize) {
                             out_bufsize *= 2;
@@ -196,6 +196,7 @@ struct layout
                 }
                 chptr++;
             }
+            out[out_len] = '\0';
             content = out;
             ctache_data_destroy(header_data);
             header_data = ctache_data_create_hash();
@@ -204,7 +205,7 @@ struct layout
             repetitions++;
         }
         ctache_data_destroy(header_data);
-        layout.content = content;
+        layouts[i].content = content;
     }
 
     *num_layouts_ptr = num_layouts;
