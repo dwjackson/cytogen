@@ -89,7 +89,6 @@ static char
 *read_line_from_string(const char *str, size_t str_len, int start)
 {
     char *line;
-    int ch;
     int line_len = next_line_length(str, str_len, start);
     if (line_len < 0) {
         return NULL;

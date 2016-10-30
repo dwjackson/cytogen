@@ -166,21 +166,36 @@ struct layout
                 char *layout_content = get_layout_content(layouts,
                                                           num_layouts,
                                                           layout_name);
-                ctache_data_t *content_data;
-                content_data = ctache_data_create_string(content,
-                                                         strlen(content));
-                ctache_data_hash_table_set(header_data,
-                                           "content",
-                                           content_data);
                 content = layout_content;
             }
-            ctache_render_string_to_string(content,
-                                           strlen(content),
-                                           &out,
-                                           header_data,
-                                           ESCAPE_HTML,
-                                           "{{",
-                                           "}}");
+            char *partial_pos = strstr(content, "{{>content}}");
+            char *chptr = content;
+            int ch;
+            int out_len = 0;
+            int out_bufsize= 10;
+            out = malloc(out_bufsize);
+            while ((ch = *chptr) != '\0') {
+                if (chptr != partial_pos) {
+                    if (out_len + 1 >= out_bufsize) {
+                        out_bufsize *= 2;
+                        out = realloc(out, out_bufsize);
+                    }
+                    out[out_len] = ch;
+                    out_len++;
+                } else {
+                    chptr += strlen("{{>content}}");
+                    char *layout_content = layout.content;
+                    while ((ch = *layout_content++) != '\0') {
+                        if (out_len + 1 >= out_bufsize) {
+                            out_bufsize *= 2;
+                            out = realloc(out, out_bufsize);
+                        }
+                        out[out_len] = ch;
+                        out_len++;
+                    }
+                }
+                chptr++;
+            }
             content = out;
             ctache_data_destroy(header_data);
             header_data = ctache_data_create_hash();

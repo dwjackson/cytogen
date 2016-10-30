@@ -18,7 +18,9 @@ ASTRO_TEST_BEGIN(test_recursive_layouts)
     struct layout *layouts;
     layouts = get_layouts(&num_layouts);
     assert_int_eq(2, num_layouts, "Wrong number of layouts");
-    // TODO
+    char correct[] = "<!DOCTYPE><html><body><div id=\"content\">{{>content}}</div></body></html>";
+    char *content = get_layout_content(layouts, num_layouts, "post");
+    assert_str_eq(correct, content, "Wrong layout content");
     layouts_destroy(layouts, num_layouts);
 }
 ASTRO_TEST_END
