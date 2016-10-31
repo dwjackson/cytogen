@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #endif /* __linux__ */
 
+#include "common.h"
 #include "initialize.h"
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -33,7 +34,7 @@ create_default_config_file()
     fprintf(fp, "{\n");
     fprintf(fp, "\t\"title\": \"SITE_TITLE\",\n");
     fprintf(fp, "\t\"url\": \"SITE_URL\",\n");
-    fprintf(fp, "\t\"author\": \"YOUR_NAME\",\n");
+    fprintf(fp, "\t\"author\": \"YOUR_NAME\"\n");
     fprintf(fp, "}");
     fclose(fp);
 }
@@ -55,21 +56,23 @@ create_default_layout()
         fprintf(stderr, "ERROR: Could not create default layout file name\n");
         exit(EXIT_FAILURE);
     }
+
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
         fprintf(stderr, "ERROR: Could not create default layout\n");
         exit(EXIT_FAILURE);
     }
-    fprintf("<!DOCTYPE html>\n");
-    fprintf("<html>\n");
-    fprintf("%s<head>\n", INDENT);
-    fprintf("%s%s<meta charset=\"utf-8\">\n", INDENT, INDENT);
-    fprintf("%s%s<title>SITE_TITLE</title>\n", INDENT, INDENT);
-    fprintf("%s</head>\n", INDENT);
-    fprintf("%s<body>\n", INDENT);
-    fprintf("%s%s{{>content}}\n", INDENT, INDENT);
-    fprintf("%s</body>\n", INDENT);
-    fprintf("</html>\n");
+    fprintf(fp, "<!DOCTYPE html>\n");
+    fprintf(fp, "<html>\n");
+    fprintf(fp, "%s<head>\n", INDENT);
+    fprintf(fp, "%s%s<meta charset=\"utf-8\">\n", INDENT, INDENT);
+    fprintf(fp, "%s%s<title>SITE_TITLE</title>\n", INDENT, INDENT);
+    fprintf(fp, "%s</head>\n", INDENT);
+    fprintf(fp, "%s<body>\n", INDENT);
+    fprintf(fp, "%s%s{{>content}}\n", INDENT, INDENT);
+    fprintf(fp, "%s</body>\n", INDENT);
+    fprintf(fp, "</html>\n");
+
     fclose(fp);
     free(file_name);
 }

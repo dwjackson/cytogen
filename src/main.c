@@ -13,6 +13,7 @@
 #define _GNU_SOURCE
 #endif /* __linux__ */
 
+#include "common.h"
 #include "layout.h"
 #include "cytogen_header.h"
 #include "cymkd.h"
@@ -41,7 +42,6 @@
 #define POSTS_DIR "_posts"
 #define SITE_POSTS_DIR "_site/posts"
 #define MAXFDS 100
-#define CONFIG_FILE_NAME "_config.json"
 
 struct generate_arguments {
     const char *curr_dir_name;
