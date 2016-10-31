@@ -22,6 +22,7 @@
 #include "config.h"
 #include "cyto_config.h"
 #include "feed.h"
+#include "initialize.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -263,15 +264,6 @@ cmd_generate(struct cyto_config *config,
     /* Clean up */
     pthread_mutex_destroy(&data_mutex);
     ctache_data_destroy(data);
-}
-
-static void
-cmd_initialize(const char *project_name)
-{
-    if (mkdir(project_name, 0770) != 0) {
-        char *err_fmt = "ERROR: Could not create project directory: %s\n";
-        fprintf(stderr, err_fmt, project_name);
-    }
 }
 
 int
