@@ -33,7 +33,7 @@ static char
     length = 0;
     buf = malloc(buf_size);
     while ((ch = fgetc(fp)) != EOF && !feof(fp)) {
-        if (length + 1 >= buf_size) {
+        if (length + 1 >= buf_size - 1) { /* -1 is for '\0' */
             buf_size *= 2;
             buf = realloc(buf, buf_size);
         }

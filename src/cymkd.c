@@ -78,7 +78,7 @@ main(int argc, char *argv[])
     contents_bufsize = CONTENTS_DEFAULT_BUFSIZE;
     contents = malloc(contents_bufsize + 1);
     while ((ch = fgetc(in_fp)) != EOF) {
-        if (contents_len + 1 >= contents_bufsize) {
+        if (contents_len + 1 >= contents_bufsize - 1) { /* -1 is for '\0' */
             contents_bufsize *= 2;
             contents = realloc(contents, contents_bufsize + 1);
             if (contents == NULL) {

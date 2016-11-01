@@ -176,7 +176,7 @@ struct layout
             out = malloc(out_bufsize);
             while ((ch = *chptr) != '\0') {
                 if (chptr != partial_pos) {
-                    if (out_len + 1 >= out_bufsize) {
+                    if (out_len + 1 >= out_bufsize - 1) { /* -1 for '\0' */
                         out_bufsize *= 2;
                         out = realloc(out, out_bufsize);
                     }
@@ -186,7 +186,7 @@ struct layout
                     chptr += strlen("{{>content}}");
                     char *layout_content = layout.content + header_len;
                     while ((ch = *layout_content++) != '\0') {
-                        if (out_len + 1 >= out_bufsize) {
+                        if (out_len + 1 >= out_bufsize - 1) { /* -1 for '\0' */
                             out_bufsize *= 2;
                             out = realloc(out, out_bufsize);
                         }

@@ -136,7 +136,7 @@ char
     content = malloc(content_bufsize);
     content_length = 0;
     while ((ch = fgetc(fp)) != EOF) {
-        if (content_length + 1 >= content_bufsize) {
+        if (content_length + 1 >= content_bufsize - 1) { /* -1 is for '\0' */
             content_bufsize *= 2;
             content = realloc(content, content_bufsize);
         }

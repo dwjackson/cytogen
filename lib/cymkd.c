@@ -324,7 +324,7 @@ a_link(struct cymkd_parser *parser)
     len = 0;
     link_text = malloc(bufsize);
     while ((ch = next(parser)) != ']') {
-        if (len + 1 >= bufsize) {
+        if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             link_text = realloc(link_text, bufsize);
         }
@@ -343,7 +343,7 @@ a_link(struct cymkd_parser *parser)
     len = 0;
     link_href = malloc(bufsize);
     while ((ch = next(parser)) != ')') {
-        if (len + 1 >= bufsize) {
+        if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             link_href = realloc(link_href, bufsize);
         }
@@ -693,7 +693,7 @@ cymkd_render_file(const char *file_name, FILE *in_fp, FILE *out_fp)
     content = malloc(content_bufsize);
     content_len = 0;
     while ((ch = fgetc(in_fp)) != EOF) {
-        if (content_len + 1 >= content_bufsize) {
+        if (content_len + 1 >= content_bufsize - 1) {
             content_bufsize *= 2;
             content = realloc(content, content_bufsize); 
         }
