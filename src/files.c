@@ -102,6 +102,7 @@ char
     char *extension;
     int start_index;
 
+    start_index = 0;
     file_name_len = strlen(file_name);
     extension_len = 0;
     for (i = file_name_len - 1; i >= 0; i--) {

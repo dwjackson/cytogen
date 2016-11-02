@@ -40,32 +40,6 @@ is_reserved(const char *str)
     return reserved;
 }
 
-static char
-*read_line_from_file(FILE *fp)
-{
-    int ch; /* Character/byte */
-
-    /* Get the line length */
-    char *line;
-    int line_length = 0;
-    while ((ch = fgetc(fp)) != EOF && ch != '\n') {
-        line_length++;
-    }
-    fseek(fp, -1 * line_length - 1, SEEK_CUR); /* Rewind */
-
-    /* Read the line */
-    line = malloc(line_length + 1);
-    memset(line, 0, line_length + 1);
-    int i;
-    for (i = 0; i < line_length; i++) {
-        ch = fgetc(fp);
-        line[i] = ch;
-    }
-    fgetc(fp); /* Throw away the newline/EOF */
-
-    return line;
-}
-
 int
 next_line_length(const char *str, size_t str_len, int start)
 {
