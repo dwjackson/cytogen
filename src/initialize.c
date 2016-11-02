@@ -18,10 +18,13 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define MKDIR_MODE 0770
 #define LAYOUTS_DIR "_layouts"
 #define INDENT "    "
+#define POSTS_DIR "_posts"
+#define DATE_FMT_BUFSIZE 11
 
 static void
 create_project_directory(const char *project_name)
@@ -79,6 +82,7 @@ create_default_layout()
     fprintf(fp, "%s%s<title>SITE_TITLE</title>\n", INDENT, INDENT);
     fprintf(fp, "%s</head>\n", INDENT);
     fprintf(fp, "%s<body>\n", INDENT);
+    fprintf(fp, "%s%s<nav><a href=\"/\">Home</a></nav>\n", INDENT, INDENT);
     fprintf(fp, "%s%s{{>content}}\n", INDENT, INDENT);
     fprintf(fp, "%s</body>\n", INDENT);
     fprintf(fp, "</html>\n");
@@ -86,13 +90,72 @@ create_default_layout()
     fclose(fp);
     free(file_name);
 }
+
+static void
+create_posts_directory()
+{
+    if (mkdir(POSTS_DIR, MKDIR_MODE) != 0) {
+        fprintf(stderr, "ERROR: Could not create _posts directory\n");
+        exit(EXIT_FAILURE);
+    }
+
+    time_t now;
+    time(&now);
+    struct tm tm;
+    localtime_r(&now, &tm);
+
+    char today[DATE_FMT_BUFSIZE];
+    strftime(today, DATE_FMT_BUFSIZE, "%Y-%m-%d", &tm);
+
+    char *file_path;
+    asprintf(&file_path, "%s/%s-example-post.md", POSTS_DIR, today);
+
+    FILE *fp = fopen(file_path, "w");
+    if (fp == NULL) {
+        char err_fmt[] = "ERROR: Could not open file for writing: %s\n";
+        fprintf(stderr, err_fmt, file_path);
+        exit(EXIT_FAILURE);
+    }
+    fprintf(fp, "---\n");
+    fprintf(fp, "layout: default\n");
+    fprintf(fp, "title: Example Post\n");
+    fprintf(fp, "---\n\n");
+    fprintf(fp, "This is an *example* post.");
+
+    fclose(fp);
+    free(file_path);
+}
+
+void
+create_index_page()
+{
+    char file_name[] = "index.html";
+    FILE *fp = fopen(file_name, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "ERROR: could not open for writing: %s", file_name);
+        exit(EXIT_FAILURE);
+    }
+    fprintf(fp, "---\nlayout: default\n---\n\n");
+    fprintf(fp, "<h2>Posts</h2>\n\n");
+    fprintf(fp, "<ul>\n");
+    fprintf(fp, "{{#posts}}\n");
+    fprintf(fp, "%s<li>", INDENT);
+    fprintf(fp, "<a href=\"{{url}}\">{{title}} ({{date}})</a>");
+    fprintf(fp, "</li>\n");
+    fprintf(fp, "{{/posts}}\n");
+    fprintf(fp, "</ul>\n");
+    fclose(fp);
+}
     
 void
 cmd_initialize(const char *project_name)
 {
     create_project_directory(project_name);
     chdir(project_name);
+
     create_default_config_file();
     create_layouts_directory();
     create_default_layout();
+    create_posts_directory();
+    create_index_page();
 }
