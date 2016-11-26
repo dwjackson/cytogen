@@ -293,7 +293,7 @@ print_help()
     printf("Flags:\n");
     printf("\t-h Print this help message\n");
     printf("\t-V Print the version number\n");
-    printf("\t-w [THREADS] Set number of worker threads (default is 4)\n");
+    printf("\t-j [THREADS] Set number of worker threads (default is 4)\n");
     printf("Commands:\n");
     printf("\tgenerate - Generate a site from the current directory\n");
     printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
@@ -310,7 +310,7 @@ main(int argc, char *argv[])
     extern int optind;
 
     num_workers = 0;
-    while ((opt = getopt(argc, argv, "hVw:")) != -1) {
+    while ((opt = getopt(argc, argv, "hVj:")) != -1) {
         switch (opt) {
         case 'h':
             print_help();
@@ -320,7 +320,7 @@ main(int argc, char *argv[])
             printf("cyto %s\n", PACKAGE_VERSION);
             exit(EXIT_SUCCESS);
             break;
-        case 'w':
+        case 'j':
             num_workers = atoi(optarg);
             break;
         default:

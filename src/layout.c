@@ -68,6 +68,10 @@ static char
     char *content = malloc(content_len);
     memset(content, 0, content_len);
     ssize_t bytes_read = read(fd, content, file_size);
+    if (bytes_read == -1) {
+        fprintf(stderr, "ERROR: Could not read layout content\n");
+        abort();
+    }
     return content;
 }
 
