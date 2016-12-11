@@ -8,6 +8,10 @@
  * Copyright (c) 2016 David Jackson
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include "common.h"
 #include "layout.h"
 #include "render.h"

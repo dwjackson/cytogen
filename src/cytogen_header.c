@@ -91,6 +91,7 @@ cytogen_header_read_from_string(const char *str, ctache_data_t *data)
     int index;
     int header_length;
 
+    index = -1;
     str_len = strlen(str);
     key = NULL;
     value = NULL;

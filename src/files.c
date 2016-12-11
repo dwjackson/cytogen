@@ -167,6 +167,7 @@ char
     path_len = strlen(path);
 
     /* Find the index of the final directory separator ("/") */
+    slash_index = -1;
     for (i = 0; i < path_len; i++) {
         ch = path[i];
         if (ch == '/') {

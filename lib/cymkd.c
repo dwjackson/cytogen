@@ -35,6 +35,10 @@
  * link = "[", string, "]", "(", string, ")"
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
