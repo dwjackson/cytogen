@@ -353,7 +353,7 @@ main(int argc, char *argv[])
         } else {
             cmd_generate(NULL, ".", SITE_DIR, num_workers);
         }
-    } else if (string_matches_any(cmd, 1, "init")) {
+    } else if (string_matches_any(cmd, 1, "i", "init")) {
         if (argc == 3) {
             char *proj_name = args[1];
             cmd_initialize(proj_name);
