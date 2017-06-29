@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2017 David Jackson
  */
 
 #ifndef GENERATE_H

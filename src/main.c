@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2017 David Jackson
  */
 
 /* Linux's feature-test macros can break other systems, turn on all features */

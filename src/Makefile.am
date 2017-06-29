@@ -2,7 +2,7 @@
 ## License, v. 2.0. If a copy of the MPL was not distributed with this
 ## file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-## Copyright (c) 2016 David Jackson
+## Copyright (c) 2016-2017 David Jackson
 
 AM_CFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)
 
