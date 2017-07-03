@@ -2,7 +2,7 @@
 ## License, v. 2.0. If a copy of the MPL was not distributed with this
 ## file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-## Copyright (c) 2016 David Jackson
+## Copyright (c) 2016-2017 David Jackson
 
 TESTS = test_cyjson test_cyto_config test_layout
 
