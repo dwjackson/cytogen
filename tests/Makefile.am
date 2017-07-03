@@ -9,7 +9,7 @@ TESTS = test_cyjson test_cyto_config test_layout
 bin_PROGRAMS = test_cyjson test_cyto_config test_layout
 
 test_cyjson_SOURCES = test_cyjson.c
-test_cyjson_CFLAGS = -g -Wall -lastrounit -I$(top_srcdir)/include
+test_cyjson_CFLAGS = -g -Wall -I$(top_srcdir)/include -lastrounit
 test_cyjson_LDADD = $(top_srcdir)/lib/libcyjson.a
 
 test_cyto_config_SOURCES = test_cyto_config.c $(top_srcdir)/src/cyto_config.c \
