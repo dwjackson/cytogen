@@ -116,17 +116,11 @@ generate(struct generate_arguments *args)
     for (i = 0; i < num_directories; i++) {
         char *directory = directories[i];
 
-        size_t subdir_len = strlen(curr_dir_name) + 1 + strlen(directory);
-        char *subdir = malloc(subdir_len + 1);
-        strcpy(subdir, curr_dir_name);
-        strcat(subdir, "/");
-        strcat(subdir, directory);
+        char *subdir;
+        asprintf(&subdir, "%s/%s", curr_dir_name, directory);
 
-        size_t site_subdir_len = strlen(site_dir) + 1 + strlen(directory);
-        char *site_subdir = malloc(site_subdir_len + 1);
-        strcpy(site_subdir, site_dir);
-        strcat(site_subdir, "/");
-        strcat(site_subdir, directory);
+        char *site_subdir;
+        asprintf(&site_subdir, "%s/%s", site_dir, directory);
 
         struct generate_arguments args_r; /* Recursive call args */
         args_r = *args;
