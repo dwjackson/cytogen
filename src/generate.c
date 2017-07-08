@@ -8,6 +8,10 @@
  * Copyright (c) 2017 David Jackson
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include "generate.h"
 #include "processing.h"
 #include "files.h"
