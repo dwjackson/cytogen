@@ -170,6 +170,16 @@ _rename_posts(const char *path,
     return 0;
 }
 
+static int
+posts_array_compar(const void *p1, const void *p2)
+{
+    ctache_data_t *d1 = (ctache_data_t *)p1;
+    ctache_data_t *d2 = (ctache_data_t *)p2;
+    const ctache_data_t *str1 = ctache_data_hash_table_get(d1, "url");
+    const ctache_data_t *str2 = ctache_data_hash_table_get(d2, "url");
+    return ctache_data_strcmp(str1, str2) * -1;
+}
+
 static void
 cmd_generate(struct cyto_config *config,
              const char *curr_dir_name,
@@ -212,6 +222,7 @@ cmd_generate(struct cyto_config *config,
 
         args.process = process_files;
         args.curr_dir_name = curr_dir_name;
+	ctache_array_sort(posts_array, posts_array_compar);
     }
     generate(&args);
 

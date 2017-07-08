@@ -25,10 +25,7 @@ file_name_compare(const void *file_name_1, const void *file_name_2)
     const char **fname1_ptr = (const char **) file_name_1;
     const char **fname2_ptr = (const char **) file_name_2;
     int strcmp_retval = strcmp(*fname1_ptr, *fname2_ptr);
-    if (strcmp_retval != 0) {
-        strcmp_retval *= -1;
-    }
-    return strcmp_retval;
+    return strcmp_retval * -1;
 }
 
 /* Set up the threads to process files, process them, tear down threads */
