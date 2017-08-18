@@ -166,7 +166,7 @@ struct layout
             if (ctache_data_hash_table_has_key(header_data, "layout")) {
                 ctache_data_t *str_data;
                 str_data = ctache_data_hash_table_get(header_data, "layout");
-                char *layout_name = str_data->data.string;
+                const char *layout_name = ctache_data_string_buffer(str_data);
                 char *layout_content = get_layout_content(layouts,
                                                           num_layouts,
                                                           layout_name);

@@ -41,7 +41,9 @@ render_with_layout(FILE *in_fp,
     content_data = ctache_data_create_string(content, content_len);
     ctache_data_hash_table_set(file_data, "content", content_data);
     ctache_data_t *layout_data = ctache_data_hash_table_get(file_data, LAYOUT);
-    char *layout_name = string_trim(layout_data->data.string);
+    char *str = strdup(ctache_data_string_buffer(layout_data));
+    char *layout_name = string_trim(str);
+    free(str);
     char *layout = get_layout_content(layouts, num_layouts, layout_name);
     if (layout == NULL) {
         fprintf(stderr, "ERROR: Layout not found: \"%s\"\n", layout_name);
