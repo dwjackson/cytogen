@@ -6,7 +6,7 @@
 
 TESTS = test_cyjson test_cyto_config test_layout
 
-bin_PROGRAMS = test_cyjson test_cyto_config test_layout
+check_PROGRAMS = test_cyjson test_cyto_config test_layout
 
 test_cyjson_SOURCES = test_cyjson.c
 test_cyjson_CFLAGS = -g -Wall -I$(top_srcdir)/include -lastrounit
