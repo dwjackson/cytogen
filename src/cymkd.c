@@ -60,7 +60,7 @@ main(int argc, char *argv[])
         file_name = argv[1];
         in_fp = fopen(file_name, "r");
         if (in_fp == NULL) {
-            printf("ERROR: Could not open file: %s\n", file_name);
+            fprintf(stderr, "ERROR: Could not open file: %s\n", file_name);
             exit(EXIT_FAILURE);
         }
     }

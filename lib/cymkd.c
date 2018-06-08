@@ -462,7 +462,7 @@ header(struct cymkd_parser *parser)
         }
         ch = consume(parser);
         if (ch != '\n') {
-            printf("ERROR: Header must end with two newlines\n");
+            fprintf(stderr, "ERROR: Header must end with two newlines\n");
             return false;
         }
         parser_emit_string(parser, "</h%d>", header_level);
