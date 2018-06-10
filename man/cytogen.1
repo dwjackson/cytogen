@@ -21,7 +21,11 @@ be rendered to the static site. Your main directory should have an index.html
 file in it as the main entry point to your site. Apart from some special
 directories (all of which begin with an underscore "_"), everything in the
 directory should be organized in the same hierarchy as you'd like to use in
-the finalized site.
+the finalized site. If you want to keep things in your project that you don't
+want to appear in your generated side, put them in a folder whose name begins
+with an an underscore "_". Just be sure that the folder name doesn't collide
+with one of the special folders.
+of the folder
 .Ss LAYOUTS
 Most of the pages on your site will share common elements (e.g. the <html>
 tags, the navigation menu, etc) and layouts mean you only have to write these
