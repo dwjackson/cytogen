@@ -28,11 +28,12 @@
  * code block = "```", { string }, "\n", code line, more code lines, "\n", "```"
  * more block quote lines = "\n", block quote line, more block quote lines | ""
  * underline = { "-" } | { "=" }
- * inline = italics | bold | inline code | link
+ * inline = italics | bold | inline code | link | image
  * italics = ("*" | "_"), string, ("*" | "_")
  * bold = ("**" | "__"), string, ("**" | "__")
  * inline code = "`", string, "`"
  * link = "[", string, "]", "(", string, ")"
+ * image = "!", "[", string, "]", "(", string, ")"
  */
 
 #ifdef __linux__
@@ -210,6 +211,16 @@ is_inline_start(struct cymkd_parser *parser)
     case '[':
         is_inline = true;
         break;
+    case '!':
+        is_inline = true;
+        consume(parser);
+        if (next(parser) == '[') {
+            is_inline = true;
+        } else {
+            is_inline = false;
+        }
+        unconsume(parser);
+        break;
     default:
         is_inline = false;
     }
@@ -366,6 +377,62 @@ a_link(struct cymkd_parser *parser)
 }
 
 static bool
+img(struct cymkd_parser *parser)
+{
+    int ch;
+    int len;
+    int bufsize;
+    char *alt_text;
+    char *img_src;
+    char img_fmt[] = "<img src=\"%s\" alt=\"%s\" />";
+
+    if (!match(parser, '!')) {
+        return false;
+    }
+    if (!match(parser, '[')) {
+        return false;
+    }
+    len = 0;
+    alt_text = malloc(bufsize);
+    while ((ch = next(parser)) != ']') {
+        if (len + 1 >= bufsize - 1) {
+            bufsize *= 2;
+            alt_text = realloc(alt_text, bufsize);
+        }
+        alt_text[len] = ch;
+        len++;
+        consume(parser);
+    }
+    alt_text[len] = '\0';
+    if (!match(parser, ']')) {
+        return false;
+    }
+    if (!match(parser, '(')) {
+        return false;
+    }
+    bufsize = 10;
+    len = 0;
+    img_src = malloc(bufsize);
+    while ((ch = next(parser)) != ')') {
+        if (len + 1 >= bufsize - 1) {
+            bufsize *= 2;
+            img_src = realloc(img_src, bufsize);
+        }
+        img_src[len] = ch;
+        len++;
+        consume(parser);
+    }
+    img_src[len] = '\0';
+    if (!match(parser, ')')) {
+        return false;
+    }
+    parser_emit_string(parser, img_fmt, img_src,  alt_text);
+    free(img_src);
+    free(alt_text);
+    return true;
+}
+
+static bool
 inline_section(struct cymkd_parser *parser)
 {
     int ch = next(parser);
@@ -381,6 +448,9 @@ inline_section(struct cymkd_parser *parser)
     case '[':
         inline_type = "link";
         break;
+    case '!':
+        inline_type = "img";
+        break;
     default:
         inline_type = "unknown";
         break;
@@ -388,7 +458,8 @@ inline_section(struct cymkd_parser *parser)
     if (!bold(parser) 
             && !italics(parser)
             && !inline_code(parser)
-            && !a_link(parser)) {
+            && !a_link(parser)
+	    && !img(parser)) {
         char err_fmt[] = "Invalid inline section of type: %s\n";
         cymkd_error(parser, err_fmt, inline_type);
         return false;
