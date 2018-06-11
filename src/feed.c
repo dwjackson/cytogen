@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2018 David Jackson
  */
 
 #include "cyto_config.h"
