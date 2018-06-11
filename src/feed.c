@@ -20,16 +20,19 @@ insert_entries(FILE *fp, ctache_data_t *posts)
     ctache_data_t *post;
     ctache_data_t *str_data;
     int i;
+    const char *str;
 
     posts_length = ctache_data_length(posts);
     for (i = 0; i < posts_length; i++) {
         post = ctache_data_array_get(posts, i);
         fprintf(fp, "\t<entry>\n");
         str_data = ctache_data_hash_table_get(post, "title");
-        fprintf(fp, "\t\t<title>%s</title>\n", str_data->data.string);
+	str = ctache_data_string_buffer(str_data);
+        fprintf(fp, "\t\t<title>%s</title>\n", str);
         str_data = ctache_data_hash_table_get(post, "url");
-        fprintf(fp, "\t\t<link href=\"%s\" />\n", str_data->data.string);
-        fprintf(fp, "\t\t<id>%s</id>\n", str_data->data.string);
+	str = ctache_data_string_buffer(str_data);
+        fprintf(fp, "\t\t<link href=\"%s\" />\n", str);
+        fprintf(fp, "\t\t<id>%s</id>\n", str);
         fprintf(fp, "\t</entry>\n");
     }
 }
