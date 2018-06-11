@@ -719,10 +719,19 @@ more_blocks(struct cymkd_parser *parser)
     return true;
 }
 
+static void
+skip_empty_lines(struct cymkd_parser *parser)
+{
+    while (next(parser) == '\n') {
+	    consume(parser);
+    }
+}
+
 static bool 
 document(struct cymkd_parser *parser)
 {
     bool success;
+    skip_empty_lines(parser);
     success = block(parser);
     if (success) {
         success = more_blocks(parser);
