@@ -8,18 +8,28 @@
  * Copyright (c) 2018 David Jackson
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#endif /* __linux__ */
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <time.h>
+#include <string.h>
 
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
+#define CRLF "\r\n"
 
 static void
 handle_request(int sockfd);
+
+static void
+send_response(int sockfd);
 
 void
 http_server(int port)
@@ -72,7 +82,28 @@ handle_request(int sockfd)
 	ssize_t size;
 	int i;
 	size = recv(sockfd, buf, BUFSIZE, 0);
-	/* TODO */
+	send_response(sockfd);
+}
+
+static void
+send_response(int sockfd)
+{
+	time_t now;
+	struct tm now_tm;
+	char timebuf[100];
+	char buf_fmt[] = "HTTP/1.1 200 OK" CRLF
+		"Date: %s" CRLF
+		"Server: cyhttp" CRLF
+		"Content-Length: %d" CRLF
+		"Content-Type: text/html; charset=utf-8" CRLF CRLF
+		"%s" CRLF CRLF;
+	char *buf;
+	char content[] = "<strong>TEST</strong>"; /* TODO */
+	now = time(NULL);
+	localtime_r(&now, &now_tm);
+	strftime(timebuf, 100, "%a, %d %b %Y %H:%M:%S %Z", &now_tm);
+	asprintf(&buf, buf_fmt, timebuf, strlen(content), content);
+	send(sockfd, buf, strlen(buf), 0);
 }
 
 /* TODO: DEBUG */
