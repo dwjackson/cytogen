@@ -21,6 +21,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <limits.h>
 
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
@@ -30,7 +31,7 @@ static void
 handle_request(int sockfd);
 
 static void
-send_response(int sockfd);
+send_response(int sockfd, const char *path);
 
 void
 http_server(int port)
@@ -40,12 +41,15 @@ http_server(int port)
 	struct sockaddr_in addr;
 	int c; /* client socket */
 	socklen_t addrlen;
+	int opt_true;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) {
 		perror("socket");
 		abort();
 	}
+	opt_true = 1;
+	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt_true, sizeof(int));
 
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
@@ -76,20 +80,64 @@ http_server(int port)
 	close(sockfd);
 }
 
+static char
+*extract_path(const char *req, ssize_t size, char *path, size_t path_size)
+{
+	char method[10];
+	int i;
+	char ch;
+	int path_len;
+
+	for (i = 0; i < 10 - 1; i++) {
+		ch = req[i];
+		if (ch == ' ') {
+			break;
+		}
+		method[i] = ch;
+	}
+	method[i] = '\0';
+	i++;
+
+	if (strcmp(method, "GET") != 0) {
+		fprintf(stderr, "Only GET requests are supported (%s)\n", method);
+		abort();
+	}
+ 
+	path_len = 0;
+	for (; i < size; i++) {
+		ch = req[i];
+		if (path_len >= path_size) {
+			fprintf(stderr, "Path length too long\n");
+			abort();
+		}
+		if (ch == ' ') {
+			break;
+		}
+		path[path_len++] = ch;
+	}
+	path[path_len] = '\0';
+}
+
 static void
 handle_request(int sockfd)
 {
 	char buf[BUFSIZE];
 	ssize_t size;
-	int i;
+	char path[100];
+
 	size = recv(sockfd, buf, BUFSIZE, 0);
-	send_response(sockfd);
+	extract_path(buf, size, path, 100);
+	if (strstr(path, "favicon.ico") != NULL) {
+		/* Ignore favicon requests */
+		return;
+	}
+	send_response(sockfd, path);
 }
 
 static void
-send_response(int sockfd)
+send_response(int sockfd, const char *path)
 {
-	char file_name[] = "index.html"; /* TODO */
+	char file_name[] = "index.html";
 	off_t file_size;
 	FILE *fp;
 	struct stat statbuf;
@@ -105,6 +153,17 @@ send_response(int sockfd)
 	char *buf;
 	char *content;
 	int content_len;
+	char topdir[PATH_MAX - 1];
+
+	getcwd(topdir, PATH_MAX - 1);
+	chdir(topdir);
+	if (!(strlen(path) == 1 && path[0] == '/')) {
+		if (chdir(path + 1) < 0) { /* +1 to skip initial "/" */
+			fprintf(stderr, "path: %s\n", path);
+			perror("chdir");
+			abort();
+		}
+	}
 
 	if (stat(file_name, &statbuf) < 0) {
 		perror("stat");
@@ -130,4 +189,6 @@ send_response(int sockfd)
 
 	free(buf);
 	free(content);
+
+	chdir(topdir);
 }
