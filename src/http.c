@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
@@ -88,6 +89,10 @@ handle_request(int sockfd)
 static void
 send_response(int sockfd)
 {
+	char file_name[] = "index.html"; /* TODO */
+	off_t file_size;
+	FILE *fp;
+	struct stat statbuf;
 	time_t now;
 	struct tm now_tm;
 	char timebuf[100];
@@ -98,10 +103,31 @@ send_response(int sockfd)
 		"Content-Type: text/html; charset=utf-8" CRLF CRLF
 		"%s" CRLF CRLF;
 	char *buf;
-	char content[] = "<strong>TEST</strong>"; /* TODO */
+	char *content;
+	int content_len;
+
+	if (stat(file_name, &statbuf) < 0) {
+		perror("stat");
+		abort();
+	}
+	file_size = statbuf.st_size;
+
+	content = malloc(file_size + 1);
+	fp = fopen(file_name, "r");
+	fread(content, 1, file_size, fp);
+	content[file_size] = '\0';
+	content_len = (int)file_size + 1;
+	if (content_len < 0) {
+		fprintf(stderr, "Negative content length\n");
+		abort();
+	}
+
 	now = time(NULL);
 	localtime_r(&now, &now_tm);
 	strftime(timebuf, 100, "%a, %d %b %Y %H:%M:%S %Z", &now_tm);
-	asprintf(&buf, buf_fmt, timebuf, strlen(content), content);
+	asprintf(&buf, buf_fmt, timebuf, content_len, content);
 	send(sockfd, buf, strlen(buf), 0);
+
+	free(buf);
+	free(content);
 }
