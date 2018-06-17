@@ -105,10 +105,3 @@ send_response(int sockfd)
 	asprintf(&buf, buf_fmt, timebuf, strlen(content), content);
 	send(sockfd, buf, strlen(buf), 0);
 }
-
-/* TODO: DEBUG */
-int main()
-{
-	http_server(8000);
-	return 0;
-}

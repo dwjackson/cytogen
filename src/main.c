@@ -23,6 +23,7 @@
 #include "feed.h"
 #include "initialize.h"
 #include "generate.h"
+#include "http.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -40,6 +41,7 @@
 #define POSTS_DIR "_posts"
 #define SITE_POSTS_DIR "_site/posts"
 #define MAXFDS 100
+#define HTTP_PORT 8000
 
 static int
 rename_posts();
@@ -125,6 +127,8 @@ main(int argc, char *argv[])
         }
     } else if (string_matches_any(cmd, 2, "c", "clean")) { 
         cmd_clean();
+    } else if (string_matches_any(cmd, 2, "s", "serve")) {
+        http_server(HTTP_PORT);
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
@@ -268,4 +272,5 @@ print_help()
     printf("\tgenerate - Generate a site from the current directory\n");
     printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
     printf("\tclean - Remove generated site files\n");
+    printf("\tserve - Start an HTTP server in the current directory\n");
 }
