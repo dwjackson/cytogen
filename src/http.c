@@ -31,7 +31,7 @@ static void
 handle_request(int sockfd);
 
 static void
-send_response(int sockfd, const char *path);
+send_response(int sockfd, char *path);
 
 void
 http_server(int port)
@@ -123,10 +123,10 @@ handle_request(int sockfd)
 {
 	char buf[BUFSIZE];
 	ssize_t size;
-	char path[100];
+	char path[PATH_MAX - 1];
 
 	size = recv(sockfd, buf, BUFSIZE, 0);
-	extract_path(buf, size, path, 100);
+	extract_path(buf, size, path, PATH_MAX - 1);
 	if (strstr(path, "favicon.ico") != NULL) {
 		/* Ignore favicon requests */
 		return;
@@ -134,10 +134,30 @@ handle_request(int sockfd)
 	send_response(sockfd, path);
 }
 
-static void
-send_response(int sockfd, const char *path)
+/* Return 1 if there are parts left */
+static int
+next_path_part(char *path_part, char **path_ptr)
 {
-	char file_name[] = "index.html";
+	char ch;
+
+	if (**path_ptr == '\0') {
+		return 0;
+	}
+	
+	while ((ch = *(*path_ptr)++) != '/' && ch != '\0') {
+		*path_part++ = ch;
+	}
+	*path_part++ = '\0';
+	if (ch == '/') {
+		return 1;
+	}
+	return 0;
+}
+
+static void
+send_response(int sockfd, char *path)
+{
+	char file_name[PATH_MAX - 1];
 	off_t file_size;
 	FILE *fp;
 	struct stat statbuf;
@@ -154,14 +174,25 @@ send_response(int sockfd, const char *path)
 	char *content;
 	int content_len;
 	char topdir[PATH_MAX - 1];
+	char path_part[PATH_MAX - 1];
 
+	strcpy(file_name, "index.html");
 	getcwd(topdir, PATH_MAX - 1);
-	chdir(topdir);
 	if (!(strlen(path) == 1 && path[0] == '/')) {
-		if (chdir(path + 1) < 0) { /* +1 to skip initial "/" */
-			fprintf(stderr, "path: %s\n", path);
-			perror("chdir");
-			abort();
+		path++; /* Skip the initial "/" */
+		while (next_path_part(path_part, &path)) {
+			if (chdir(path_part) < 0) {
+				fprintf(stderr, "path: %s\n", path);
+				perror("chdir");
+				abort();
+			}
+		}
+		stat(path_part, &statbuf);
+		if (S_ISDIR(statbuf.st_mode)) {
+			chdir(path_part);
+		} else {
+			strncpy(file_name, path_part, PATH_MAX - 3);
+			file_name[PATH_MAX - 2] = '\0';
 		}
 	}
 
