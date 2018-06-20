@@ -66,6 +66,8 @@ http_server(int port)
 		abort();
 	}
 
+	printf("Serving on 0.0.0.0:%d...\n", port);
+
 	addrlen = sizeof(addr);
 	while (1) {
 		c = accept(sockfd, (struct sockaddr *) &addr, &addrlen);
