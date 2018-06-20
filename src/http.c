@@ -164,11 +164,12 @@ send_response(int sockfd, char *path)
 	time_t now;
 	struct tm now_tm;
 	char timebuf[100];
+	char content_type[100] = "text/html";
 	char buf_fmt[] = "HTTP/1.1 200 OK" CRLF
 		"Date: %s" CRLF
 		"Server: cyhttp" CRLF
 		"Content-Length: %d" CRLF
-		"Content-Type: text/html; charset=utf-8" CRLF CRLF
+		"Content-Type: %s; charset=utf-8" CRLF CRLF
 		"%s" CRLF CRLF;
 	char *buf;
 	char *content;
@@ -193,6 +194,9 @@ send_response(int sockfd, char *path)
 		} else {
 			strncpy(file_name, path_part, PATH_MAX - 3);
 			file_name[PATH_MAX - 2] = '\0';
+			if (strstr(file_name, ".css") >= 0) {
+				strcpy(content_type, "text/css");
+			}
 		}
 	}
 
@@ -215,7 +219,7 @@ send_response(int sockfd, char *path)
 	now = time(NULL);
 	localtime_r(&now, &now_tm);
 	strftime(timebuf, 100, "%a, %d %b %Y %H:%M:%S %Z", &now_tm);
-	asprintf(&buf, buf_fmt, timebuf, content_len, content);
+	asprintf(&buf, buf_fmt, timebuf, content_len, content_type, content);
 	send(sockfd, buf, strlen(buf), 0);
 
 	free(buf);
