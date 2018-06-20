@@ -191,7 +191,7 @@ send_response(int sockfd, char *path)
 		stat(path_part, &statbuf);
 		if (S_ISDIR(statbuf.st_mode)) {
 			chdir(path_part);
-		} else {
+		} else if (S_ISREG(statbuf.st_mode)) {
 			strncpy(file_name, path_part, PATH_MAX - 3);
 			file_name[PATH_MAX - 2] = '\0';
 			if (strstr(file_name, ".css") >= 0) {
