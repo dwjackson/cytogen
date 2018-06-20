@@ -82,8 +82,8 @@ http_server(int port)
 	close(sockfd);
 }
 
-static char
-*extract_path(const char *req, ssize_t size, char *path, size_t path_size)
+static void 
+extract_path(const char *req, ssize_t size, char *path, size_t path_size)
 {
 	char method[10];
 	int i;
