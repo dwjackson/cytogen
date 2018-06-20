@@ -188,20 +188,23 @@ send_response(int sockfd, char *path)
 				abort();
 			}
 		}
-		stat(path_part, &statbuf);
-		if (S_ISDIR(statbuf.st_mode)) {
+		if (stat(path_part, &statbuf) < 0) {
+			strcpy(file_name, "index.html");
+		} else if (S_ISDIR(statbuf.st_mode)) {
 			chdir(path_part);
 		} else if (S_ISREG(statbuf.st_mode)) {
 			strncpy(file_name, path_part, PATH_MAX - 3);
 			file_name[PATH_MAX - 2] = '\0';
-			if (strstr(file_name, ".css") >= 0) {
+			if (strstr(file_name, ".css") != NULL) {
 				strcpy(content_type, "text/css");
+			} else if (strstr(file_name, ".xml") != NULL) {
+				strcpy(content_type, "application/xml");
 			}
 		}
 	}
 
 	if (stat(file_name, &statbuf) < 0) {
-		perror("stat");
+		perror(file_name);
 		abort();
 	}
 	file_size = statbuf.st_size;
