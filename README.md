@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
 
 <!--
-Copyright (c) 2016 David Jackson
+Copyright (c) 2016-2018 David Jackson
 -->
 
 # Cytogen: static site generator
@@ -59,6 +59,14 @@ To clean up (i.e. remove) the generated site files:
 
 ```sh
 cyto clean
+```
+
+To serve the site on a local webserver for debugging purposes (this is *not* a
+"real" web-server, so don't try to use it as such!):
+
+```sh
+cd _site
+cyto serve
 ```
 
 Note: Most `cyto` commands are usable just by typing their first letter (this
