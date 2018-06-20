@@ -2,7 +2,7 @@
 .\" License, v. 2.0. If a copy of the MPL was not distributed with this
 .\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
 .\"
-.\" Copyright (c) 2016 David Jackson
+.\" Copyright (c) 2016-2018 David Jackson
 .Dd July 5, 2016
 .Dt CYTO 1
 .Os
@@ -35,6 +35,9 @@ and initialize a Cytogen project within it.
 .It cyto generate
 Within a cytogen project directory, generate the static site to a directory
 called _site.
+.It cyto serve
+Within a cytogen-generated-site tree (i.e. the _site directory), serve the site
+with a local HTTP server.
 .El
 .Sh SEE ALSO
 .Xr ctache 1
