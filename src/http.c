@@ -26,6 +26,7 @@
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
 #define CRLF "\r\n"
+#define ERROR_404 "404: File not found"
 
 static void
 handle_request(int sockfd);
@@ -167,7 +168,9 @@ send_response(int sockfd, char *path)
 	struct tm now_tm;
 	char timebuf[100];
 	char content_type[100] = "text/html";
-	char buf_fmt[] = "HTTP/1.1 200 OK" CRLF
+	int status = 200;
+	char status_string[100] = "OK";
+	char buf_fmt[] = "HTTP/1.1 %d %s" CRLF
 		"Date: %s" CRLF
 		"Server: cyhttp" CRLF
 		"Content-Length: %d" CRLF
@@ -179,7 +182,6 @@ send_response(int sockfd, char *path)
 	char topdir[PATH_MAX - 1];
 	char path_part[PATH_MAX - 1];
 
-	strcpy(file_name, "index.html");
 	getcwd(topdir, PATH_MAX - 1);
 	if (!(strlen(path) == 1 && path[0] == '/')) {
 		path++; /* Skip the initial "/" */
@@ -202,29 +204,40 @@ send_response(int sockfd, char *path)
 			} else if (strstr(file_name, ".xml") != NULL) {
 				strcpy(content_type, "application/xml");
 			}
+			// TODO: JS
 		}
 	}
 
-	if (stat(file_name, &statbuf) < 0) {
-		perror(file_name);
-		abort();
+	if (strlen(file_name) == 0) {
+		strcpy(file_name, "index.html");
+	}
+
+	if (stat(file_name, &statbuf) == 0) {
+		content = malloc(file_size + 1);
+		fp = fopen(file_name, "r");
+		fread(content, 1, file_size, fp);
+		content[file_size] = '\0';
+		content_len = (int)file_size + 1;
+		if (content_len < 0) {
+			fprintf(stderr, "Negative content length\n");
+			abort();
+		}
+	} else {
+		fprintf(stderr, "File not found: %s\n", file_name);
+		status = 404;
+		strcpy(status_string, "Not Found");
+		content_len = strlen(ERROR_404);
+		content = malloc(content_len + 1);
+		strcpy(content, ERROR_404);
 	}
 	file_size = statbuf.st_size;
 
-	content = malloc(file_size + 1);
-	fp = fopen(file_name, "r");
-	fread(content, 1, file_size, fp);
-	content[file_size] = '\0';
-	content_len = (int)file_size + 1;
-	if (content_len < 0) {
-		fprintf(stderr, "Negative content length\n");
-		abort();
-	}
 
 	now = time(NULL);
 	localtime_r(&now, &now_tm);
 	strftime(timebuf, 100, "%a, %d %b %Y %H:%M:%S %Z", &now_tm);
-	asprintf(&buf, buf_fmt, timebuf, content_len, content_type, content);
+	asprintf(&buf, buf_fmt, status, status_string, timebuf, content_len, 
+			content_type, content);
 	send(sockfd, buf, strlen(buf), 0);
 
 	free(buf);
