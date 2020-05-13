@@ -2,13 +2,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# Copyright (c) 2016-2018 David Jackson
+# Copyright (c) 2016-2020 David Jackson
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([cytogen], [0.5.0], [dwjackson@users.noreply.github.com])
+AC_INIT([cytogen], [0.5.1], [dwjackson@users.noreply.github.com])
 AC_CONFIG_SRCDIR([src/cytogen_header.c])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([-Wall foreign])

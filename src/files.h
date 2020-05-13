@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #ifndef FILES_H
@@ -29,6 +29,9 @@ char
 
 bool
 extension_implies_markdown(const char *extension);
+
+bool
+extension_implies_text(const char *extension);
 
 #ifndef HAVE_BASENAME_R
 char

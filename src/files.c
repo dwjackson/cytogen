@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #include <stdio.h>
@@ -185,3 +185,10 @@ char
     return bname;
 }
 #endif /* HAVE_BASENAME_R */
+
+bool
+extension_implies_text(const char *extension)
+{
+    return strcmp(extension, "txt") == 0 || strcmp(extension, "html") == 0
+        || extension_implies_markdown(extension);
+}

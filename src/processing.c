@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #ifdef __linux__
@@ -74,10 +74,12 @@ process_file(const char *in_file_name,
 
     bool is_markdown = false;
     is_markdown = extension_implies_markdown(in_file_extension);
-    
+
+    bool is_text = extension_implies_text(in_file_extension);
+
     const char *ctache_file_name = in_file_name;
     FILE *in_fp = fopen(ctache_file_name, "r");
-    if (in_fp != NULL) {
+    if (in_fp != NULL && is_text) {
         /* Read the header data, populate the file ctache_data_t hash */
         cytogen_header_read_from_file(in_fp, file_data);
 
@@ -117,6 +119,21 @@ process_file(const char *in_file_name,
 
         free(html_file_name);
         fclose(in_fp); 
+    } else if (in_fp != NULL && !is_text) {
+        fclose(in_fp);
+        in_fp = fopen(in_file_name, "rb");
+	unsigned char chunk[512];
+        FILE *out_fp = fopen(out_file_name, "wb");
+        if (out_fp == NULL) {
+            fprintf(stderr,
+                    "ERROR: Could not open for writing: %s\n",
+                    out_file_name);
+            abort();
+        }
+	while ((fread(chunk, 512, 1, in_fp)) > 0) {
+            fwrite(chunk, 512, 1, out_fp);
+	}
+	fclose(out_fp);
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
         fprintf(stderr, err_fmt, ctache_file_name);
