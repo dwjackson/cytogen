@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2018 David Jackson
+ * Copyright (c) 2018-2020 David Jackson
  */
 
 #ifdef __linux__
@@ -193,7 +193,7 @@ send_response(int sockfd, char *path)
 			}
 		}
 		if (stat(path_part, &statbuf) < 0) {
-			strcpy(file_name, "index.html");
+			strncpy(file_name, path_part, PATH_MAX - 3);
 		} else if (S_ISDIR(statbuf.st_mode)) {
 			chdir(path_part);
 		} else if (S_ISREG(statbuf.st_mode)) {
@@ -203,8 +203,9 @@ send_response(int sockfd, char *path)
 				strcpy(content_type, "text/css");
 			} else if (strstr(file_name, ".xml") != NULL) {
 				strcpy(content_type, "application/xml");
+			} else if (strstr(file_name, ".js") != NULL) {
+				strcpy(content_type, "text/javascript");
 			}
-			// TODO: JS
 		}
 	}
 
@@ -213,6 +214,8 @@ send_response(int sockfd, char *path)
 	}
 
 	if (stat(file_name, &statbuf) == 0) {
+		printf("200: %s\n", file_name);
+		file_size = statbuf.st_size;
 		content = malloc(file_size + 1);
 		fp = fopen(file_name, "r");
 		fread(content, 1, file_size, fp);
@@ -223,15 +226,13 @@ send_response(int sockfd, char *path)
 			abort();
 		}
 	} else {
-		fprintf(stderr, "File not found: %s\n", file_name);
+		printf("404: %s\n", file_name);
 		status = 404;
 		strcpy(status_string, "Not Found");
 		content_len = strlen(ERROR_404);
 		content = malloc(content_len + 1);
 		strcpy(content, ERROR_404);
 	}
-	file_size = statbuf.st_size;
-
 
 	now = time(NULL);
 	localtime_r(&now, &now_tm);
