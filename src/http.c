@@ -182,6 +182,11 @@ send_response(int sockfd, char *path)
 	char topdir[PATH_MAX - 1];
 	char path_part[PATH_MAX - 1];
 
+	memset(file_name, 0, PATH_MAX - 1);
+	memset(timebuf, 0, 100);
+	memset(topdir, 0, PATH_MAX - 1);
+	memset(path_part, 0, PATH_MAX - 1);
+
 	getcwd(topdir, PATH_MAX - 1);
 	if (!(strlen(path) == 1 && path[0] == '/')) {
 		path++; /* Skip the initial "/" */
