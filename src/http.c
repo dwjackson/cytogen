@@ -139,16 +139,16 @@ handle_request(int sockfd)
 
 /* Return 1 if there are parts left */
 static int
-next_path_part(char *path_part, char *path_ptr)
+next_path_part(char *path_part, char **path_ptr)
 {
 	char ch;
 
-	if (*path_ptr == '\0') {
+	if (**path_ptr == '\0') {
 		return 0;
 	}
 	
-	/* Copy path into path_part */
-	while ((ch = *path_ptr++) != '/' && ch != '\0') {
+	/* Copy "next piece" of path into path_part, updating path as we go */
+	while ((ch = *(*path_ptr)++) != '/' && ch != '\0') {
 		*path_part++ = ch;
 	}
 	*path_part++ = '\0';
@@ -182,6 +182,7 @@ send_response(int sockfd, char *path)
 	int content_len;
 	char topdir[PATH_MAX - 1];
 	char path_part[PATH_MAX - 1];
+	char *orig_path = path;
 
 	memset(file_name, 0, PATH_MAX - 1);
 	memset(timebuf, 0, 100);
@@ -191,9 +192,9 @@ send_response(int sockfd, char *path)
 	getcwd(topdir, PATH_MAX - 1);
 	if (!(strlen(path) == 1 && path[0] == '/')) {
 		path++; /* Skip the initial "/" */
-		while (next_path_part(path_part, path)) {
+		while (next_path_part(path_part, &path)) {
 			if (chdir(path_part) < 0) {
-				printf("404: %s\n", path - 1);
+				printf("404: %s\n", orig_path);
 				status = 404;
 				strcpy(status_string, "Not Found");
 				content_len = strlen(ERROR_404);
@@ -236,7 +237,7 @@ send_response(int sockfd, char *path)
 			abort();
 		}
 	} else {
-		printf("404: %s\n", file_name);
+		printf("404: %s\n", orig_path);
 		status = 404;
 		strcpy(status_string, "Not Found");
 		content_len = strlen(ERROR_404);
