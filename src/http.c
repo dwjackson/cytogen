@@ -139,15 +139,16 @@ handle_request(int sockfd)
 
 /* Return 1 if there are parts left */
 static int
-next_path_part(char *path_part, char **path_ptr)
+next_path_part(char *path_part, char *path_ptr)
 {
 	char ch;
 
-	if (**path_ptr == '\0') {
+	if (*path_ptr == '\0') {
 		return 0;
 	}
 	
-	while ((ch = *(*path_ptr)++) != '/' && ch != '\0') {
+	/* Copy path into path_part */
+	while ((ch = *path_ptr++) != '/' && ch != '\0') {
 		*path_part++ = ch;
 	}
 	*path_part++ = '\0';
@@ -190,11 +191,15 @@ send_response(int sockfd, char *path)
 	getcwd(topdir, PATH_MAX - 1);
 	if (!(strlen(path) == 1 && path[0] == '/')) {
 		path++; /* Skip the initial "/" */
-		while (next_path_part(path_part, &path)) {
+		while (next_path_part(path_part, path)) {
 			if (chdir(path_part) < 0) {
-				fprintf(stderr, "path: %s\n", path);
-				perror("chdir");
-				abort();
+				printf("404: %s\n", path - 1);
+				status = 404;
+				strcpy(status_string, "Not Found");
+				content_len = strlen(ERROR_404);
+				content = malloc(content_len + 1);
+				strcpy(content, ERROR_404);
+				break;
 			}
 		}
 		if (stat(path_part, &statbuf) < 0) {
