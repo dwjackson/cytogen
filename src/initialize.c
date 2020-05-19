@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #ifdef __linux__
@@ -143,7 +143,7 @@ static void
 create_index_page()
 {
     char file_name[] = "index.html";
-    
+
     if (file_exists(file_name)) {
         return;
     }

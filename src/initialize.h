@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #ifndef INITIALIZE_H
