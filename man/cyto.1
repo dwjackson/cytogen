@@ -30,10 +30,11 @@ in parallel.
 The available
 commands are:
 .Bl -tag -width Ds
-.It cyto init Ar project
+.It cyto init Op Ar project
 Create a directory named for
 .Ar project
-and initialize a Cytogen project within it.
+and initialize a Cytogen project within it; if no project name is given, simply
+initialize a Cytogen project within the current directory.
 .It cyto generate
 Within a cytogen project directory, generate the static site to a directory
 called _site.

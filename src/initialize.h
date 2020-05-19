@@ -11,6 +11,8 @@
 #ifndef INITIALIZE_H
 #define INITIALIZE_H
 
+#define CURRENT_DIRECTORY "."
+
 void
 cmd_initialize(const char *project_name);
 

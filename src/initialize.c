@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <string.h>
 
 #define MKDIR_MODE 0770
 #define LAYOUTS_DIR "_layouts"
@@ -127,10 +129,25 @@ create_posts_directory()
     free(file_path);
 }
 
-void
+static bool
+file_exists(const char *file_name)
+{
+    struct stat statbuf;
+    if (stat(file_name, &statbuf) != -1) {
+        return true;
+    }
+    return false;
+}
+
+static void 
 create_index_page()
 {
     char file_name[] = "index.html";
+    
+    if (file_exists(file_name)) {
+        return;
+    }
+
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
         fprintf(stderr, "ERROR: could not open for writing: %s", file_name);
@@ -151,8 +168,10 @@ create_index_page()
 void
 cmd_initialize(const char *project_name)
 {
-    create_project_directory(project_name);
-    chdir(project_name);
+    if (strcmp(project_name, CURRENT_DIRECTORY) != 0) {
+        create_project_directory(project_name);
+        chdir(project_name);
+    }
 
     create_default_config_file();
     create_layouts_directory();

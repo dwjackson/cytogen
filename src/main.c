@@ -118,13 +118,13 @@ main(int argc, char *argv[])
             cmd_generate(NULL, ".", SITE_DIR, num_workers);
         }
     } else if (string_matches_any(cmd, 2, "i", "init")) {
+        char *proj_name;
         if (argc == 3) {
-            char *proj_name = args[1];
-            cmd_initialize(proj_name);
+            proj_name = args[1];
         } else {
-            fprintf(stderr, "ERROR: No project name given\n");
-            exit(EXIT_FAILURE);
+	    proj_name = CURRENT_DIRECTORY;
         }
+        cmd_initialize(proj_name);
     } else if (string_matches_any(cmd, 2, "c", "clean")) { 
         cmd_clean();
     } else if (string_matches_any(cmd, 2, "s", "serve")) {
