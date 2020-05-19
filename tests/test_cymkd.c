@@ -27,6 +27,7 @@ ASTRO_TEST_BEGIN(test_link_in_unordered_list)
 	out_fp = fmemopen(outbuf, BUFSIZE, "w+");
 	assert(out_fp != NULL, "fmemopen() failed");
 	cymkd_render("test", content, content_len, out_fp);
+	fwrite("\0", 1, 1, out_fp); /* For string compare */
 	fseek(out_fp, 0, SEEK_SET);
 	char expected[BUFSIZE] = "<ul><li>this is a list</li><li><a href=\"http://example.com\">Example</a> is a website</li><li>final bullet</li></ul>";
 	char actual[BUFSIZE];
