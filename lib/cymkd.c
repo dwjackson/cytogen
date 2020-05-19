@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2018 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 /*
@@ -70,6 +70,9 @@ struct cymkd_parser_position {
     const char *str_pos;
     int str_index;
 };
+
+static bool
+text_and_inline(struct cymkd_parser *parser);
 
 static void
 cymkd_error(struct cymkd_parser *parser, const char *err_fmt, ...)
@@ -338,7 +341,7 @@ a_link(struct cymkd_parser *parser)
     bufsize = 10;
     len = 0;
     link_text = malloc(bufsize);
-    while ((ch = next(parser)) != ']') {
+    while ((ch = next(parser)) != ']' && ch != -1) {
         if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             link_text = realloc(link_text, bufsize);
@@ -357,7 +360,7 @@ a_link(struct cymkd_parser *parser)
     bufsize = 10;
     len = 0;
     link_href = malloc(bufsize);
-    while ((ch = next(parser)) != ')') {
+    while ((ch = next(parser)) != ')' && ch != -1) {
         if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             link_href = realloc(link_href, bufsize);
@@ -393,6 +396,7 @@ img(struct cymkd_parser *parser)
         return false;
     }
     len = 0;
+    bufsize = 10;
     alt_text = malloc(bufsize);
     while ((ch = next(parser)) != ']') {
         if (len + 1 >= bufsize - 1) {
@@ -468,26 +472,35 @@ inline_section(struct cymkd_parser *parser)
 }
 
 static bool
-paragraph(struct cymkd_parser *parser)
+text_and_inline(struct cymkd_parser *parser)
 {
     int ch;
+    while ((ch = next(parser)) != '\n' && ch != -1) {
+        if (ch == ESCAPE_CHAR) {
+            consume(parser);
+            ch = next(parser);
+            parser_emit_char(parser, ch);
+        } else if (is_inline_start(parser)) {
+            if (!inline_section(parser)) {
+                return false;
+            } else if (next(parser) >= 0) {
+                parser_emit_char(parser, next(parser));
+            }
+        } else {
+            parser_emit_char(parser, ch);
+        }
+        consume(parser); /* Move to the next input character */
+    }
+    return true;
+}
+
+static bool
+paragraph(struct cymkd_parser *parser)
+{
     parser_emit_string(parser, "<p>");
     while (true) {
-        while ((ch = next(parser)) != '\n' && ch != -1) {
-            if (ch == ESCAPE_CHAR) {
-                consume(parser);
-                ch = next(parser);
-                parser_emit_char(parser, ch);
-            } else if (is_inline_start(parser)) {
-                if (!inline_section(parser)) {
-                    return false;
-                } else if (next(parser) >= 0) {
-                    parser_emit_char(parser, next(parser));
-                }
-            } else {
-                parser_emit_char(parser, ch);
-            }
-            consume(parser); /* Move to the next input character */
+        if (!text_and_inline(parser)) {
+            return false;
         }
         if (match(parser, '\n') && next(parser) == '\n') {
             consume(parser);
@@ -545,13 +558,14 @@ header(struct cymkd_parser *parser)
 static bool
 unordered_list_line(struct cymkd_parser *parser)
 {
-    int ch;
     if (match(parser, '*') || match(parser, '-')) {
         parser_emit_string(parser, "<li>");
-        while ((ch = next(parser)) != '\n' && ch != EOF) {
-            parser_emit_char(parser, ch);
-            consume(parser); // Move past the character
+        while (next(parser) == ' ') {
+            consume(parser);
         }
+	if (!text_and_inline(parser)) {
+		return false;
+	}
         parser_emit_string(parser, "</li>");
         return true;
     }
