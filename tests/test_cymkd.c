@@ -49,6 +49,7 @@ ASTRO_TEST_BEGIN(test_mdash)
 	out_fp = fmemopen(outbuf, BUFSIZE, "w+");
 	assert(out_fp != NULL, "fmemopen() failed");
 	cymkd_render("test", content, content_len, out_fp);
+	fwrite("\0", 1, 1, out_fp); /* For string compare */
 	fseek(out_fp, 0, SEEK_SET);
 	char expected[BUFSIZE] = "<p>This sentence has an em dash&mdash;e.g. right there.</p>";
 	char actual[BUFSIZE];
