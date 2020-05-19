@@ -37,6 +37,30 @@ ASTRO_TEST_BEGIN(test_link_in_unordered_list)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_mdash)
+{
+	char content[] = "This sentence has an em dash--e.g. right there.";
+	size_t content_len = strlen(content);
+	FILE* out_fp;
+	char outbuf[BUFSIZE];
+
+	memset(outbuf, 0, BUFSIZE);
+
+	out_fp = fmemopen(outbuf, BUFSIZE, "w+");
+	assert(out_fp != NULL, "fmemopen() failed");
+	cymkd_render("test", content, content_len, out_fp);
+	fseek(out_fp, 0, SEEK_SET);
+	char expected[BUFSIZE] = "<p>This sentence has an em dash&mdash;e.g. right there.</p>";
+	char actual[BUFSIZE];
+	fread(actual, BUFSIZE, 1, out_fp);
+	assert_str_eq(expected, actual, "generated HTML is wrong");
+	fclose(out_fp);
+	printf("DONE");
+}
+ASTRO_TEST_END
+
+
+
 int
 main(void)
 {
@@ -45,6 +69,7 @@ main(void)
 
     suite = astro_suite_create();
     astro_suite_add_test(suite, test_link_in_unordered_list, NULL);
+    astro_suite_add_test(suite, test_mdash, NULL);
     astro_suite_run(suite);
     num_failures = astro_suite_num_failures(suite);
     astro_suite_destroy(suite);

@@ -486,6 +486,9 @@ text_and_inline(struct cymkd_parser *parser)
             } else if (next(parser) >= 0) {
                 parser_emit_char(parser, next(parser));
             }
+        } else if (ch == '-' && next(parser) == '-') {
+            consume(parser);
+	    parser_emit_string(parser, "&mdash;");
         } else {
             parser_emit_char(parser, ch);
         }
