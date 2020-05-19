@@ -40,7 +40,7 @@ ASTRO_TEST_END
 
 ASTRO_TEST_BEGIN(test_mdash)
 {
-	char content[] = "This sentence has an em dash--e.g. right there.";
+	char content[] = "This sentence has an em dash--e.g. right there - not there.";
 	size_t content_len = strlen(content);
 	FILE* out_fp;
 	char outbuf[BUFSIZE];
@@ -52,7 +52,7 @@ ASTRO_TEST_BEGIN(test_mdash)
 	cymkd_render("test", content, content_len, out_fp);
 	fwrite("\0", 1, 1, out_fp); /* For string compare */
 	fseek(out_fp, 0, SEEK_SET);
-	char expected[BUFSIZE] = "<p>This sentence has an em dash&mdash;e.g. right there.</p>";
+	char expected[BUFSIZE] = "<p>This sentence has an em dash&mdash;e.g. right there - not there.</p>";
 	char actual[BUFSIZE];
 	fread(actual, BUFSIZE, 1, out_fp);
 	assert_str_eq(expected, actual, "generated HTML is wrong");
@@ -60,8 +60,6 @@ ASTRO_TEST_BEGIN(test_mdash)
 	printf("DONE");
 }
 ASTRO_TEST_END
-
-
 
 int
 main(void)

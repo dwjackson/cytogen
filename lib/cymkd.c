@@ -486,9 +486,17 @@ text_and_inline(struct cymkd_parser *parser)
             } else if (next(parser) >= 0) {
                 parser_emit_char(parser, next(parser));
             }
-        } else if (ch == '-' && next(parser) == '-') {
+        } else if (ch == '-') {
             consume(parser);
-	    parser_emit_string(parser, "&mdash;");
+	    ch = next(parser);
+	    if (ch == '-') {
+		parser_emit_string(parser, "&mdash;");
+	    } else if (ch != -1) {
+                parser_emit_char(parser, '-');
+		parser_emit_char(parser, ch);
+	    } else {
+                parser_emit_char(parser, '-');
+	    }
         } else {
             parser_emit_char(parser, ch);
         }
