@@ -14,6 +14,7 @@
  * document = block, more blocks
  * more blocks = block end, block, more blocks | ""
  * block = paragraph | header | unordered list | block quote | code block
+ *         | ordered list
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
@@ -23,6 +24,9 @@
  * unordered list = unordered list line, more unordered list lines
  * unordered list line = ("*" | "-") text and inline
  * more unordered list lines = "\n", unordered list line, more unordered list lines
+ * ordered list = ordered list line, more ordered list lines
+ * ordered list line = { "\d" }, ".", text and inline 
+ * more ordered list lines = "\n", ordered list list, more ordered list lines
  * block quote = block quote line, more block quote lines
  * block quote line = ">" string
  * code block = "```", { string }, "\n", code line, more code lines, "\n", "```"
@@ -51,6 +55,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #define BUFSIZE 1024
 #define ESCAPE_CHAR '\\'
@@ -70,6 +75,9 @@ struct cymkd_parser_position {
     const char *str_pos;
     int str_index;
 };
+
+static int
+lookahead(struct cymkd_parser *parser, unsigned int n);
 
 static bool
 text_and_inline(struct cymkd_parser *parser);
@@ -169,12 +177,18 @@ unconsume(struct cymkd_parser *parser)
 static int
 next(struct cymkd_parser *parser)
 {
-    int ch;
-    if (parser->str_index >= parser->str_len) {
-        return -1;
-    }
-    ch = *(parser->str_pos);
-    return ch;
+	return lookahead(parser, 0);
+}
+
+static int
+lookahead(struct cymkd_parser *parser, unsigned int n)
+{
+	int ch;
+	if (parser->str_index + n >= parser->str_len) {
+		return -1;
+	}
+	ch = *(parser->str_pos + n);
+	return ch;
 }
 
 static struct cymkd_parser_position
@@ -602,6 +616,60 @@ unordered_list(struct cymkd_parser *parser)
 }
 
 static bool
+ordered_list_line(struct cymkd_parser *parser)
+{
+	/* Read the line number */
+	int number_length = 0;
+	while (isdigit(next(parser))) {
+		consume(parser);
+		number_length++;
+	}
+
+	if (next(parser) != '.' && next(parser) != ')') {
+		for (int i = 0; i < number_length; i++) {
+			unconsume(parser);
+		}
+		return false;
+	}
+
+	/* Consume the dot/left-parenthesis */
+	consume(parser);
+
+        parser_emit_string(parser, "<li>");
+
+	/* Consume any spaces that occur before text */
+        while (next(parser) == ' ') {
+            consume(parser);
+        }
+
+	if (!text_and_inline(parser)) {
+		return false;
+	}
+
+        parser_emit_string(parser, "</li>");
+	
+        return true;
+}
+
+static bool
+ordered_list(struct cymkd_parser *parser)
+{
+    if (next(parser) == '1' && lookahead(parser, 1) == '.') {
+        parser_emit_string(parser, "<ol>");
+        if (ordered_list_line(parser)) {
+            while (match(parser, '\n')
+                   && ordered_list_line(parser)
+                   && next(parser) >= 0) {
+                ; // Loop until list is finished
+            }
+            parser_emit_string(parser, "</ol>");
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool
 block_quote_line(struct cymkd_parser *parser)
 {
     if (!match(parser, '>')) {
@@ -709,13 +777,16 @@ block(struct cymkd_parser *parser)
     if (!success) {
         success = unordered_list(parser);
         if (!success) {
-            success = block_quote(parser);
-            if (!success) {
-                success = code_block(parser);
+            success = ordered_list(parser);
+	    if (!success) {
+                success = block_quote(parser);
                 if (!success) {
-                    success = paragraph(parser);
+                    success = code_block(parser);
+                    if (!success) {
+                        success = paragraph(parser);
+                    }
                 }
-            }
+	    }
         }
     }
     return success;
