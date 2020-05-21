@@ -412,7 +412,7 @@ img(struct cymkd_parser *parser)
     len = 0;
     bufsize = 10;
     alt_text = malloc(bufsize);
-    while ((ch = next(parser)) != ']') {
+    while ((ch = next(parser)) != ']' && ch != -1) {
         if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             alt_text = realloc(alt_text, bufsize);
@@ -431,7 +431,7 @@ img(struct cymkd_parser *parser)
     bufsize = 10;
     len = 0;
     img_src = malloc(bufsize);
-    while ((ch = next(parser)) != ')') {
+    while ((ch = next(parser)) != ')' && ch != -1) {
         if (len + 1 >= bufsize - 1) {
             bufsize *= 2;
             img_src = realloc(img_src, bufsize);
@@ -494,11 +494,10 @@ text_and_inline(struct cymkd_parser *parser)
             consume(parser);
             ch = next(parser);
             parser_emit_char(parser, ch);
+            consume(parser); /* Move to the next input character */
         } else if (is_inline_start(parser)) {
             if (!inline_section(parser)) {
                 return false;
-            } else if (next(parser) >= 0) {
-                parser_emit_char(parser, next(parser));
             }
         } else if (ch == '-') {
             consume(parser);
@@ -511,10 +510,11 @@ text_and_inline(struct cymkd_parser *parser)
 	    } else {
                 parser_emit_char(parser, '-');
 	    }
+            consume(parser); /* Move to the next input character */
         } else {
             parser_emit_char(parser, ch);
+            consume(parser); /* Move to the next input character */
         }
-        consume(parser); /* Move to the next input character */
     }
     return true;
 }
@@ -527,6 +527,8 @@ paragraph(struct cymkd_parser *parser)
         if (!text_and_inline(parser)) {
             return false;
         }
+
+	/* Two newlines ends a paragraph */
         if (match(parser, '\n') && next(parser) == '\n') {
             consume(parser);
             parser_emit_string(parser, "</p>");
@@ -566,11 +568,11 @@ header(struct cymkd_parser *parser)
     int ch;
     int header_level;
     if (header_prefix(parser, &header_level)) {
-        while ((ch = consume(parser)) != '\n') {
+        while ((ch = consume(parser)) != '\n' && ch != -1) {
             parser_emit_char(parser, ch);
         }
         ch = consume(parser);
-        if (ch != '\n') {
+        if (ch != '\n' && ch != -1) {
             fprintf(stderr, "ERROR: Header must end with two newlines\n");
             return false;
         }
