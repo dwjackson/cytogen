@@ -22,17 +22,21 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
 #define CRLF "\r\n"
 #define ERROR_404 "404: File not found"
+#define METHOD_BUFSIZE 10
+
+typedef unsigned char byte;
 
 static void
 handle_request(int sockfd);
 
 static void
-send_response(int sockfd, char *path);
+send_response(char *method, int sockfd, char *path);
 
 void
 http_server(int port)
@@ -86,28 +90,12 @@ http_server(int port)
 static void 
 extract_path(const char *req, ssize_t size, char *path, size_t path_size)
 {
-	char method[10];
-	int i;
-	char ch;
 	int path_len;
+	int i;
+	int ch;
 
-	for (i = 0; i < 10 - 1; i++) {
-		ch = req[i];
-		if (ch == ' ') {
-			break;
-		}
-		method[i] = ch;
-	}
-	method[i] = '\0';
-	i++;
-
-	if (strcmp(method, "GET") != 0) {
-		fprintf(stderr, "Only GET requests are supported (%s)\n", method);
-		abort();
-	}
- 
 	path_len = 0;
-	for (; i < size; i++) {
+	for (i = 0; i < size; i++) {
 		ch = req[i];
 		if (path_len >= path_size) {
 			fprintf(stderr, "Path length too long\n");
@@ -121,20 +109,63 @@ extract_path(const char *req, ssize_t size, char *path, size_t path_size)
 	path[path_len] = '\0';
 }
 
+static int 
+extract_method(char *method, char *req)
+{
+	int i;
+	char ch;
+	int path_len;
+	char supported_methods[2][METHOD_BUFSIZE] = {
+		"GET",
+		"HEAD"
+	};
+	bool is_allowed = false;
+	int method_len;
+
+	for (i = 0; i < 10 - 1; i++) {
+		ch = req[i];
+		if (ch == ' ') {
+			break;
+		}
+		method[i] = ch;
+	}
+	method[i] = '\0';
+	i++;
+	method_len = i;
+
+	for (i = 0; i < 2; i++) {
+		if (strcmp(method, supported_methods[i]) == 0) {
+			is_allowed = true;
+		}
+	}
+
+	if (!is_allowed) {
+		fprintf(stderr, "Unsupported method (%s)\n", method);
+		abort();
+	}
+
+	return method_len;
+}
+
 static void
 handle_request(int sockfd)
 {
 	char buf[BUFSIZE];
 	ssize_t size;
 	char path[PATH_MAX - 1];
+	char method[METHOD_BUFSIZE];
+	int method_len;
+	char *req;
 
 	size = recv(sockfd, buf, BUFSIZE, 0);
-	extract_path(buf, size, path, PATH_MAX - 1);
+	method_len = extract_method(method, buf);
+	req = buf + method_len;
+	extract_path(req, size, path, PATH_MAX - 1);
 	if (strstr(path, "favicon.ico") != NULL) {
 		/* Ignore favicon requests */
 		return;
 	}
-	send_response(sockfd, path);
+	send_response(method, sockfd, path);
 }
 
 /* Return 1 if there are parts left */
@@ -159,7 +190,7 @@ next_path_part(char *path_part, char **path_ptr)
 }
 
 static void
-send_response(int sockfd, char *path)
+send_response(char *method, int sockfd, char *path)
 {
 	char file_name[PATH_MAX - 1];
 	off_t file_size;
@@ -171,18 +202,22 @@ send_response(int sockfd, char *path)
 	char content_type[100] = "text/html";
 	int status = 200;
 	char status_string[100] = "OK";
-	char buf_fmt[] = "HTTP/1.1 %d %s" CRLF
+	char header_fmt[] = "HTTP/1.1 %d %s" CRLF
 		"Date: %s" CRLF
 		"Server: cyhttp" CRLF
 		"Content-Length: %d" CRLF
-		"Content-Type: %s; charset=utf-8" CRLF CRLF
-		"%s" CRLF CRLF;
-	char *buf;
-	char *content;
+		"Content-Type: %s" CRLF CRLF;
+	char *header = NULL;
+	byte *buf = NULL;
+	byte *content = NULL;
 	int content_len;
 	char topdir[PATH_MAX - 1];
 	char path_part[PATH_MAX - 1];
 	char *orig_path = path;
+	bool is_binary = false;
+	int i;
+	size_t header_len;
+	size_t response_len = 0;
 
 	memset(file_name, 0, PATH_MAX - 1);
 	memset(timebuf, 0, 100);
@@ -204,18 +239,26 @@ send_response(int sockfd, char *path)
 			}
 		}
 		if (stat(path_part, &statbuf) < 0) {
-			strncpy(file_name, path_part, PATH_MAX - 3);
+			strcpy(file_name, "");
 		} else if (S_ISDIR(statbuf.st_mode)) {
 			chdir(path_part);
 		} else if (S_ISREG(statbuf.st_mode)) {
 			strncpy(file_name, path_part, PATH_MAX - 3);
 			file_name[PATH_MAX - 2] = '\0';
+			is_binary = false;
 			if (strstr(file_name, ".css") != NULL) {
-				strcpy(content_type, "text/css");
+				strcpy(content_type, "text/css; charset=utf-8");
 			} else if (strstr(file_name, ".xml") != NULL) {
-				strcpy(content_type, "application/xml");
+				strcpy(content_type, "application/xml; charset=utf-8");
 			} else if (strstr(file_name, ".js") != NULL) {
-				strcpy(content_type, "text/javascript");
+				strcpy(content_type, "text/javascript; charset=utf-8");
+			} else if (strstr(file_name, ".png") != NULL) {
+				strcpy(content_type, "image/png");
+				is_binary = true;
+			} else {
+				fprintf(stderr, "Unsupported filetype: %s\n",
+						file_name);
+				abort();
 			}
 		}
 	}
@@ -225,13 +268,19 @@ send_response(int sockfd, char *path)
 	}
 
 	if (stat(file_name, &statbuf) == 0) {
-		printf("200: %s\n", file_name);
+		printf("200: %s\n", orig_path);
 		file_size = statbuf.st_size;
 		content = malloc(file_size + 1);
-		fp = fopen(file_name, "r");
-		fread(content, 1, file_size, fp);
-		content[file_size] = '\0';
-		content_len = (int)file_size + 1;
+		if (is_binary) {
+			fp = fopen(file_name, "rb");
+		} else {
+			fp = fopen(file_name, "r");
+		}
+		if (fread(content, 1, file_size, fp) != file_size) {
+			perror("fread");
+			abort();
+		}
+		content_len = (int)file_size;
 		if (content_len < 0) {
 			fprintf(stderr, "Negative content length\n");
 			abort();
@@ -248,12 +297,42 @@ send_response(int sockfd, char *path)
 	now = time(NULL);
 	localtime_r(&now, &now_tm);
 	strftime(timebuf, 100, "%a, %d %b %Y %H:%M:%S %Z", &now_tm);
-	asprintf(&buf, buf_fmt, status, status_string, timebuf, content_len, 
-			content_type, content);
-	send(sockfd, buf, strlen(buf), 0);
+	asprintf(&header, header_fmt, status, status_string, timebuf,
+			content_len, content_type, content);
+	header_len = strlen(header);
+	if (strcmp(method, "GET") == 0) {
+		response_len = header_len + content_len + 2;
+		buf = malloc(response_len);
+		if (buf == NULL) {
+			perror("malloc");
+			abort();
+		}
+		memcpy(buf, header, header_len);
+		memcpy(buf + header_len, content, content_len);
+		memcpy(buf + header_len + content_len, CRLF, 2);
+	} else if (strcmp(method, "HEAD") == 0) {
+		response_len = header_len;
+		buf = malloc(header_len);
+		if (buf == NULL) {
+			perror("malloc");
+			abort();
+		}
+		memcpy(buf, header, header_len);
+	} else {
+		fprintf(stderr, "Unsupported method: %s\n", method);
+	}
+
+	ssize_t sent = 0;
+	while ((sent = send(sockfd, buf, response_len, 0)) < response_len 
+			&& sent != -1) {
+	}
+	if (sent == -1) {
+		perror("send");
+	}
 
 	free(buf);
 	free(content);
+	free(header);
 
 	chdir(topdir);
 }
