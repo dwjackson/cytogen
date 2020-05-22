@@ -16,6 +16,7 @@
 #include <stdbool.h>
 
 #define DEFAULT_CONTENT_LENGTH 1024
+#define TEXT_EXTENSIONS_COUNT 4
     
 void
 get_file_list(const char *dir_name,
@@ -189,6 +190,18 @@ char
 bool
 extension_implies_text(const char *extension)
 {
-    return strcmp(extension, "txt") == 0 || strcmp(extension, "html") == 0
-        || extension_implies_markdown(extension);
+	char extensions[TEXT_EXTENSIONS_COUNT][10] = {
+		"txt",
+		"html",
+		"css",
+		"js"
+	};
+	int i;
+	char *ext;
+	for (i = 0; i < TEXT_EXTENSIONS_COUNT; i++) {
+		if (strcmp(extensions[i], extension) == 0) {
+			return true;
+		}
+	}
+	return extension_implies_markdown(extension);
 }

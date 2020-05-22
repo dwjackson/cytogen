@@ -32,6 +32,10 @@
 #include <libgen.h>
 #endif /* HAVE_BASENAME_R */
 
+#define CHUNK_SIZE 512
+
+typedef unsigned char byte;
+
 char
 *determine_out_file_name(const char *in_file_name,
                          const char *site_dir)
@@ -122,7 +126,7 @@ process_file(const char *in_file_name,
     } else if (in_fp != NULL && !is_text) {
         fclose(in_fp);
         in_fp = fopen(in_file_name, "rb");
-	unsigned char chunk[512];
+	byte chunk[CHUNK_SIZE];
         FILE *out_fp = fopen(out_file_name, "wb");
         if (out_fp == NULL) {
             fprintf(stderr,
@@ -130,10 +134,34 @@ process_file(const char *in_file_name,
                     out_file_name);
             abort();
         }
-	while ((fread(chunk, 512, 1, in_fp)) > 0) {
-            fwrite(chunk, 512, 1, out_fp);
+	struct stat statbuf;
+	stat(in_file_name, &statbuf);
+	off_t file_size = statbuf.st_size;
+	size_t data_read;
+	size_t data_written;
+	size_t total_read = 0;
+	size_t nmemb_read = 0;
+	size_t write_chunk = CHUNK_SIZE;
+	while (!feof(in_fp)) {
+	    nmemb_read = fread(chunk, CHUNK_SIZE, 1, in_fp);
+	    if (nmemb_read == 0 && ferror(in_fp)) {
+                perror("fread");
+                fprintf(stderr, "Error reading file\n");
+                abort();
+            }
+	    if (total_read + CHUNK_SIZE > file_size) {
+		    write_chunk = file_size - total_read;
+	    }
+	    total_read += CHUNK_SIZE;
+            data_written = fwrite(chunk, write_chunk, 1, out_fp);
+	    if (data_written == 0) {
+                perror("fwrite");
+                fprintf(stderr, "Error writing file\n");
+                abort();
+	    }
 	}
 	fclose(out_fp);
+	fclose(in_fp);
     } else {
         char *err_fmt = "ERROR: Could not open input file %s\n";
         fprintf(stderr, err_fmt, ctache_file_name);
