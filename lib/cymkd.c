@@ -772,6 +772,25 @@ code_block(struct cymkd_parser *parser)
 }
 
 static bool
+literal_html(struct cymkd_parser *parser)
+{
+	int ch;
+
+	if (next(parser) != '<') {
+		return false;
+	}
+	
+	/* HTML is assumed until a double-newline */
+	while (!(next(parser) == '\n' && lookahead(parser, 1) == '\n')
+			&& next(parser) != -1) {
+		ch = next(parser);
+		parser_emit_char(parser, ch);
+		consume(parser);
+	}
+	return true;
+}
+
+static bool
 block(struct cymkd_parser *parser)
 {
     bool success;
@@ -785,7 +804,10 @@ block(struct cymkd_parser *parser)
                 if (!success) {
                     success = code_block(parser);
                     if (!success) {
-                        success = paragraph(parser);
+                        success = literal_html(parser);
+                        if (!success) {
+                            success = paragraph(parser);
+                        }
                     }
                 }
 	    }

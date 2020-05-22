@@ -191,6 +191,27 @@ ASTRO_TEST_BEGIN(test_img_within_headers2)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_literal_html)
+{
+	char content[] = "<div class=\"testing\">This is a test.</div>";
+	size_t content_len = strlen(content);
+	FILE* out_fp;
+	char outbuf[BUFSIZE];
+
+	memset(outbuf, 0, BUFSIZE);
+
+	out_fp = fmemopen(outbuf, BUFSIZE, "w+");
+	assert(out_fp != NULL, "fmemopen() failed");
+	cymkd_render("test", content, content_len, out_fp);
+	fwrite("\0", 1, 1, out_fp); /* For string compare */
+	fseek(out_fp, 0, SEEK_SET);
+	char expected[BUFSIZE] = "<div class=\"testing\">This is a test.</div>";
+	char actual[BUFSIZE];
+	fread(actual, BUFSIZE, 1, out_fp);
+	assert_str_eq(expected, actual, "generated HTML is wrong");
+	fclose(out_fp);
+}
+ASTRO_TEST_END
 
 
 int
@@ -208,6 +229,7 @@ main(void)
     astro_suite_add_test(suite, test_img, NULL);
     astro_suite_add_test(suite, test_img_within_headers, NULL);
     astro_suite_add_test(suite, test_img_within_headers2, NULL);
+    astro_suite_add_test(suite, test_literal_html, NULL);
     astro_suite_run(suite);
     num_failures = astro_suite_num_failures(suite);
     astro_suite_destroy(suite);
