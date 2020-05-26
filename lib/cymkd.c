@@ -83,6 +83,9 @@ static bool
 text_and_inline(struct cymkd_parser *parser);
 
 static void
+parser_emit_unescaped_char(struct cymkd_parser *parser, int ch);
+
+static void
 cymkd_error(struct cymkd_parser *parser, const char *err_fmt, ...)
 {
     const char *file_name = parser->file_name;
@@ -116,11 +119,41 @@ parser_emit_string(struct cymkd_parser *parser, const char *fmt, ...)
 static void
 parser_emit_char(struct cymkd_parser *parser, int ch)
 {
-    if (parser->out_fp != NULL) {
-        fprintf(parser->out_fp, "%c", ch);
-    } else {
-        write(parser->out_fd, &ch, 1);
-    }
+	char *s;
+	if (ch == '<' || ch == '>' || ch == '&') {
+		switch (ch) {
+			case '<':
+				s = "&lt;";
+				break;
+			case '>':
+				s = "&gt;";
+				break;
+			case '&':
+				s = "&amp;";
+				break;
+			default:
+				fprintf(stderr, "Bad character: %c\n", ch);
+				abort();
+				break;
+		}
+		if (parser->out_fp != NULL) {
+			fprintf(parser->out_fp, "%s", s);
+		} else {
+			write(parser->out_fd, s, strlen(s));
+		}
+	} else {
+		parser_emit_unescaped_char(parser, ch);
+	}
+}
+
+static void
+parser_emit_unescaped_char(struct cymkd_parser *parser, int ch)
+{
+	if (parser->out_fp != NULL) {
+		fprintf(parser->out_fp, "%c", ch);
+	} else {
+		write(parser->out_fd, &ch, 1);
+	}
 }
 
 static bool
@@ -784,7 +817,7 @@ literal_html(struct cymkd_parser *parser)
 	while (!(next(parser) == '\n' && lookahead(parser, 1) == '\n')
 			&& next(parser) != -1) {
 		ch = next(parser);
-		parser_emit_char(parser, ch);
+		parser_emit_unescaped_char(parser, ch);
 		consume(parser);
 	}
 	return true;

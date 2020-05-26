@@ -213,6 +213,28 @@ ASTRO_TEST_BEGIN(test_literal_html)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_inline_with_less_than_symbol)
+{
+	char content[] = "We check `rbp<lbp/` before recursing.";
+	size_t content_len = strlen(content);
+	FILE* out_fp;
+	char outbuf[BUFSIZE];
+
+	memset(outbuf, 0, BUFSIZE);
+
+	out_fp = fmemopen(outbuf, BUFSIZE, "w+");
+	assert(out_fp != NULL, "fmemopen() failed");
+	cymkd_render("test", content, content_len, out_fp);
+	fwrite("\0", 1, 1, out_fp); /* For string compare */
+	fseek(out_fp, 0, SEEK_SET);
+	char expected[BUFSIZE] = "<p>We check <code>rbp&lt;lbp/</code> before recursing.</p>";
+	char actual[BUFSIZE];
+	fread(actual, BUFSIZE, 1, out_fp);
+	assert_str_eq(expected, actual, "generated HTML is wrong");
+	fclose(out_fp);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -230,6 +252,7 @@ main(void)
     astro_suite_add_test(suite, test_img_within_headers, NULL);
     astro_suite_add_test(suite, test_img_within_headers2, NULL);
     astro_suite_add_test(suite, test_literal_html, NULL);
+    astro_suite_add_test(suite, test_inline_with_less_than_symbol, NULL);
     astro_suite_run(suite);
     num_failures = astro_suite_num_failures(suite);
     astro_suite_destroy(suite);
