@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <stdbool.h>
+#include "mime.h"
 
 #define MAX_CONNECTIONS 5
 #define BUFSIZE 512
@@ -218,6 +219,7 @@ send_response(char *method, int sockfd, char *path)
 	int i;
 	size_t header_len;
 	size_t response_len = 0;
+	char *mime_type;
 
 	memset(file_name, 0, PATH_MAX - 1);
 	memset(timebuf, 0, 100);
@@ -246,19 +248,12 @@ send_response(char *method, int sockfd, char *path)
 			strncpy(file_name, path_part, PATH_MAX - 3);
 			file_name[PATH_MAX - 2] = '\0';
 			is_binary = false;
-			if (strstr(file_name, ".css") != NULL) {
-				strcpy(content_type, "text/css; charset=utf-8");
-			} else if (strstr(file_name, ".xml") != NULL) {
-				strcpy(content_type, "application/xml; charset=utf-8");
-			} else if (strstr(file_name, ".js") != NULL) {
-				strcpy(content_type, "text/javascript; charset=utf-8");
-			} else if (strstr(file_name, ".png") != NULL) {
-				strcpy(content_type, "image/png");
-				is_binary = true;
+			mime_type = mime_type_of(file_name);
+			if (mime_type != NULL) {
+				strcpy(content_type, mime_type);
 			} else {
 				fprintf(stderr, "Unsupported filetype: %s\n",
 						file_name);
-				abort();
 			}
 		}
 	}
