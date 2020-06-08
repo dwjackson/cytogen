@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #include "cymkd.h"
@@ -54,10 +54,10 @@ main(int argc, char *argv[])
         }
     }
 
-    if (argc == 1) {
+    if (optind == argc) {
         in_fp = stdin;
     } else {
-        file_name = argv[1];
+        file_name = argv[optind];
         in_fp = fopen(file_name, "r");
         if (in_fp == NULL) {
             fprintf(stderr, "ERROR: Could not open file: %s\n", file_name);
