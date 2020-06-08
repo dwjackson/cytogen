@@ -197,7 +197,6 @@ extension_implies_text(const char *extension)
 		"js"
 	};
 	int i;
-	char *ext;
 	for (i = 0; i < TEXT_EXTENSIONS_COUNT; i++) {
 		if (strcmp(extensions[i], extension) == 0) {
 			return true;
