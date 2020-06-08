@@ -132,8 +132,7 @@ main(void)
     astro_suite_add_test(suite, test_img_within_headers2, NULL);
     astro_suite_add_test(suite, test_literal_html, NULL);
     astro_suite_add_test(suite, test_inline_with_less_than_symbol, NULL);
-    astro_suite_run(suite);
-    num_failures = astro_suite_num_failures(suite);
+    num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 
     return (num_failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
