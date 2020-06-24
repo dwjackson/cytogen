@@ -11,7 +11,7 @@ AC_PREREQ([2.69])
 AC_INIT([cytogen], [0.6.7], [dwjackson@users.noreply.github.com])
 AC_CONFIG_SRCDIR([src/cytogen_header.c])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE([-Wall foreign])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 
 # Checks for programs.
 AC_PROG_CC
