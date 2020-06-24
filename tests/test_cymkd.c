@@ -114,6 +114,22 @@ ASTRO_TEST_BEGIN(test_inline_with_less_than_symbol)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_block_quote)
+{
+	char content[] = "> This is a\n> block quote";
+	char expected[BUFSIZE] = "<blockquote>This is a block quote</blockquote>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
+ASTRO_TEST_BEGIN(test_block_quote2)
+{
+	char content[] = "> This is a\n> block quote\n\nTesting";
+	char expected[BUFSIZE] = "<blockquote>This is a block quote</blockquote><p>Testing</p>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -132,6 +148,8 @@ main(void)
     astro_suite_add_test(suite, test_img_within_headers2, NULL);
     astro_suite_add_test(suite, test_literal_html, NULL);
     astro_suite_add_test(suite, test_inline_with_less_than_symbol, NULL);
+    astro_suite_add_test(suite, test_block_quote, NULL);
+    astro_suite_add_test(suite, test_block_quote2, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 

@@ -731,10 +731,15 @@ block_quote(struct cymkd_parser *parser)
     if (next(parser) == '>') {
         parser_emit_string(parser, "<blockquote>");
         while (block_quote_line(parser)) {
+            if (next(parser) == -1) {
+                parser_emit_string(parser, "</blockquote>");
+                return true;
+            }
             if (!match(parser, '\n')) {
                 return false;
             }
-            if (next(parser) == '\n' || next(parser) < 0) {
+            if (next(parser) == '\n' || next(parser) == -1) {
+                consume(parser);
                 parser_emit_string(parser, "</blockquote>");
                 return true;
             }
