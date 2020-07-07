@@ -130,6 +130,14 @@ ASTRO_TEST_BEGIN(test_block_quote2)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_html_comment)
+{
+	char content[] = "<!-- comment -->\nThis is a test.";
+	char expected[BUFSIZE] = "<!-- comment -->\n<p>This is a test.</p>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -150,6 +158,7 @@ main(void)
     astro_suite_add_test(suite, test_inline_with_less_than_symbol, NULL);
     astro_suite_add_test(suite, test_block_quote, NULL);
     astro_suite_add_test(suite, test_block_quote2, NULL);
+    astro_suite_add_test(suite, test_html_comment, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 

@@ -14,7 +14,7 @@
  * document = block, more blocks
  * more blocks = block end, block, more blocks | ""
  * block = paragraph | header | unordered list | block quote | code block
- *         | ordered list
+ *         | ordered list | HTML comment
  * paragraph = text and inline, more text and inline
  * text and inline = string
  * text and inline = inline
@@ -38,6 +38,7 @@
  * inline code = "`", string, "`"
  * link = "[", string, "]", "(", string, ")"
  * image = "!", "[", string, "]", "(", string, ")"
+ * HTML comment = "<!--", string, "-->"
  */
 
 #ifdef __linux__
@@ -175,6 +176,21 @@ match(struct cymkd_parser *parser, char ch)
     } else {
         return false;
     }
+}
+
+static int 
+match_string(struct cymkd_parser *parser, const char *str) {
+	int i;
+	char ch;
+	int matched = 0;
+	for (i = 0; i < strlen(str); i++) {
+		ch = str[i];
+		if (!match(parser, ch)) {
+			break;
+		}
+		matched++;
+	}
+	return matched;
 }
 
 static int
@@ -809,6 +825,41 @@ code_block(struct cymkd_parser *parser)
     return true;
 }
 
+static bool 
+literal_html_comment(struct cymkd_parser *parser)
+{
+	bool done = false;
+	int ch;
+
+	if (match_string(parser, "<!--") != 4) {
+		return false;
+	}
+
+	parser_emit_string(parser, "<!--");
+
+	while (!done) {
+		ch = consume(parser);
+		if (ch == '-' && next(parser) == '-' && lookahead(parser, 1) == '>') {
+			match(parser, '-');
+			match(parser, '>');
+			done = true;
+			parser_emit_string(parser, "-->");
+		} else if (ch == -1) {
+			done = true;
+		} else {
+			parser_emit_char(parser, ch);
+		}
+	}
+
+	/* Consume whitespace */
+	while (isspace(next(parser)) && next(parser) != -1) {
+		ch = consume(parser);
+		parser_emit_char(parser, ch);
+	}
+
+	return true;
+}
+
 static bool
 literal_html(struct cymkd_parser *parser)
 {
@@ -818,6 +869,10 @@ literal_html(struct cymkd_parser *parser)
 		return false;
 	}
 	
+	if (lookahead(parser, 1) == '!') {
+		return literal_html_comment(parser);
+	}
+
 	/* HTML is assumed until a double-newline */
 	while (!(next(parser) == '\n' && lookahead(parser, 1) == '\n')
 			&& next(parser) != -1) {
