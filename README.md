@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
 
 <!--
-Copyright (c) 2016-2018 David Jackson
+Copyright (c) 2016-2020 David Jackson
 -->
 
 # Cytogen: static site generator
@@ -87,6 +87,13 @@ To use the `cymkd(1)` executable:
 
 ```sh
 cymkd [file_name]
+```
+
+Invoked without an argument, `cymkd` can be used as a "filter" in that you can
+pipe text to it and it will print output to `stdout`. For example:
+
+```sh
+cat some_file.md | cymkd > output.html
 ```
 
 ## License

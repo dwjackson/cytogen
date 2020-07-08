@@ -726,17 +726,11 @@ block_quote_line(struct cymkd_parser *parser)
     if (!match(parser, '>')) {
         return false;
     }
-    int ch;
-    while (next(parser) == ' ') { /* skip whitespace */
+    while (isspace(next(parser))) { /* skip whitespace */
         consume(parser);
     }
-    while ((ch = next(parser)) != '\n' && ch >= 0) {
-        if (ch == ESCAPE_CHAR) {
-            consume(parser);
-            ch = next(parser);
-        }
-        parser_emit_char(parser, ch);
-        consume(parser);
+    if (!text_and_inline(parser)) {
+	    return false;
     }
     return true;
 }

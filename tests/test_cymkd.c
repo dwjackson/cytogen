@@ -122,6 +122,14 @@ ASTRO_TEST_BEGIN(test_block_quote)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_block_quote_including_emphasis)
+{
+	char content[] = "> This is\n> a _block_ quote";
+	char expected[BUFSIZE] = "<blockquote>This is a <em>block</em> quote</blockquote>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 ASTRO_TEST_BEGIN(test_block_quote2)
 {
 	char content[] = "> This is a\n> block quote\n\nTesting";
@@ -158,6 +166,7 @@ main(void)
     astro_suite_add_test(suite, test_inline_with_less_than_symbol, NULL);
     astro_suite_add_test(suite, test_block_quote, NULL);
     astro_suite_add_test(suite, test_block_quote2, NULL);
+    astro_suite_add_test(suite, test_block_quote_including_emphasis, NULL);
     astro_suite_add_test(suite, test_html_comment, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
