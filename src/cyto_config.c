@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2020 David Jackson
  */
 
 #include "cyjson.h"
@@ -55,6 +55,13 @@ config_is_valid(struct cyto_config *config)
         && config->author != NULL;
 }
 
+static void
+read_config_item(char **dest, const char *value)
+{
+	*dest = malloc(strlen(value) + 1);
+	strcpy(*dest, value);
+}
+
 int
 cyto_config_read(const char *file_name, struct cyto_config *config)
 {
@@ -88,14 +95,11 @@ cyto_config_read(const char *file_name, struct cyto_config *config)
         } else if (event_type == CYJSON_EVENT_OBJECT_VALUE) {
             value = cyjson_get_string(parser);
             if (strcmp(key, "title") == 0) {
-                config->title = malloc(strlen(value) + 1);
-                strcpy(config->title, value);
+                read_config_item(&(config->title), value);
             } else if (strcmp(key, "url") == 0) {
-                config->url = malloc(strlen(value) + 1);
-                strcpy(config->url, value);
+                read_config_item(&(config->url), value);
             } else if (strcmp(key, "author") == 0) {
-                config->author = malloc(strlen(value) + 1);
-                strcpy(config->author, value);
+                read_config_item(&(config->author), value);
             }
         }
         parse_ok = cyjson_parse(&parser);
