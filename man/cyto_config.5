@@ -1,0 +1,51 @@
+.\" This Source Code Form is subject to the terms of the Mozilla Public
+.\" License, v. 2.0. If a copy of the MPL was not distributed with this
+.\" file, You can obtain one at http://mozilla.org/MPL/2.0/.
+.\"
+.\" Copyright (c) 2020 David Jackson
+.Dd July 12, 2020
+.Dt CYTO_CONFIG 5
+.Sh NAME
+.Nm cyto_config
+.Nd cyto configuration file
+.Sh DESCRIPTION
+cyto reads its config from an _config.json file in the root of the cytogen
+site directory (i.e. the directory in which you keep your site's files). The
+file is, as you may expect from its extension, a JSON file. The settings from
+the config file can be accessed from within your site via
+.Xr ctache 1
+template markup.
+.Pp
+The possible configuration options are as follows (note that everything
+is case-sensitive):
+.Bl -tag -width Ds
+.It Cm title
+The site's title
+.It Cm url
+The site's URL, without the URI scheme (i.e. you don't need the http:// part)
+.It Cm author
+The primary author of the site
+.El
+.Sh EXAMPLE
+Here is an example configuration file:
+.Bd -literal -width Ds
+{
+	"title": "My Site",
+	"author": "T. Author",
+	"url": "example.com"
+}
+.Ed
+and here is how you might use these within one of your site's files:
+.Bd -literal -width Ds
+<!DOCTYPE>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{title}}
+	</head>
+	<body>
+		<h1>{{title}}</h1>
+		<h2>Author: {{author}}</h2>
+	</body>
+</html>
+.Ed
