@@ -146,6 +146,14 @@ ASTRO_TEST_BEGIN(test_html_comment)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_unicode)
+{
+	char content[] = "Dieses Büch ist nicht gut. 你喝茶吗";
+	char expected[BUFSIZE] = "<p>Dieses Büch ist nicht gut. 你喝茶吗</p>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -168,6 +176,7 @@ main(void)
     astro_suite_add_test(suite, test_block_quote2, NULL);
     astro_suite_add_test(suite, test_block_quote_including_emphasis, NULL);
     astro_suite_add_test(suite, test_html_comment, NULL);
+    astro_suite_add_test(suite, test_unicode, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 
