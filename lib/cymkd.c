@@ -89,6 +89,9 @@ parser_emit_unescaped_char(struct cymkd_parser *parser, int ch);
 static bool
 unordered_list_internal(struct cymkd_parser *parser, int bullet, const char *curr_indent);
 
+static bool
+ordered_list_internal(struct cymkd_parser *parser, const char *curr_indent);
+
 static void
 cymkd_error(struct cymkd_parser *parser, const char *err_fmt, ...)
 {
@@ -635,6 +638,12 @@ header(struct cymkd_parser *parser)
 }
 
 static bool
+is_bullet(int ch)
+{
+	return ch == '*' || ch == '-';
+}
+
+static bool
 unordered_list_line(struct cymkd_parser *parser, int bullet, const char *curr_indent)
 {
 	char indent[BUFSIZE];
@@ -648,14 +657,19 @@ unordered_list_line(struct cymkd_parser *parser, int bullet, const char *curr_in
 		indent[indent_len++] = ch;
 	}
 	if (indent_len != curr_indent_len) {
+		ch = next(parser);
+
 		/* Put the indent back so we can measure it correctly */
 		for (i = 0; i < strlen(indent); i++) {
 			unconsume(parser);
 		}
 
-		if (indent_len > curr_indent_len) {
+		if (is_bullet(ch) && indent_len > curr_indent_len) {
 			/* Go "down" a list level, make a new (indented) list */
 			return unordered_list_internal(parser, bullet, indent);
+		} else if (isdigit(ch) && indent_len > curr_indent_len) {
+			/* Go "down" a list level, make a new (indented) list */
+			return ordered_list_internal(parser, indent);
 		} else if (indent_len < curr_indent_len) {
 			/* Go back "up" one level */
 			return false;
@@ -695,7 +709,7 @@ static bool
 unordered_list(struct cymkd_parser *parser)
 {
 	int bullet;
-	if (next(parser) == '*' || next(parser) == '-') {
+	if (is_bullet(next(parser))) {
 		bullet = next(parser);
 		return unordered_list_internal(parser, bullet, "");
 	}
@@ -703,8 +717,38 @@ unordered_list(struct cymkd_parser *parser)
 }
 
 static bool
-ordered_list_line(struct cymkd_parser *parser)
+ordered_list_line(struct cymkd_parser *parser, const char *curr_indent)
 {
+	char indent[BUFSIZE];
+	int ch;
+	int i;
+	size_t curr_indent_len = strlen(curr_indent);
+	size_t indent_len = 0;
+	memset(indent, 0, BUFSIZE);
+	while (isspace(next(parser)) && indent_len < BUFSIZE - 1) {
+		ch = consume(parser);
+		indent[indent_len++] = ch;
+	}
+	if (indent_len != curr_indent_len) {
+		ch = next(parser);
+
+		/* Put the indent back so we can measure it correctly */
+		for (i = 0; i < strlen(indent); i++) {
+			unconsume(parser);
+		}
+		
+		if (is_bullet(ch) && indent_len > curr_indent_len) {
+			/* Go "down" a list level, make a new (indented) list */
+			return unordered_list_internal(parser, ch, indent);
+		} else if (isdigit(ch) && indent_len > curr_indent_len) {
+			/* Go "down" a list level, make a new (indented) list */
+			return ordered_list_internal(parser, indent);
+		} else if (indent_len < curr_indent_len) {
+			/* Go back "up" one level */
+			return false;
+		}
+	}
+
 	/* Read the line number */
 	int number_length = 0;
 	while (isdigit(next(parser))) {
@@ -739,115 +783,121 @@ ordered_list_line(struct cymkd_parser *parser)
 }
 
 static bool
+ordered_list_internal(struct cymkd_parser *parser, const char *curr_indent)
+{
+	parser_emit_string(parser, "<ol>");
+	while (ordered_list_line(parser, curr_indent)) {
+		while (match(parser, '\n')
+			&& ordered_list_line(parser, curr_indent)
+			&& next(parser) >= 0) {
+			; // Loop until list is finished
+		}
+	}
+	parser_emit_string(parser, "</ol>");
+	return true;
+}
+
+static bool
 ordered_list(struct cymkd_parser *parser)
 {
-    if (next(parser) == '1' && lookahead(parser, 1) == '.') {
-        parser_emit_string(parser, "<ol>");
-        if (ordered_list_line(parser)) {
-            while (match(parser, '\n')
-                   && ordered_list_line(parser)
-                   && next(parser) >= 0) {
-                ; // Loop until list is finished
-            }
-            parser_emit_string(parser, "</ol>");
-            return true;
-        }
-    }
-    return false;
+	if (next(parser) == '1' && lookahead(parser, 1) == '.') {
+		return ordered_list_internal(parser, "");
+	}
+	return false;
 }
 
 static bool
 block_quote_line(struct cymkd_parser *parser)
 {
-    if (!match(parser, '>')) {
-        return false;
-    }
-    while (isspace(next(parser))) { /* skip whitespace */
-        consume(parser);
-    }
-    if (!text_and_inline(parser)) {
-	    return false;
-    }
-    return true;
+if (!match(parser, '>')) {
+return false;
+}
+while (isspace(next(parser))) { /* skip whitespace */
+consume(parser);
+}
+if (!text_and_inline(parser)) {
+    return false;
+}
+return true;
 }
 
 static bool
 block_quote(struct cymkd_parser *parser)
 {
-    if (next(parser) == '>') {
-        parser_emit_string(parser, "<blockquote>");
-        while (block_quote_line(parser)) {
-            if (next(parser) == -1) {
-                parser_emit_string(parser, "</blockquote>");
-                return true;
-            }
-            if (!match(parser, '\n')) {
-                return false;
-            }
-            if (next(parser) == '\n' || next(parser) == -1) {
-                consume(parser);
-                parser_emit_string(parser, "</blockquote>");
-                return true;
-            }
-            parser_emit_char(parser, ' ');
-        }
-        return true;
+if (next(parser) == '>') {
+parser_emit_string(parser, "<blockquote>");
+while (block_quote_line(parser)) {
+    if (next(parser) == -1) {
+	parser_emit_string(parser, "</blockquote>");
+	return true;
     }
-    return false;
+    if (!match(parser, '\n')) {
+	return false;
+    }
+    if (next(parser) == '\n' || next(parser) == -1) {
+	consume(parser);
+	parser_emit_string(parser, "</blockquote>");
+	return true;
+    }
+    parser_emit_char(parser, ' ');
+}
+return true;
+}
+return false;
 }
 
 static bool
 code_line(struct cymkd_parser *parser)
 {
-    int ch;
-    while ((ch = next(parser)) != '\n') {
-        if (ch == '<') {
-            parser_emit_string(parser, "&lt;");
-        } else if (ch == '>') {
-            parser_emit_string(parser, "&gt;");
-        } else {
-            parser_emit_char(parser, ch);
-        }
-        consume(parser);
-    }
-    return true;
+int ch;
+while ((ch = next(parser)) != '\n') {
+if (ch == '<') {
+    parser_emit_string(parser, "&lt;");
+} else if (ch == '>') {
+    parser_emit_string(parser, "&gt;");
+} else {
+    parser_emit_char(parser, ch);
+}
+consume(parser);
+}
+return true;
 }
 
 static bool
 code_block(struct cymkd_parser *parser)
 {
-    int i;
+int i;
+for (i = 0; i < 3; i++) {
+if (!match(parser, '`')) {
+    return false;
+}
+}
+/* Skip past the source type */
+while (next(parser) != '\n') {
+consume(parser);
+}
+if (!match(parser, '\n')) {
+return false;
+}
+parser_emit_string(parser, "<pre><code>");
+while (code_line(parser)) {
+if (!match(parser, '\n')) {
+    return false;
+}
+parser_emit_char(parser, '\n');
+if (next(parser) == '`') {
+    bool done = true;
     for (i = 0; i < 3; i++) {
-        if (!match(parser, '`')) {
-            return false;
-        }
-    }
-    /* Skip past the source type */
-    while (next(parser) != '\n') {
-        consume(parser);
+	if (!match(parser, '`')) {
+	    done = false;
+	    break;
+	}
     }
     if (!match(parser, '\n')) {
-        return false;
+	return false;
     }
-    parser_emit_string(parser, "<pre><code>");
-    while (code_line(parser)) {
-        if (!match(parser, '\n')) {
-            return false;
-        }
-        parser_emit_char(parser, '\n');
-        if (next(parser) == '`') {
-            bool done = true;
-            for (i = 0; i < 3; i++) {
-                if (!match(parser, '`')) {
-                    done = false;
-                    break;
-                }
-            }
-            if (!match(parser, '\n')) {
-                return false;
-            }
-            if (done) {
-                break;
+    if (done) {
+	break;
             }
         }
     }

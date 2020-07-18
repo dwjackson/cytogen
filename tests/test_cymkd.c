@@ -170,6 +170,22 @@ ASTRO_TEST_BEGIN(test_nested_list_end_on_inner_list)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_nested_ordered_within_unordered)
+{
+	char content[] = "* This is\n\t1. a list\n\t2. with\n* an indent";
+	char expected[BUFSIZE] = "<ul><li>This is</li><ol><li>a list</li><li>with</li></ol><li>an indent</li></ul>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
+ASTRO_TEST_BEGIN(test_nested_unordered_within_ordered)
+{
+	char content[] = "1. This is\n\t* a list\n\t* with\n2. an indent";
+	char expected[BUFSIZE] = "<ol><li>This is</li><ul><li>a list</li><li>with</li></ul><li>an indent</li></ol>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -195,6 +211,8 @@ main(void)
     astro_suite_add_test(suite, test_unicode, NULL);
     astro_suite_add_test(suite, test_nested_list, NULL);
     astro_suite_add_test(suite, test_nested_list_end_on_inner_list, NULL);
+    astro_suite_add_test(suite, test_nested_ordered_within_unordered, NULL);
+    astro_suite_add_test(suite, test_nested_unordered_within_ordered, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 
