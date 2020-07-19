@@ -275,6 +275,8 @@ is_inline_start(struct cymkd_parser *parser)
         consume(parser);
         if (next(parser) == '`') {
             is_inline = false;
+	} else if (isspace(next(parser))) {
+		is_inline = false;
         } else {
             is_inline = true;
         }
