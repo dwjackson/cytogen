@@ -369,7 +369,7 @@ italics(struct cymkd_parser *parser)
     }
 
     parser_emit_string(parser, "<em>");
-    while ((ch = consume(parser)) != start_ch && ch >= 0) {
+    while ((ch = consume(parser)) != start_ch && ch != -1) {
         parser_emit_char(parser, ch);
     }
     if (ch == start_ch) {

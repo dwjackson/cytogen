@@ -188,8 +188,8 @@ ASTRO_TEST_END
 
 ASTRO_TEST_BEGIN(test_lone_backtick)
 {
-	char content[] = "This is ` _ * a test";
-	char expected[BUFSIZE] = "<p>This is ` _ * a test</p>";
+	char content[] = "This is ` _ * a test *茶*";
+	char expected[BUFSIZE] = "<p>This is ` _ * a test <em>茶</em></p>";
 	test_markdown(content, expected);
 }
 ASTRO_TEST_END
