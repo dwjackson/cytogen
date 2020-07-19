@@ -149,7 +149,7 @@ ASTRO_TEST_END
 ASTRO_TEST_BEGIN(test_unicode)
 {
 	char content[] = "Diese Bücher sind nicht gut. 你喝茶吗";
-	char expected[BUFSIZE] = "<p>Dieses Büch ist nicht gut. 你喝茶吗</p>";
+	char expected[BUFSIZE] = "<p>Diese Bücher sind nicht gut. 你喝茶吗</p>";
 	test_markdown(content, expected);
 }
 ASTRO_TEST_END
