@@ -22,7 +22,7 @@
  * header = header prefix, " ", string
  * header prefix = { "#" }, string | string, "\n", underline
  * unordered list = unordered list line, more unordered list lines
- * unordered list line = ("*" | "-") text and inline
+ * unordered list line = ("*" | "-"), " ", text and inline
  * more unordered list lines = "\n", unordered list line, more unordered list lines
  * ordered list = ordered list line, more ordered list lines
  * ordered list line = { "\d" }, ".", text and inline 
@@ -711,7 +711,7 @@ static bool
 unordered_list(struct cymkd_parser *parser)
 {
 	int bullet;
-	if (is_bullet(next(parser))) {
+	if (is_bullet(next(parser)) && isspace(lookahead(parser, 1))) {
 		bullet = next(parser);
 		return unordered_list_internal(parser, bullet, "");
 	}

@@ -194,6 +194,14 @@ ASTRO_TEST_BEGIN(test_lone_backtick)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_bare_emphasis)
+{
+	char content[] = "*test*";
+	char expected[BUFSIZE] = "<p><em>test</em></p>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -222,6 +230,7 @@ main(void)
     astro_suite_add_test(suite, test_nested_ordered_within_unordered, NULL);
     astro_suite_add_test(suite, test_nested_unordered_within_ordered, NULL);
     astro_suite_add_test(suite, test_lone_backtick, NULL);
+    astro_suite_add_test(suite, test_bare_emphasis, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 
