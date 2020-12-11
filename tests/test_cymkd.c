@@ -74,6 +74,14 @@ ASTRO_TEST_BEGIN(test_ordered_list)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_ordered_list_single_messy_numbers)
+{
+	char content[] = "1. This is\n1. a numbered\n3. list\n2. with weird nums";
+	char expected[BUFSIZE] = "<ol><li>This is</li><li>a numbered</li><li>list</li><li>with weird nums</li></ol>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 ASTRO_TEST_BEGIN(test_img)
 {
 	char content[] = "![alt text](/some/image.png)";
@@ -231,6 +239,7 @@ main(void)
     astro_suite_add_test(suite, test_nested_unordered_within_ordered, NULL);
     astro_suite_add_test(suite, test_lone_backtick, NULL);
     astro_suite_add_test(suite, test_bare_emphasis, NULL);
+    astro_suite_add_test(suite, test_ordered_list_single_messy_numbers, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 
