@@ -5,13 +5,13 @@
  */
 
 /*
- * Copyright (c) 2020 David Jackson
+ * Copyright (c) 2020-2021 David Jackson
  */
 
 #ifndef MIME_H
 #define MIME_H
 
-char
+const char
 *mime_type_of(const char *file_name);
 
 #endif /* MIME_H */

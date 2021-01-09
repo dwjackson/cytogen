@@ -5,15 +5,15 @@
  */
 
 /*
- * Copyright (c) 2020 David Jackson
+ * Copyright (c) 2020-2021 David Jackson
  */
 
 #include "mime.h"
 #include <string.h>
 
 struct mime_entry {
-	char *mime_type;
-	char *extension;
+	const char *mime_type;
+	const char *extension;
 };
 
 static struct mime_entry mime_types[] = {
@@ -41,7 +41,7 @@ static const char
 	return chptr;
 }
 
-char
+const char
 *mime_type_of(const char *file_name)
 {
 	int i;

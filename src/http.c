@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2018-2020 David Jackson
+ * Copyright (c) 2018-2021 David Jackson
  */
 
 #ifdef __linux__
@@ -219,7 +219,7 @@ send_response(char *method, int sockfd, char *path)
 	int i;
 	size_t header_len;
 	size_t response_len = 0;
-	char *mime_type;
+	const char *mime_type;
 
 	memset(file_name, 0, PATH_MAX - 1);
 	memset(timebuf, 0, 100);
