@@ -66,6 +66,21 @@ name: Test Testerson
     <p>Hello {{name}}!</p>
 </div>
 .Ed
+.Pp
+The full list of understood header keys is as follows.
+.Bl -tag -width Ds
+.It author
+The author of the page/post
+.It date
+The date on which the page/post was originally written
+.It edited
+The date on which the page/post was most-recently edited
+.It layout
+The name of the layout to use for the page/post; the same as the file name of
+the layout in the _layouts directory except without the file extension
+.It title
+The title of the page/post
+.El
 .Sh SEE ALSO
 .Xr cyto 1
 .Xr ctache 1
