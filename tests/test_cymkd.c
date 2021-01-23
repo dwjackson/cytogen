@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2020 David Jackson
+ * Copyright (c) 2020-2021 David Jackson
  */
 
 #include "cymkd.h"
@@ -210,6 +210,14 @@ ASTRO_TEST_BEGIN(test_bare_emphasis)
 }
 ASTRO_TEST_END
 
+ASTRO_TEST_BEGIN(test_header_after_hyphen)
+{
+	char content[] = "abc-\n\n# test\n\ntesting";
+	char expected[BUFSIZE] = "<p>abc-</p><h1>test</h1><p>testing</p>";
+	test_markdown(content, expected);
+}
+ASTRO_TEST_END
+
 
 int
 main(void)
@@ -240,6 +248,7 @@ main(void)
     astro_suite_add_test(suite, test_lone_backtick, NULL);
     astro_suite_add_test(suite, test_bare_emphasis, NULL);
     astro_suite_add_test(suite, test_ordered_list_single_messy_numbers, NULL);
+    astro_suite_add_test(suite, test_header_after_hyphen, NULL);
     num_failures = astro_suite_run(suite);
     astro_suite_destroy(suite);
 

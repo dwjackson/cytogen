@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2020 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 /*
@@ -561,13 +561,15 @@ text_and_inline(struct cymkd_parser *parser)
 	    ch = next(parser);
 	    if (ch == '-') {
 		parser_emit_string(parser, "&mdash;");
-	    } else if (ch != -1) {
+	    } else if (ch != -1 && ch != '\n') {
                 parser_emit_char(parser, '-');
 		parser_emit_char(parser, ch);
 	    } else {
                 parser_emit_char(parser, '-');
 	    }
-            consume(parser); /* Move to the next input character */
+	    if (ch != '\n') {
+		    consume(parser); /* Move to the next input character */
+	    }
         } else {
             parser_emit_char(parser, ch);
             consume(parser); /* Move to the next input character */
