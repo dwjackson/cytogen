@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2020 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 #include "cyjson.h"
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctache/ctache.h>
 
 static char
 *read_file(const char *file_name)
@@ -133,4 +134,39 @@ cyto_config_destroy(struct cyto_config *config)
     if (config->author != NULL) {
         free(config->author);
     }
+}
+
+ctache_data_t
+*cyto_config_to_ctache_data(struct cyto_config *config)
+{
+	ctache_data_t *config_data = ctache_data_create_hash();
+	if (config_data == NULL) {
+		return NULL;
+	}
+
+	char *title = config->title;
+	ctache_data_t *title_data = ctache_data_create_string(title, strlen(title));
+	if (title == NULL) {
+		ctache_data_destroy(config_data);
+		return NULL;
+	}
+	ctache_data_hash_table_set(config_data, "title", title_data);
+
+	char *author = config->author;
+	ctache_data_t *author_data = ctache_data_create_string(author, strlen(author));
+	if (author_data == NULL) {
+		ctache_data_destroy(config_data);
+		return NULL;
+	}
+	ctache_data_hash_table_set(config_data, "author", author_data);
+
+	char *url = config->url;
+	ctache_data_t *url_data = ctache_data_create_string(url, strlen(url));
+	if (url_data == NULL) {
+		ctache_data_destroy(config_data);
+		return NULL;
+	}
+	ctache_data_hash_table_set(config_data, "url", url_data);
+
+	return config_data;
 }

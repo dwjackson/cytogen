@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 #ifndef CYTO_CONFIG_H
@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctache/ctache.h>
 
 struct cyto_config {
     char *title;
@@ -27,5 +28,8 @@ cyto_config_read(const char *file_name, struct cyto_config *config);
 
 void
 cyto_config_destroy(struct cyto_config *config);
+
+ctache_data_t
+*cyto_config_to_ctache_data(struct cyto_config *config);
 
 #endif /* CYTO_CONFIG_H */
