@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 #include <stdio.h>
@@ -20,7 +20,8 @@
 
 static char *reserved_words[] = {
     "content",
-    "posts"
+    "posts",
+    "config"
 };
 #define NUM_RESERVED_WORDS 2
 
