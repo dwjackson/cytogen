@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2020 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 /* Linux's feature-test macros can break other systems, turn on all features */
@@ -224,7 +224,6 @@ cmd_generate(struct cyto_config *config,
         generate(&args);
         rename_posts();
 
-        args.process = process_files;
         args.curr_dir_name = curr_dir_name;
 	ctache_array_sort(posts_array, posts_array_compar);
     }
