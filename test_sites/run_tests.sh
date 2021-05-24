@@ -1,7 +1,7 @@
 #!/bin/sh
 
 CYTO="../src/cyto"
-SITE_DIR='_site'
+SITE_DIR='./_site'
 EXPECTED='./_expected'
 
 run_test() {
@@ -22,14 +22,18 @@ run_test() {
 			exit 1
 		fi
 
-		d=`diff "$expected_file" "$f" > /dev/null`
+		d=`diff "$expected_file" "$SITE_DIR/$f" > /dev/null`
 		if [ "$?" -ne 0 ]
 		then
 			echo "$test_name: FAIL: File is wrong: $f"
+			echo 'EXPECTED'
+			cat "$expected_file"
+			echo 'ACTUAL'
+			cat "$f"
 			exit 1
 		fi
 	done
-	rm -rf "$SITE_DIR"
+	../$CYTO clean
 	echo "$test_name: PASSED"
 }
 
