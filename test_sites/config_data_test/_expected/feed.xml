@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>Config Data Test</title>
+	<link href="http://example.com" />
+	<updated>2021-05-25T17:43:03Z</updated>
+	<id>http://example.com</id>
+	<author>
+		<name>E. Xample</name>
+	</author>
+	<entry>
+		<title>Test Three</title>
+		<link href="/posts/2018/06/11/test-three" />
+		<id>/posts/2018/06/11/test-three</id>
+	</entry>
+</feed>
