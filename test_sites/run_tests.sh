@@ -15,7 +15,7 @@ test_file() {
 		echo 'EXPECTED'
 		cat "$expected_file"
 		echo 'ACTUAL'
-		cat "$f"
+		cat "$actual_file"
 		exit 1
 	fi
 }
