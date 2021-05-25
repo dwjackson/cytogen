@@ -48,18 +48,18 @@ test_directory() {
 			exit 1
 		fi
 
-		if [ -f "$f" ]
+		if [ -f "$actual_file" ]
 		then
 			test_file "$test_name" "$actual_file" "$expected_file"
 			if [ "$?" -eq 1 ]
 			then
 				exit 1
 			fi
-		elif [ -d "$f" ]
+		elif [ -d "$actual_file" ]
 		then
-			tmp="$test_dir"
-			test_directory "$test_name" "$actual_file"
-			test_dir="$tmp"
+			(
+				test_directory "$test_name" "$actual_file"
+			)
 			if [ "$?" -eq 1 ]
 			then
 				exit 1
