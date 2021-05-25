@@ -5,7 +5,3 @@
 ## Copyright (c) 2021 David Jackson
 
 TESTS = run_tests.sh
-
-check_PROGRAMS = run_tests.sh
-
-run_tests_sh_SOURCES = run_tests.sh
