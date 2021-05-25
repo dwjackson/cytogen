@@ -230,7 +230,7 @@ cmd_generate(struct cyto_config *config,
     generate(&args);
 
     /* Create the Atom/RSS feed file */
-    if (config != NULL) {
+    if (config != NULL && posts_array != NULL) {
         generate_feed(config, posts_array);
     }
 
