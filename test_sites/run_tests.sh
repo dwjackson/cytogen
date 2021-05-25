@@ -57,7 +57,9 @@ test_directory() {
 			fi
 		elif [ -d "$f" ]
 		then
+			tmp="$test_dir"
 			test_directory "$test_name" "$actual_file"
+			test_dir="$tmp"
 			if [ "$?" -eq 1 ]
 			then
 				exit 1
@@ -84,6 +86,8 @@ run_test() {
 	if [ "$?" -eq 0 ]
 	then
 		printf "PASS\n"
+	else
+		exit 1
 	fi
 }
 
@@ -93,10 +97,25 @@ then
 	exit 1
 fi
 
+fail_count=0
 for dir in `find . -type 'd' -name '*_test' | sort -n`
 do
 	(
 		cd "$dir"
 		run_test "$dir"
 	)
+
+	if [ "$?" -ne 0 ]
+	then
+		fail_count=`dc -e "$fail_count 1 + p"`
+	fi
 done
+
+echo '----------'
+if [ "$fail_count" -ne 0 ]
+then
+	echo 'TEST(S) FAILED'
+	exit 1
+else
+	echo 'ALL TESTS PASSED'
+fi
