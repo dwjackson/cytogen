@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2020 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 #ifdef __linux__
@@ -331,7 +331,8 @@ void
 
     for (i = args->start_index; i < args->end_index; i++) {
         in_file_name = (args->file_names)[i];
-        ctache_data_t *file_data = ctache_data_create_hash();
+	ctache_data_t *empty = ctache_data_create_hash();
+        ctache_data_t *file_data = ctache_data_merge_hashes(args->data, empty);
 
         const char *site_dir = args->site_dir;
         char *post_dir = prepare_post_directory(site_dir,
@@ -367,6 +368,7 @@ void
 
         free(url);
         ctache_data_destroy(file_data);
+        ctache_data_destroy(empty);
     }
     return NULL;
 }

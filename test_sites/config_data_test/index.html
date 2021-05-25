@@ -1,8 +1,15 @@
 ---
 layout: default
-title: Testing Posts
+title: Testing Config Data 
 ---
 <div id="content">
     <h1>{{title}}</h1>
-    <p>This is testing config data.</p>
+    <p>This test is testing config data.</p>
+
+    <h2>Posts</h2>
+    <ul>
+    {{#posts}}
+    <li><a href="{{url}}">{{title}}</a></li>
+    {{/posts}}
+    </ul>
 </div>
