@@ -222,7 +222,6 @@ cmd_generate(struct cyto_config *config,
     args.num_workers = num_workers;
     args.data = data;
     args.data_mutex = &data_mutex;
-    args.process = process_files;
 
     /* Perform the generation */
     if (has_posts) {
@@ -235,10 +234,12 @@ cmd_generate(struct cyto_config *config,
         args.curr_dir_name = curr_dir_name;
 	ctache_array_sort(posts_array, posts_array_compar);
     }
+
+    args.process = process_files;
     generate(&args);
 
     /* Create the Atom/RSS feed file */
-    if (config != NULL && posts_array != NULL) {
+    if (config != NULL && has_posts) {
         generate_feed(config, posts_array);
     }
 
