@@ -12,10 +12,7 @@ test_file() {
 	if [ "$?" -ne 0 ]
 	then
 		printf "FAIL: File is wrong: $actual_file\n"
-		echo 'EXPECTED'
-		cat "$expected_file"
-		echo 'ACTUAL'
-		cat "$actual_file"
+		diff -u "$expected_file" "$actual_file"
 		exit 1
 	fi
 }
