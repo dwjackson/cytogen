@@ -43,7 +43,7 @@ then
 	exit 1
 fi
 
-for dir in `find . -type 'd' -name '*_test'`
+for dir in `find . -type 'd' -name '*_test' | sort -n`
 do
 	(
 		cd "$dir"
