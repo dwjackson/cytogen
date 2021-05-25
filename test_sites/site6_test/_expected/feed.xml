@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>Test Six</title>
+	<link href="http://example.com" />
+	<updated>2021-05-25T16:40:09Z</updated>
+	<id>http://example.com</id>
+	<author>
+		<name>E. Xample</name>
+	</author>
+	<entry>
+		<title>Test Three</title>
+		<link href="/posts/2018/06/11/test-three" />
+		<id>/posts/2018/06/11/test-three</id>
+	</entry>
+	<entry>
+		<title>Test Two</title>
+		<link href="/posts/2016/07/15/test-two" />
+		<id>/posts/2016/07/15/test-two</id>
+	</entry>
+	<entry>
+		<title>Test One</title>
+		<link href="/posts/2016/07/14/test-one" />
+		<id>/posts/2016/07/14/test-one</id>
+	</entry>
+</feed>
