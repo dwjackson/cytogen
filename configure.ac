@@ -42,5 +42,6 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile
                  src/Makefile
                  man/Makefile
-                 tests/Makefile])
+                 tests/Makefile
+		 test_sites/Makefile])
 AC_OUTPUT
