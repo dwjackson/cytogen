@@ -8,6 +8,18 @@ test_file() {
 	test_name="$1"
 	actual_file="$2"
 	expected_file="$3"
+	
+	af_bn=`basename $actual_file`
+	if [ "$af_bn" = "feed.xml" ]
+	then
+		# Strip the update tag line because it's always different
+		actual_file_tmp=`mktemp`
+		expected_file_tmp=`mktemp`
+		sed -e '/<updated>/d' "$actual_file" > "$actual_file_tmp"
+		sed -e '/<updated>/d' "$expected_file" > "$expected_file_tmp"
+		actual_file="$actual_file_tmp"
+		expected_file="$expected_file_tmp"
+	fi
 	d=`diff "$expected_file" "$actual_file" > /dev/null`
 	if [ "$?" -ne 0 ]
 	then
