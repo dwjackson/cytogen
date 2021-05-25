@@ -8,6 +8,7 @@
  * Copyright (c) 2016-2021 David Jackson
  */
 
+#include "cyto_config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,7 @@
 static char *reserved_words[] = {
     "content",
     "posts",
-    "config"
+    CYTO_CONFIG_HASH_KEY
 };
 #define NUM_RESERVED_WORDS 2
 

@@ -17,6 +17,8 @@
 #include <string.h>
 #include <ctache/ctache.h>
 
+#define CYTO_CONFIG_HASH_KEY "config"
+
 struct cyto_config {
     char *title;
     char *url;

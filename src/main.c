@@ -198,6 +198,14 @@ cmd_generate(struct cyto_config *config,
 
     /* Set up the data */
     data = ctache_data_create_hash();
+    if (config != NULL) {
+	    ctache_data_t *config_data = cyto_config_to_ctache_data(config);
+	    if (config_data == NULL) {
+		    fprintf(stderr, "Could not create config ctache data");
+		    exit(EXIT_FAILURE);
+	    }
+	    ctache_data_hash_table_set(data, CYTO_CONFIG_HASH_KEY, config_data);
+    }
     pthread_mutex_init(&data_mutex, NULL);
 
     /* Set up the posts data */
