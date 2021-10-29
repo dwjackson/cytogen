@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2020 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
 #include "cymkd.h"
@@ -19,6 +19,8 @@
 #define USAGE_FMT "Usage: %s [markdown_file]\n"
 #define CONTENTS_DEFAULT_BUFSIZE 1024
 #define INDENT "    "
+
+void print_help(const char *progname);
 
 int
 main(int argc, char *argv[])
@@ -36,8 +38,12 @@ main(int argc, char *argv[])
 
     extern char *optarg;
 
-    while ((opt = getopt(argc, argv, "no:V")) != -1) {
+    while ((opt = getopt(argc, argv, "hno:V")) != -1) {
         switch (opt) {
+	case 'h':
+		print_help(argv[0]);
+		exit(EXIT_SUCCESS);
+		break;
         case 'n':
             no_wrap = true;
             break;
@@ -127,4 +133,14 @@ main(int argc, char *argv[])
     }
 
     return 0;
+}
+
+void print_help(const char *progname)
+{
+	printf(USAGE_FMT, progname);
+	printf("Options:\n");
+	printf("\t-h - Show this help message\n");
+	printf("\t-n - No wrap (Wrapping makes output standalone HTML)\n");
+	printf("\t-o [FILE_NAME] - Save output to the given filename\n");
+	printf("\t-V - Print version number\n");
 }
