@@ -5,12 +5,10 @@
  */
 
 /*
- * Copyright (c) 2017 David Jackson
+ * Copyright (c) 2017-2021 David Jackson
  */
 
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include "generate.h"
 #include "processing.h"

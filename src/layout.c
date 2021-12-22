@@ -5,12 +5,10 @@
  */
 
 /*
- * Copyright (c) 2016 David Jackson
+ * Copyright (c) 2016-2021 David Jackson
  */
 
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include "layout.h"
 #include "cytogen_header.h"

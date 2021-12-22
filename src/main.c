@@ -8,17 +8,13 @@
  * Copyright (c) 2016-2021 David Jackson
  */
 
-/* Linux's feature-test macros can break other systems, turn on all features */
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include "common.h"
 #include "processing.h"
 #include "cytogen_header.h"
 #include "cymkd.h"
 #include "string_util.h"
-#include "config.h"
 #include "cyto_config.h"
 #include "feed.h"
 #include "initialize.h"

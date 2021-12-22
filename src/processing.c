@@ -8,9 +8,7 @@
  * Copyright (c) 2016-2021 David Jackson
  */
 
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include "common.h"
 #include "layout.h"

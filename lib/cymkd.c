@@ -41,9 +41,7 @@
  * HTML comment = "<!--", string, "-->"
  */
 
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>

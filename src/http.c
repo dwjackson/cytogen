@@ -8,9 +8,7 @@
  * Copyright (c) 2018-2021 David Jackson
  */
 
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif /* __linux__ */
+#include "config.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
