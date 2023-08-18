@@ -5,7 +5,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
 
 <!--
-Copyright (c) 2016-2020 David Jackson
+Copyright (c) 2016-2023 David Jackson
 -->
 
 # Cytogen: static site generator
@@ -67,6 +67,11 @@ To serve the site on a local webserver for debugging purposes (this is *not* a
 ```sh
 cd _site
 cyto serve
+```
+
+To create a new template (markdown) post file:
+```sh
+cyto post [POST_TITLE]
 ```
 
 Note: Most `cyto` commands are usable just by typing their first letter (this

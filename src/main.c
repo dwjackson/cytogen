@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2021 David Jackson
+ * Copyright (c) 2016-2023 David Jackson
  */
 
 #include "config.h"
@@ -29,6 +29,10 @@
 #include <ctache/ctache.h>
 #include <ftw.h>
 #include <libgen.h>
+#include <dirent.h>
+#include <errno.h>
+#include <time.h>
+#include <ctype.h>
 
 #define USAGE "Usage: cyto [FLAGS] [COMMAND]"
 
@@ -38,6 +42,7 @@
 #define SITE_POSTS_DIR "_site/posts"
 #define MAXFDS 100
 #define HTTP_PORT 8000
+#define DATE_BUFSIZE 11
 
 static int
 rename_posts();
@@ -59,6 +64,9 @@ cmd_generate(struct cyto_config *config,
              const char *curr_dir_name,
              const char *site_dir,
              int num_workers);
+
+static void
+cmd_post(const char *post_name);
 
 int
 main(int argc, char *argv[])
@@ -125,6 +133,12 @@ main(int argc, char *argv[])
         cmd_clean();
     } else if (string_matches_any(cmd, 2, "s", "serve")) {
         http_server(HTTP_PORT);
+    } else if (string_matches_any(cmd, 2, "p", "post")) {
+        char *post_name = "";
+        if (argc > 2) {
+            post_name = args[1];
+	}
+        cmd_post(post_name);
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
@@ -277,4 +291,71 @@ print_help()
     printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
     printf("\tclean - Remove generated site files\n");
     printf("\tserve - Start an HTTP server in the current directory\n");
+}
+
+static void
+cmd_post(const char *post_name)
+{
+	// If the _posts directory does not exist, create it
+	DIR *posts_dir = opendir(POSTS_DIR);
+	if (posts_dir == NULL && errno == ENOENT) {
+		if (mkdir(POSTS_DIR, 0755) == -1) {
+			fprintf(stderr, "Cannot create %s directory\n", POSTS_DIR);
+			exit(EXIT_FAILURE);
+		}
+	} else if (posts_dir == NULL) {
+		fprintf(stderr, "Cannot create/open %s directory\n", POSTS_DIR);
+		exit(EXIT_FAILURE);
+	}
+
+	// Generate the post's file name
+	time_t now = time(NULL);
+	struct tm now_local;
+	localtime_r(&now, &now_local);
+	char today[DATE_BUFSIZE]; // yyy-MM-dd + '\0'
+	strftime(today, DATE_BUFSIZE, "%Y-%m-%d", &now_local);
+	size_t post_name_len = strlen(post_name);
+	char ext[] = ".md";
+	size_t post_file_name_bufsize = post_name_len + DATE_BUFSIZE + strlen(ext) + 1;
+	char *post_file_name = malloc(post_file_name_bufsize);
+	memset(post_file_name, 0, post_file_name_bufsize);
+	strcat(post_file_name, today);
+	post_file_name[DATE_BUFSIZE - 1] = '_';
+	for (int i = 0; i < post_name_len; i++) {
+		char ch = post_name[i];
+		if (isspace(ch)) {
+			ch = '_';
+		} else if (isupper(ch)) {
+			ch = tolower(ch);
+		}
+		post_file_name[i + DATE_BUFSIZE] = ch;
+	}
+	strcat(post_file_name, ext);
+
+	// Create the template post file path
+	size_t post_path_size = strlen(POSTS_DIR) + 1 + strlen(post_file_name) + 1;
+	char *post_path = malloc(post_path_size);
+	memset(post_path, 0, post_path_size);
+	strcat(post_path, POSTS_DIR);
+	strcat(post_path, "/");
+	strcat(post_path, post_file_name);
+
+	// Write the template post file
+	FILE *fp = fopen(post_path, "w");
+	if (fp == NULL) {
+		fprintf(stderr, "Could not create post file\n");
+		exit(EXIT_FAILURE);
+	}
+	fprintf(fp, "---\n");
+	fprintf(fp, "layout: [LAYOUT]\n");
+	fprintf(fp, "title: %s\n", post_name);
+	fprintf(fp, "author: [AUTHOR_NAME]\n");
+	fprintf(fp, "date: %s\n", today);
+	fprintf(fp, "---\n\n");
+	fprintf(fp, "TODO...\n");
+
+	// Clean up
+	fclose(fp);
+	free(post_path);
+	free(post_file_name);
 }
