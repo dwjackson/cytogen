@@ -2,7 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# Copyright (c) 2016-2023 David Jackson
+# Copyright (c) 2016-2025 David Jackson
 
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
@@ -34,10 +34,8 @@ AC_CHECK_HEADER_STDBOOL
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
 AC_FUNC_MMAP
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([memset mkdir munmap rmdir strdup basename_r])
+AC_CHECK_FUNCS([memset mkdir munmap rmdir strdup basename_r malloc realloc])
 
 AC_CONFIG_FILES([Makefile
                  lib/Makefile

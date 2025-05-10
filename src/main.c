@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016-2023 David Jackson
+ * Copyright (c) 2016-2025 David Jackson
  */
 
 #include "config.h"
@@ -134,11 +134,14 @@ main(int argc, char *argv[])
     } else if (string_matches_any(cmd, 2, "s", "serve")) {
         http_server(HTTP_PORT);
     } else if (string_matches_any(cmd, 2, "p", "post")) {
-        char *post_name = "";
-        if (argc > 2) {
-            post_name = args[1];
-	}
+        if (argc < 3) {
+            fprintf(stderr, "ERROR: a post title is required\n");
+            exit(EXIT_FAILURE);
+        }
+        char *post_name = args[1];
         cmd_post(post_name);
+    } else if (string_matches_any(cmd, 2, "h", "help")) {
+        print_help();
     } else {
         fprintf(stderr, "Unrecognized command: %s\n", cmd);
         exit(EXIT_FAILURE);
@@ -287,9 +290,11 @@ print_help()
     printf("\t-V Print the version number\n");
     printf("\t-j [THREADS] Set number of worker threads (default is 4)\n");
     printf("Commands:\n");
-    printf("\tgenerate - Generate a site from the current directory\n");
-    printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
     printf("\tclean - Remove generated site files\n");
+    printf("\tgenerate - Generate a site from the current directory\n");
+    printf("\thelp - Print this help message\n");
+    printf("\tinit [PROJECT_NAME] - Initialize a cytogen project\n");
+    printf("\tpost [TITLE] - Create a post with the given title\n");
     printf("\tserve - Start an HTTP server in the current directory\n");
 }
 
